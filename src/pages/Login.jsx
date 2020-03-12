@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { login } from '../utils/api'
 import { saveToken } from '../actions/auth'
 
-import { IonGrid, IonRow, IonCol, IonNote, IonItem, IonIcon, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar, IonLabel } from '@ionic/react';
+import { IonGrid, IonRow, IonCol, IonNote, IonItem, IonIcon, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar, IonLabel, IonButton } from '@ionic/react';
 import { personCircleOutline } from 'ionicons/icons'
 import ExploreContainer from '../components/ExploreContainer'
 import { save } from 'ionicons/icons'
@@ -58,6 +58,11 @@ class Login extends Component {
         this.props.history.replace('/dashboard')
     }
 
+    goToSignup = (e) => {
+        e.preventDefault()
+        console.log(this.props)
+        this.props.history.replace('/signup')
+    }
 
 
     render() {
@@ -99,7 +104,9 @@ class Login extends Component {
                             </IonRow>
                             <IonRow style={{ marginTop: '5px' }}>
                                 <IonCol style={{ textAlign: 'center' }}>
-                                    <IonNote style={{ fontSize: '0.8em' }}>¿No tienes cuenta? Registrate Aquí</IonNote>
+                                    <IonButton fill="clear" >
+                                        <IonNote onClick={this.goToSignup} style={{ fontSize: '0.8em' }}>¿No tienes cuenta? Registrate Aquí</IonNote>
+                                    </IonButton>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>

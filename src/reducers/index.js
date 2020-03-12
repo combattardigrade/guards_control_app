@@ -1,8 +1,8 @@
 import { combineReducers } from 'redux'
 import auth from './auth'
-import workOrders from './workOrders'
+import device from './device'
 
 export default combineReducers({
     auth,
-    workOrders
+    device
 })

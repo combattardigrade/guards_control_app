@@ -5,6 +5,9 @@ import { IonApp, IonRouterOutlet, IonSplitPane } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Redirect, Route } from 'react-router-dom';
 import { connect } from 'react-redux'
+import { Plugins } from '@capacitor/core';
+
+
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -26,6 +29,7 @@ import '@ionic/react/css/display.css';
 import './theme/variables.css';
 
 import Login from './pages/Login'
+import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import StartTurn from './pages/StartTurn'
 import EndTurn from './pages/EndTurn'
@@ -45,11 +49,26 @@ import HistorialAccesos from './pages/HistorialAccesos'
 import Report from './pages/Report'
 import Bitacora from './pages/Bitacora'
 
+// Actions
+import { saveDeviceData } from './actions/device'
+
+// Plugins
+const { Device } = Plugins;
+
 class App extends Component {
 
   state = {
     selectedPage: '',
     setSelectedPage: ''
+  }
+
+  async componentDidMount() {
+  const { device, dispatch } = this.props
+    Device.getInfo()
+      .then((info) => {
+          dispatch(saveDeviceData(info))
+      })
+
   }
 
   render() {
@@ -62,9 +81,10 @@ class App extends Component {
             <Menu selectedPage={selectedPage} />
             <IonRouterOutlet id="main">
               <Route path="/dashboard" component={Dashboard} />
-              
+
               <Route path="/" render={() => <Redirect to="/login" />} exact={true} />
               <Route path="/login" component={Login} />
+              <Route path="/signup" component={Signup} />
               <Route path="/startTurn" component={StartTurn} />
               <Route path="/endTurn" component={EndTurn} />
               <Route path="/registerCheckpoint" component={RegisterCheckpoint} />
@@ -90,4 +110,10 @@ class App extends Component {
   }
 };
 
-export default App;
+function mapStateToProps({ device }) {
+  return {
+    device
+  }
+}
+
+export default connect(mapStateToProps)(App)
