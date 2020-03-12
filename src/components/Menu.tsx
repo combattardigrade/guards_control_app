@@ -10,7 +10,8 @@ import {
   IonNote,
   IonRow,
   IonCol,
-  IonToggle
+  IonToggle,
+  IonButton
 } from '@ionic/react';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -113,7 +114,7 @@ const Menu: React.FunctionComponent<MenuProps> = ({ selectedPage }) => {
         </IonList>
 
         <IonItem lines="none" style={{ textAlign: 'center', bottom: '10px', position: 'absolute', width: '100%' }}>
-          <IonLabel style={{ color: '#808289', fontSize: '14px',fontWeight:'300' }}>Cerrar Sesión</IonLabel>
+          <IonButton fill="clear"><IonLabel style={{ color: '#808289', fontSize: '14px',fontWeight:'300' }}>Cerrar Sesión</IonLabel></IonButton>
         </IonItem>
       </IonContent>
     </IonMenu>

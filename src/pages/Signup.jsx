@@ -22,7 +22,7 @@ class Signup extends Component {
     }
 
     componentDidMount() {
-        console.log(this.props.history)
+       
 
     }
     
@@ -81,7 +81,7 @@ class Signup extends Component {
                 battery: device && device.batteryLevel
             })
             response = await response.json()
-            console.log(response)
+            
         }
         catch (err) {
             console.log(err)

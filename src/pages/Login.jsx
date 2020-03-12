@@ -3,7 +3,10 @@ import { connect } from 'react-redux'
 import { login } from '../utils/api'
 import { saveToken } from '../actions/auth'
 
-import { IonGrid, IonRow, IonCol, IonNote, IonItem, IonIcon, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar, IonLabel, IonButton } from '@ionic/react';
+import { IonGrid, IonRow, IonCol, IonNote, IonItem, IonIcon, IonHeader, 
+    IonMenuButton, IonPage, IonTitle, IonToolbar, IonLabel, IonButton,
+    IonAlert
+} from '@ionic/react';
 import { personCircleOutline } from 'ionicons/icons'
 import ExploreContainer from '../components/ExploreContainer'
 import { save } from 'ionicons/icons'
@@ -12,55 +15,54 @@ const { Modals } = Plugins
 
 class Login extends Component {
 
+    state = {
+        showAlert: false,
+        alertMsg: '',
+        alertTitle: ''
+    }
 
-
-    componentDidMount() {
-        console.log(this.props.history)
+    componentDidMount() {        
 
     }
-    async showAlert(message) {
-        let alertRet = await Modals.alert({
-            title: 'Error',
-            message,
-        })
+
+    showAlert = (msg, title) => {
+        this.setState({showAlert: true, alertMsg: msg, alertTitle: title})
     }
 
     handleSubmit = async (e) => {
         e.preventDefault()
 
-        const user = e.target.user.value
+        const username = e.target.username.value
         const password = e.target.password.value
 
-        if (!user || !password) {
-            this.showAlert('Ingresa todos los campos requeridos')
+        if (!username || !password) {
+            this.showAlert('Ingresa todos los campos requeridos', 'Error')
             return
         }
 
         let response
         try {
-            response = await (await login({ user: user, password: password })).json()
-            console.log(response)
+            response = await (await login({ username: username, password: password })).json()            
         }
         catch (err) {
             console.log(err)
-            this.showAlert('Ocurrió un error al intentar realizar la acción. Por favor, inténtalo nuevamente.')
+            this.showAlert('Ocurrió un error al intentar realizar la acción. Por favor, inténtalo nuevamente.', 'Error')
             return
         }
 
         if (response.status != 'OK') {
-            this.showAlert('message' in response ? response.message : 'Ocurrió un error al intentar realizar la acción. Por favor, inténtalo nuevamente.')
+            this.showAlert('message' in response ? response.message : 'Ocurrió un error al intentar realizar la acción. Por favor, inténtalo nuevamente.', 'Error')
             return
         }
         // save jwt
-        this.props.dispatch(saveToken(response.payload))
+        this.props.dispatch(saveToken(response.token))
 
         // redirect to dashboard
         this.props.history.replace('/dashboard')
     }
 
     goToSignup = (e) => {
-        e.preventDefault()
-        console.log(this.props)
+        e.preventDefault()       
         this.props.history.replace('/signup')
     }
 
@@ -82,7 +84,7 @@ class Login extends Component {
                         <div style={{ padding: 15 }}>
                             <ion-item>
                                 <ion-label position="stacked">Usuario:<ion-text color="danger">*</ion-text></ion-label>
-                                <ion-input type="text" name="user"></ion-input>
+                                <ion-input type="text" name="username"></ion-input>
                             </ion-item>
 
                             <ion-item>
@@ -115,7 +117,17 @@ class Login extends Component {
 
                     </form>
                 </ion-content>
-                <ion-alert-controller></ion-alert-controller>
+                <IonAlert
+                    isOpen={this.state.showAlert}
+                    header={this.state.alertTitle}
+                    message={this.state.alertMsg}
+                    buttons={[{
+                        text: 'OK',
+                        handler: () => {
+                            this.setState({showAlert: false})
+                        }
+                    }]}
+                />
             </IonPage>
         )
     }
