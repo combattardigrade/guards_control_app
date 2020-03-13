@@ -10,5 +10,18 @@
     <param name="android-package" value="org.apache.cordova.dialogs.Notification"/>
   </feature>
 
+  <feature name="Geolocation">
+    <param name="android-package" value="org.apache.cordova.geolocation.Geolocation"/>
+  </feature>
+
+  <feature name="NfcPlugin">
+    <param name="android-package" value="com.chariotsolutions.nfc.plugin.NfcPlugin"/>
+    <param name="onload" value="true"/>
+  </feature>
+
+  <feature name="BarcodeScanner">
+    <param name="android-package" value="com.phonegap.plugins.barcodescanner.BarcodeScanner"/>
+  </feature>
+
   
 </widget>

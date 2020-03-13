@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { IonButtons, IonButton, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle,
-     IonToolbar, IonIcon, IonItem, IonLabel, IonRefresher, IonRefresherContent,
-      IonGrid, IonRow, IonCol, IonAlert 
-    } from '@ionic/react';
+import {
+    IonButtons, IonButton, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle,
+    IonToolbar, IonIcon, IonItem, IonLabel, IonRefresher, IonRefresherContent,
+    IonGrid, IonRow, IonCol, IonAlert
+} from '@ionic/react';
 import {
     notificationsOutline, keyOutline, shieldCheckmarkOutline, repeatOutline,
     navigateOutline, cameraOutline, readerOutline, alertCircleOutline,
@@ -17,10 +18,11 @@ import { saveGuardData } from '../actions/guard'
 
 
 // Api
-import { getGuardData } from '../utils/api'
+import { getGuardData, sendUserLocation } from '../utils/api'
 
-import { Plugins } from '@capacitor/core'
-const { Geolocation } = Plugins
+// import { Plugins } from '@capacitor/core'
+// const { Geolocation } = Plugins
+import { Geolocation } from '@ionic-native/geolocation';
 
 class Dashboard extends Component {
 
@@ -32,42 +34,58 @@ class Dashboard extends Component {
 
     componentDidMount() {
         const { token, dispatch } = this.props
+
         this.watchPosition()
 
-        getGuardData({token})
+        getGuardData({ token })
             .then(data => data.json())
             .then(res => {
-                if(res.status == 'OK') {
+                if (res.status == 'OK') {
                     dispatch(saveGuardData(res.payload))
                 }
             })
     }
 
     watchPosition = () => {
-        console.log('watch position')
-        const options = {
-            enableHighAccuracy: true,
-            maximumAge:30000,
-            requireAltitude: true,
-            timeout: 30000
-        }
-        Geolocation.watchPosition(options, (position, err) => {
-            if (err) {
-                console.log(err)
+        const { dispatch, token } = this.props
+        
+        let watch = Geolocation.watchPosition({
+            maximumAge: 3000,
+            timeout: 5000,
+            enableHighAccuracy: true
+        })
+
+        watch.subscribe((data) => {
+            if ('code' in data) {
+                console.log(`Location error code ${data.code}. ${data.message}`)
                 return
             }
             
             const locationData = {
-                lat: position.coords.latituted,
-                lng: position.coords.lng,
-                accuracy: position.coords.accuracy,
-                speed: position.coords.speed,
-                altitude: position.coords.altitude,
-                altitudeAccuracy: position.coords.altitudeAccuracy,
-                timestamp: position.timestamp
+                lat: data.coords.latitude,
+                lng: data.coords.longitude,
+                accuracy: data.coords.accuracy,
+                speed: data.coords.speed,
+                altitude: data.coords.altitude,
+                altitudeAccuracy: data.coords.altitudeAccuracy,
+                timestamp: data.timestamp
             }
-            saveLocation(locationData)
+            console.log()
+            // Send User Location to server
+            sendUserLocation({...locationData, token})
+                .then(data => data.json())
+                .then(res => {
+                    console.log(res)
+                    if(!('status' in res) || res.status != 'OK') {
+                        // backup data until connection is restored
+                        // To Do...
+                    }
+                    dispatch(saveLocation(locationData))
+                })
+
+            
         })
+        
     }
 
     handleWorkOrderClick = async (wonum) => {
@@ -84,22 +102,22 @@ class Dashboard extends Component {
         const { guard, history } = this.props
         e.preventDefault()
 
-        if(guard.status == 'ON_STAND_BY') {
+        if (guard.status == 'ON_STAND_BY') {
             history.push('startTurn')
         } else if (guard.status == 'ON_PATROL') {
             history.push('endTurn')
         } else {
             this.showAlert('No fue posible obtener el estado del guardia. Por favor, inténtalo nuevamente', 'Error')
         }
-        
-        
+
+
     }
 
-    goToPage = (page) => {        
+    goToPage = (page) => {
         this.props.history.push(page)
     }
 
-    
+
     render() {
 
 
@@ -121,7 +139,7 @@ class Dashboard extends Component {
                     <IonGrid>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none"  button onClick={this.handleAccessBtn}>
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={this.handleAccessBtn}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={repeatOutline}></IonIcon></IonCol>
@@ -133,7 +151,7 @@ class Dashboard extends Component {
                                 </IonItem>
                             </IonCol>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => {e.preventDefault(); this.goToPage('checkpoints')}}>
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('checkpoints') }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={shieldCheckmarkOutline}></IonIcon></IonCol>
@@ -147,19 +165,19 @@ class Dashboard extends Component {
                         </IonRow>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => {e.preventDefault(); this.goToPage('checkpoints')}}>
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('checkpoints') }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={navigateOutline}></IonIcon></IonCol>
                                         </IonRow>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonLabel>Rutas</IonLabel></IonCol>
+                                            <IonCol><IonLabel>Rutass</IonLabel></IonCol>
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>
                             </IonCol>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => {e.preventDefault(); this.goToPage('report')}}>
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('report') }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={cameraOutline}></IonIcon></IonCol>
@@ -173,7 +191,7 @@ class Dashboard extends Component {
                         </IonRow>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => {e.preventDefault(); this.goToPage('bitacora')}}>
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('bitacora') }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={readerOutline}></IonIcon></IonCol>
@@ -199,7 +217,7 @@ class Dashboard extends Component {
                         </IonRow>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => {e.preventDefault(); this.goToPage('chat')}}>
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('chat') }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={chatboxEllipsesOutline}></IonIcon></IonCol>
@@ -249,7 +267,7 @@ function mapStateToProps({ auth, guard }) {
     return {
         token: auth.token,
         guard: guard && guard.guard
-        
+
 
     }
 }
