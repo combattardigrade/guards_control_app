@@ -1,13 +1,16 @@
-import { SAVE_GUARD_DATA } from '../actions/guard'
+import { SAVE_GUARD_DATA, UPDATE_GUARD_STATUS } from '../actions/guard'
 
 export default function guard(state = null, action) {
-    switch(action.type) {
+    switch (action.type) {
         case SAVE_GUARD_DATA:
+            return {                
+                ...action.guard
+
+            }
+        case UPDATE_GUARD_STATUS:
             return {
                 ...state,
-                guard: {
-                    ...action.guard
-                }
+                status: action.status
             }
         default:
             return state

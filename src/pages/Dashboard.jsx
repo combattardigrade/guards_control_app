@@ -15,10 +15,11 @@ import {
 // Actions
 import { saveLocation } from '../actions/location'
 import { saveGuardData } from '../actions/guard'
+import { saveAccessLogs } from '../actions/accessLogs'
 
 
 // Api
-import { getGuardData, sendUserLocation } from '../utils/api'
+import { getGuardData, sendUserLocation, getAccessLogs } from '../utils/api'
 
 // import { Plugins } from '@capacitor/core'
 // const { Geolocation } = Plugins
@@ -44,11 +45,20 @@ class Dashboard extends Component {
                     dispatch(saveGuardData(res.payload))
                 }
             })
+
+        getAccessLogs({token})
+            .then(data => data.json())
+            .then(res => {
+                if(res.status == 'OK') {
+                    console.log(res.payload)
+                    dispatch(saveAccessLogs(res.payload))
+                }
+            })
     }
 
     watchPosition = () => {
         const { dispatch, token } = this.props
-        
+
         let watch = Geolocation.watchPosition({
             maximumAge: 3000,
             timeout: 5000,
@@ -60,7 +70,7 @@ class Dashboard extends Component {
                 console.log(`Location error code ${data.code}. ${data.message}`)
                 return
             }
-            
+
             const locationData = {
                 lat: data.coords.latitude,
                 lng: data.coords.longitude,
@@ -72,20 +82,20 @@ class Dashboard extends Component {
             }
             console.log()
             // Send User Location to server
-            sendUserLocation({...locationData, token})
+            sendUserLocation({ ...locationData, token })
                 .then(data => data.json())
                 .then(res => {
                     console.log(res)
-                    if(!('status' in res) || res.status != 'OK') {
+                    if (!('status' in res) || res.status != 'OK') {
                         // backup data until connection is restored
                         // To Do...
                     }
                     dispatch(saveLocation(locationData))
                 })
 
-            
+
         })
-        
+
     }
 
     handleWorkOrderClick = async (wonum) => {
@@ -266,7 +276,7 @@ class Dashboard extends Component {
 function mapStateToProps({ auth, guard }) {
     return {
         token: auth.token,
-        guard: guard && guard.guard
+        guard: guard && guard
 
 
     }

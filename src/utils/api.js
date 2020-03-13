@@ -40,3 +40,24 @@ export function sendUserLocation(params) {
         }
     })
 }
+
+export function registerAccess(params) {
+    return fetch(API + '/guardAccess/registerAccess', {
+        method: 'POST',
+        body: JSON.stringify(params),
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    })
+}
+
+export function getAccessLogs(params) {
+    return fetch(API + '/guardAccess/getAccessLogs', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    })
+}

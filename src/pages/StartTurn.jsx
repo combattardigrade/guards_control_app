@@ -18,6 +18,13 @@ import MyMap from '../components/MyMap'
 import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 import { NFC, Ndef } from '@ionic-native/nfc';
 
+// Api
+import { registerAccess } from '../utils/api'
+
+// Actions
+import { updateGuardStatus } from '../actions/guard'
+import { saveNewAccessLog } from '../actions/accessLogs'
+
 const moment = require('moment')
 
 
@@ -35,6 +42,27 @@ class StartTurn extends Component {
 
     handleScanner = async (e) => {
         console.log('QR SCANNER STARTED')
+        const { token, location, device, dispatch } = this.props
+        const accessCode = '17dadc0d75f84cd57f5ec4a97e6f45a2'
+       
+        registerAccess({accessCode, lat: location.lat, lng: location.lng, 
+            imei: device.uuid, accessMethod: 'QR_CODE', accessType: 'ENTRY', token: token
+        })
+            .then(data => data.json())
+            .then(res => {
+                console.log(res)
+                if(res.status == 'OK') {
+                    dispatch(updateGuardStatus('ON_PATROL'))
+                    dispatch(saveNewAccessLog(res.payload))
+                    // show success page
+                }
+            })
+            .catch(err => {
+                console.log(err)
+                this.showAlert('message' in err ? err.message : 'Ocurrió un error al intentar registrar el acceso', 'Error')
+                return
+            })
+
         e.preventDefault()
         try {
 
@@ -43,7 +71,7 @@ class StartTurn extends Component {
         }
         catch (err) {
             console.log(err)
-            this.showAlert('Ocurrió un erro al intentar escanear el código QR.', 'Error')
+            this.showAlert('Ocurrió un error al intentar escanear el código QR.', 'Error')
             return
         }
     }
@@ -53,6 +81,11 @@ class StartTurn extends Component {
         e.preventDefault()
         console.log(NFC)
         try {
+
+            // Receive NFC event
+            // https://stackoverflow.com/questions/26688456/my-cordova-application-not-launching-after-nfc-tag-detect
+            // To Do
+
             NFC.addTagDiscoveredListener(
                 function (nfcEvent) {
                     var tag = nfcEvent.tag,
@@ -169,11 +202,12 @@ class StartTurn extends Component {
 };
 
 
-function mapStateToProps({ token, location, guard }) {
+function mapStateToProps({ auth, token, location, guard, device }) {
     return {
-        token,
-        location: location && location.location,
-        guard: guard && guard.guard
+        token: auth && auth.token,
+        location: location && location,
+        guard: guard && guard,
+        device: device && device
     }
 }
 

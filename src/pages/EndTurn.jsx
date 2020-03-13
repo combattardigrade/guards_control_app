@@ -18,8 +18,10 @@ import {
 
 class EndTurn extends Component {
 
-   
-  
+    handleBackBtn = () => {
+        this.props.history.goBack()
+    }
+
 
     render() {
 
@@ -91,7 +93,7 @@ class EndTurn extends Component {
                             </IonCol>
                         </IonRow>
                     </IonGrid>
-                    <div style={{ bottom: '10px', position: 'absolute', padding:'10px', width:'100%'}}>
+                    <div style={{ bottom: '10px', position: 'absolute', padding: '10px', width: '100%' }}>
                         <ion-button color="light" expand="full" type="submit" className="ion-no-margin">Ver Historial de Accesos</ion-button>
                     </div>
 
@@ -104,7 +106,9 @@ class EndTurn extends Component {
 
 
 function mapStateToProps({ auth, workOrders }) {
-    
+    return {
+        token: auth && auth.token
+    }
 }
 
 export default connect(mapStateToProps)(EndTurn)
