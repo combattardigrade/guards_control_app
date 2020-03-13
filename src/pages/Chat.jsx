@@ -18,9 +18,12 @@ import {
 
 class Chat extends Component {
 
+    handleBackBtn = () => {
+        this.props.history.goBack()
+    }
     render() {
 
-
+        
 
         return (
             <IonPage>

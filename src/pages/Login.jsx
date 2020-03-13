@@ -96,7 +96,7 @@ class Login extends Component {
                         <IonGrid>
                             <IonRow>
                                 <IonCol size="12" style={{ paddingBottom: '0px' }}>
-                                    <ion-button expand="block" type="submit" className="ion-no-margin">Iniciar sesión</ion-button>
+                                    <ion-button expand="block" type="submit" className="ion-no-margin">Iniciar sesións</ion-button>
                                 </IonCol>
                             </IonRow>
                             <IonRow>

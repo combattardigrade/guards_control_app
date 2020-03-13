@@ -19,7 +19,9 @@ import {
 class Report extends Component {
 
 
-
+    handleBackBtn = () => {
+        this.props.history.goBack()
+    }
 
     render() {
 

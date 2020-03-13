@@ -20,7 +20,9 @@ import {
 
 class Notifications extends Component {
 
-
+    handleBackBtn = () => {
+        this.props.history.goBack()
+    }
 
 
     render() {

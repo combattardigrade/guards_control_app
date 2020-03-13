@@ -19,7 +19,9 @@ import {
 
 class Settings extends Component {
 
-
+    handleBackBtn = () => {
+        this.props.history.goBack()
+    }
 
 
     render() {

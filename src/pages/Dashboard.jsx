@@ -1,21 +1,73 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { IonButtons, IonButton, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar, IonIcon, IonItem, IonLabel, IonRefresher, IonRefresherContent, IonGrid, IonRow, IonCol } from '@ionic/react';
-import { 
+import { IonButtons, IonButton, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle,
+     IonToolbar, IonIcon, IonItem, IonLabel, IonRefresher, IonRefresherContent,
+      IonGrid, IonRow, IonCol, IonAlert 
+    } from '@ionic/react';
+import {
     notificationsOutline, keyOutline, shieldCheckmarkOutline, repeatOutline,
     navigateOutline, cameraOutline, readerOutline, alertCircleOutline,
     chatboxEllipsesOutline, callOutline
 
 } from 'ionicons/icons'
 
+// Actions
+import { saveLocation } from '../actions/location'
+import { saveGuardData } from '../actions/guard'
+
+
+// Api
+import { getGuardData } from '../utils/api'
 
 import { Plugins } from '@capacitor/core'
-const { Modals } = Plugins
+const { Geolocation } = Plugins
 
 class Dashboard extends Component {
 
-    async componentDidMount() {
+    state = {
+        showAlert: false,
+        alertMsg: '',
+        alertTitle: ''
+    }
 
+    componentDidMount() {
+        const { token, dispatch } = this.props
+        this.watchPosition()
+
+        getGuardData({token})
+            .then(data => data.json())
+            .then(res => {
+                if(res.status == 'OK') {
+                    dispatch(saveGuardData(res.payload))
+                }
+            })
+    }
+
+    watchPosition = () => {
+        console.log('watch position')
+        const options = {
+            enableHighAccuracy: true,
+            maximumAge:30000,
+            requireAltitude: true,
+            timeout: 30000
+        }
+        Geolocation.watchPosition(options, (position, err) => {
+            if (err) {
+                console.log(err)
+                return
+            }
+            
+            const locationData = {
+                lat: position.coords.latituted,
+                lng: position.coords.lng,
+                accuracy: position.coords.accuracy,
+                speed: position.coords.speed,
+                altitude: position.coords.altitude,
+                altitudeAccuracy: position.coords.altitudeAccuracy,
+                timestamp: position.timestamp
+            }
+            saveLocation(locationData)
+        })
     }
 
     handleWorkOrderClick = async (wonum) => {
@@ -24,15 +76,32 @@ class Dashboard extends Component {
         this.props.history.push('/wo/' + wonum)
     }
 
-    async showAlert(message) {
-        await Modals.alert({
-            title: 'Error',
-            message,
-        })
+    showAlert = (msg, title) => {
+        this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
     }
 
-    render() {
+    handleAccessBtn = (e) => {
+        const { guard, history } = this.props
+        e.preventDefault()
+
+        if(guard.status == 'ON_STAND_BY') {
+            history.push('startTurn')
+        } else if (guard.status == 'ON_PATROL') {
+            history.push('endTurn')
+        } else {
+            this.showAlert('No fue posible obtener el estado del guardia. Por favor, inténtalo nuevamente', 'Error')
+        }
         
+        
+    }
+
+    goToPage = (page) => {        
+        this.props.history.push(page)
+    }
+
+    
+    render() {
+
 
         return (
             <IonPage>
@@ -52,7 +121,7 @@ class Dashboard extends Component {
                     <IonGrid>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none">
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none"  button onClick={this.handleAccessBtn}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={repeatOutline}></IonIcon></IonCol>
@@ -64,7 +133,7 @@ class Dashboard extends Component {
                                 </IonItem>
                             </IonCol>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none">
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => {e.preventDefault(); this.goToPage('checkpoints')}}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={shieldCheckmarkOutline}></IonIcon></IonCol>
@@ -78,7 +147,7 @@ class Dashboard extends Component {
                         </IonRow>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none">
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => {e.preventDefault(); this.goToPage('checkpoints')}}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={navigateOutline}></IonIcon></IonCol>
@@ -90,7 +159,7 @@ class Dashboard extends Component {
                                 </IonItem>
                             </IonCol>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none">
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => {e.preventDefault(); this.goToPage('report')}}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={cameraOutline}></IonIcon></IonCol>
@@ -104,7 +173,7 @@ class Dashboard extends Component {
                         </IonRow>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none">
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => {e.preventDefault(); this.goToPage('bitacora')}}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={readerOutline}></IonIcon></IonCol>
@@ -116,7 +185,7 @@ class Dashboard extends Component {
                                 </IonItem>
                             </IonCol>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none">
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button >
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={alertCircleOutline}></IonIcon></IonCol>
@@ -130,7 +199,7 @@ class Dashboard extends Component {
                         </IonRow>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none">
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => {e.preventDefault(); this.goToPage('chat')}}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={chatboxEllipsesOutline}></IonIcon></IonCol>
@@ -142,7 +211,7 @@ class Dashboard extends Component {
                                 </IonItem>
                             </IonCol>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none">
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={callOutline}></IonIcon></IonCol>
@@ -158,7 +227,17 @@ class Dashboard extends Component {
 
 
 
-
+                    <IonAlert
+                        isOpen={this.state.showAlert}
+                        header={this.state.alertTitle}
+                        message={this.state.alertMsg}
+                        buttons={[{
+                            text: 'OK',
+                            handler: () => {
+                                this.setState({ showAlert: false })
+                            }
+                        }]}
+                    />
                 </IonContent>
             </IonPage>
         );
@@ -166,10 +245,11 @@ class Dashboard extends Component {
 };
 
 
-function mapStateToProps({ auth, workOrders }) {
+function mapStateToProps({ auth, guard }) {
     return {
-        // token: auth.token,
-        // workOrders: workOrders.workOrders
+        token: auth.token,
+        guard: guard && guard.guard
+        
 
     }
 }

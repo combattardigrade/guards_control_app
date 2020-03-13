@@ -19,6 +19,9 @@ import {
 
 class StartTurn extends Component {
 
+    handleBackBtn = () => {
+        this.props.history.goBack()
+    }
     
 
     render() {

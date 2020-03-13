@@ -1,4 +1,4 @@
-import Menu from './components/Menu';
+import Menu from './components/Menu.jsx';
 
 import React, { Component } from 'react'
 import { IonApp, IonRouterOutlet, IonSplitPane } from '@ionic/react';
@@ -63,16 +63,19 @@ class App extends Component {
   }
 
   async componentDidMount() {
-  const { device, dispatch } = this.props
+    const { dispatch } = this.props
     Device.getInfo()
       .then((info) => {
-          dispatch(saveDeviceData(info))
+        dispatch(saveDeviceData(info))
       })
+
+
 
   }
 
   render() {
     const { selectedPage, setSelectedPage } = this.state
+    const { auth } = this.props
 
     return (
       <IonApp>
@@ -80,28 +83,31 @@ class App extends Component {
           <IonSplitPane contentId="main">
             <Menu selectedPage={selectedPage} />
             <IonRouterOutlet id="main">
-              <Route path="/dashboard" component={Dashboard} />
+              
 
               <Route path="/" render={() => <Redirect to="/login" />} exact={true} />
               <Route path="/login" component={Login} />
               <Route path="/signup" component={Signup} />
-              <Route path="/startTurn" component={StartTurn} />
-              <Route path="/endTurn" component={EndTurn} />
-              <Route path="/registerCheckpoint" component={RegisterCheckpoint} />
-              <Route path="/routes" component={Routes} />
-              <Route path="/chat" component={Chat} />
-              <Route path="/chatMembers" component={ChatMembers} />
-              <Route path="/sendReport" component={SendReport} />
-              <Route path="/sendBitacora" component={SendBitacora} />
-              <Route path="/historialBitacoras" component={HistorialBitacoras} />
-              <Route path="/historialReportes" component={HistorialReportes} />
-              <Route path="/alert" component={Alert} />
-              <Route path="/settings" component={Settings} />
-              <Route path="/notifications" component={Notifications} />
-              <Route path="/checkpoints" component={Checkpoints} />
-              <Route path="/historialAccesos" component={HistorialAccesos} />
-              <Route path="/report" component={Report} />
-              <Route path="/bitacora" component={Bitacora} />
+
+              <PrivateRoute path='/dashboard' component={Dashboard} auth={auth}/>
+              <PrivateRoute path='/startTurn' component={StartTurn} auth={auth}/>
+              <PrivateRoute path='/endTurn' component={EndTurn} auth={auth}/>
+              <PrivateRoute path='/registerCheckpoint' component={RegisterCheckpoint} auth={auth}/>
+              <PrivateRoute path='/routes' component={Routes} auth={auth}/>
+              <PrivateRoute path='/chat' component={Chat} auth={auth}/>
+              <PrivateRoute path='/chatMembers' component={ChatMembers} auth={auth}/> 
+              <PrivateRoute path="/sendReport" component={SendReport} auth={auth}/>
+              <PrivateRoute path="/sendBitacora" component={SendBitacora} auth={auth} />
+              <PrivateRoute path="/historialBitacoras" component={HistorialBitacoras} auth={auth}/>
+              <PrivateRoute path="/historialReportes" component={HistorialReportes} auth={auth}/>
+              <PrivateRoute path="/alert" component={Alert} auth={auth}/>
+              <PrivateRoute path="/settings" component={Settings}auth={auth} />
+              <PrivateRoute path="/notifications" component={Notifications} auth={auth}/>
+              <PrivateRoute path="/checkpoints" component={Checkpoints} auth={auth}/>
+              <PrivateRoute path="/historialAccesos" component={HistorialAccesos} auth={auth}/>
+              <PrivateRoute path="/report" component={Report} auth={auth}/>
+              <PrivateRoute path="/bitacora" component={Bitacora} auth={auth}/>
+              
             </IonRouterOutlet>
           </IonSplitPane>
         </IonReactRouter>
@@ -110,9 +116,32 @@ class App extends Component {
   }
 };
 
-function mapStateToProps({ device }) {
+function PrivateRoute({ component: Component, ...rest }) {
+  const { auth } = rest
+  return (
+    <Route
+      {...rest}
+      render={props =>
+        auth !== null ? (
+          <Component {...props} />
+        )
+          : (
+            <Redirect
+              to={{
+                pathname: '/login',
+                state: { from: props.location.pathname } // thanks a lot of the suggestion :)
+              }}
+            />
+          )
+      }
+    />
+  )
+}
+
+function mapStateToProps({ device, auth }) {
   return {
-    device
+    device,
+    auth
   }
 }
 

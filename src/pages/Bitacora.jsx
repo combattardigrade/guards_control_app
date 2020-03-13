@@ -18,7 +18,9 @@ import {
 
 class Bitacora extends Component {
 
-
+    handleBackBtn = () => {
+        this.props.history.goBack()
+    }
 
 
     render() {
