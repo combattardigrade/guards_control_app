@@ -75,7 +75,7 @@ class Routes extends Component {
                         {
                             routes ?
                                 Object.values(routes).map((route, index) => (
-                                    <IonItem key={route.id} lines="full" button onClick={e => { e.preventDefault(); this.handleShowRoute(index) }}>
+                                    <IonItem key={route.id} lines="full" button detailIcon={searchOutline} detail onClick={e => { e.preventDefault(); this.handleShowRoute(index) }}>
                                         <IonGrid>
                                             <IonRow>
                                                 <IonCol><IonLabel>ID {route.id}</IonLabel></IonCol>
