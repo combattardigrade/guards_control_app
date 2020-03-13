@@ -14,16 +14,43 @@ import {
     documentAttachOutline, chevronBackOutline, searchOutline
 } from 'ionicons/icons'
 
-
+import RouteMap from '../components/RouteMap'
+import Checkpoints from './Checkpoints';
 
 class Routes extends Component {
 
-   
-  
+    state = {
+        showAlert: false,
+        alertTitle: '',
+        alertMsg: '',
+        checkpoints: ''
+    }
+
+    handleBackBtn = () => {
+        this.props.history.goBack()
+    }
+
+    showAlert = (msg, title) => {
+        this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
+    }
+
+    componentDidMount() {
+        const { routes } = this.props
+        if (routes) {
+            this.setState({ checkpoints: routes[0].checkpoints })
+        }
+
+    }
+
+    handleShowRoute(index) {        
+        const { routes } = this.props
+        this.setState({ checkpoints: routes[index].checkpoints })
+    }
 
     render() {
 
-
+        const { routes, location } = this.props
+        const { checkpoints } = this.state
 
         return (
             <IonPage>
@@ -32,55 +59,43 @@ class Routes extends Component {
                         <IonButtons slot="start" onClick={e => { e.preventDefault(); this.handleBackBtn() }}>
                             <IonIcon style={{ fontSize: '28px' }} icon={chevronBackOutline}></IonIcon>
                         </IonButtons>
-                        <IonTitle>Rutas</IonTitle>
+                        <IonTitle>Rutas Activas</IonTitle>
                     </IonToolbar>
                 </IonHeader>
 
                 <IonContent>
-                    <IonItem lines="full">
-                        <div style={{height:'300px'}}>Mapa</div>
-                    </IonItem>
+                    <IonRow>
+                        <IonCol>
+                            {
+                                location && <RouteMap location={location} checkpoints={checkpoints} />
+                            }
+                        </IonCol>
+                    </IonRow>
+                    <div style={{ marginTop: '30vh' }}>
+                        {
+                            routes ?
+                                Object.values(routes).map((route, index) => (
+                                    <IonItem key={route.id} lines="full" button onClick={e => { e.preventDefault(); this.handleShowRoute(index) }}>
+                                        <IonGrid>
+                                            <IonRow>
+                                                <IonCol><IonLabel>ID {route.id}</IonLabel></IonCol>
+                                            </IonRow>
+                                            <IonRow>
+                                                <IonCol>
+                                                    <IonLabel>Nombre: {route.name}</IonLabel>
+                                                    <IonLabel>Descripción: {route.description}</IonLabel>
+                                                </IonCol>
+                                            </IonRow>
+                                        </IonGrid>
+                                    </IonItem>
+                                ))
+                                :
+                                <div>No se encontraron resultados</div>
 
-                    <IonItem lines="full">
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol><IonLabel>Ruta #1</IonLabel></IonCol>
-                            </IonRow>
-                            <IonRow>
-                                <IonCol>
-                                    <IonLabel>Nombre: Patio</IonLabel>
-                                    <IonLabel>Observaciones: No hay iluminación</IonLabel>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem lines="full">
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol><IonLabel>Ruta #2</IonLabel></IonCol>
-                            </IonRow>
-                            <IonRow>
-                                <IonCol>
-                                    <IonLabel>Nombre: Patio</IonLabel>
-                                    <IonLabel>Observaciones: No hay iluminación</IonLabel>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem lines="full">
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol><IonLabel>Ruta #3</IonLabel></IonCol>
-                            </IonRow>
-                            <IonRow>
-                                <IonCol>
-                                    <IonLabel>Nombre: Patio</IonLabel>
-                                    <IonLabel>Observaciones: No hay iluminación</IonLabel>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    
+
+                        }
+                    </div>
+
                 </IonContent>
             </IonPage >
 
@@ -89,8 +104,13 @@ class Routes extends Component {
 };
 
 
-function mapStateToProps({ auth, workOrders }) {
-    
+function mapStateToProps({ auth, routes, location }) {
+    return {
+        token: auth && auth.token,
+        routes: routes && routes,
+        location: location && location
+    }
+
 }
 
 export default connect(mapStateToProps)(Routes)

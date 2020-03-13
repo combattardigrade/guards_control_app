@@ -16,10 +16,11 @@ import {
 import { saveLocation } from '../actions/location'
 import { saveGuardData } from '../actions/guard'
 import { saveAccessLogs } from '../actions/accessLogs'
+import { saveRoutes } from '../actions/routes'
 
 
 // Api
-import { getGuardData, sendUserLocation, getAccessLogs } from '../utils/api'
+import { getGuardData, sendUserLocation, getAccessLogs, getRoutesByStatus } from '../utils/api'
 
 // import { Plugins } from '@capacitor/core'
 // const { Geolocation } = Plugins
@@ -35,9 +36,11 @@ class Dashboard extends Component {
 
     componentDidMount() {
         const { token, dispatch } = this.props
-
+        
+        // Start watching position
         this.watchPosition()
 
+        // Get Guard Data
         getGuardData({ token })
             .then(data => data.json())
             .then(res => {
@@ -46,12 +49,22 @@ class Dashboard extends Component {
                 }
             })
 
+        // Get Access Logs
         getAccessLogs({token})
+            .then(data => data.json())
+            .then(res => {
+                if(res.status == 'OK') {                    
+                    dispatch(saveAccessLogs(res.payload))
+                }
+            })
+
+        // Get Routes
+        getRoutesByStatus({status: 'ACTIVE', token})
             .then(data => data.json())
             .then(res => {
                 if(res.status == 'OK') {
                     console.log(res.payload)
-                    dispatch(saveAccessLogs(res.payload))
+                    dispatch(saveRoutes(res.payload))
                 }
             })
     }
@@ -175,13 +188,13 @@ class Dashboard extends Component {
                         </IonRow>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('checkpoints') }}>
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('routes') }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={navigateOutline}></IonIcon></IonCol>
                                         </IonRow>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonLabel>Rutass</IonLabel></IonCol>
+                                            <IonCol><IonLabel>Rutas</IonLabel></IonCol>
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>
