@@ -10,8 +10,7 @@ import {
 } from '@ionic/react';
 import { Redirect, Route } from 'react-router-dom';
 import {
-    addOutline, peopleOutline, hammerOutline, documentTextOutline, cameraOutline,
-    documentAttachOutline, chevronBackOutline, searchOutline
+    closeOutline
 } from 'ionicons/icons'
 
 
@@ -26,7 +25,7 @@ import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 import { NFC, Ndef } from '@ionic-native/nfc';
 
 
-class RegisterCheckpoint extends Component {
+class RegisterCheckpointModal extends Component {
 
     state = {
         showAlert: false,
@@ -34,13 +33,7 @@ class RegisterCheckpoint extends Component {
         alertMsg: ''
     }
 
-    handleBackBtn = () => {
-        this.props.history.goBack()
-    }
-
-    ionViewWillEnter() {
-        const { checkpointId } = this.props.match.params
-    }
+      
 
     handleScanner = async (e) => {
 
@@ -90,16 +83,18 @@ class RegisterCheckpoint extends Component {
         this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
     }
 
+    
+
     render() {
 
-        const { checkpoint, route, location } = this.props
+        const { checkpoint, route, location, showRegisterCheckpointModal, handleToggleRegisterCheckpointModal } = this.props
 
         return (
-            <IonPage>
+            <IonModal isOpen={showRegisterCheckpointModal} >
                 <IonHeader>
                     <IonToolbar>
-                        <IonButtons slot="start" onClick={e => { e.preventDefault(); this.handleBackBtn() }}>
-                            <IonIcon style={{ fontSize: '28px' }} icon={chevronBackOutline}></IonIcon>
+                        <IonButtons slot="end" onClick={e => { e.preventDefault(); handleToggleRegisterCheckpointModal(false) }}>
+                            <IonIcon style={{ fontSize: '28px' }} icon={closeOutline}></IonIcon>
                         </IonButtons>
                         <IonTitle>Registrar Punto de Control</IonTitle>
                     </IonToolbar>
@@ -192,7 +187,7 @@ class RegisterCheckpoint extends Component {
                         }]}
                     />
                 </IonContent>
-            </IonPage >
+            </IonModal >
 
         );
     }
@@ -200,12 +195,12 @@ class RegisterCheckpoint extends Component {
 
 
 function mapStateToProps({ auth, location }, ownProps) {
+    console.log(ownProps)
     return {
         token: auth && auth.token,
         location: location && location,
-        checkpoint: ownProps.location.state.checkpoint,
-        route: ownProps.location.state.route
+        
     }
 }
 
-export default connect(mapStateToProps)(withIonLifeCycle(RegisterCheckpoint))
+export default connect(mapStateToProps)(RegisterCheckpointModal)

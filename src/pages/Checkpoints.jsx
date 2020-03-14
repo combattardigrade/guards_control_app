@@ -15,6 +15,7 @@ import {
 } from 'ionicons/icons'
 
 import RouteMap from '../components/RouteMap'
+import RegisterCheckpointModal from './RegisterCheckpointModal'
 import { getMapRoute } from '../utils/api'
 import './styles.css'
 
@@ -28,7 +29,10 @@ class Checkpoints extends Component {
         points: [],
         checkpoints: '',
         registerBtnDisabled: true,
-        activeCheckpoint: ''
+        activeCheckpoint: '',
+        showRegisterCheckpointModal: false,
+        currentCheckpoint: '',
+        currentRoute: ''
     }
 
     componentDidMount() {
@@ -70,27 +74,33 @@ class Checkpoints extends Component {
         this.setState({ points })
     }
 
-    handleCheckpointClick(checkpoint) {        
-        if(checkpoint.status == 'COMPLETED') {            
-            this.setState({registerBtnDisabled: true})
+    handleCheckpointClick(checkpoint) {
+        if (checkpoint.status == 'COMPLETED') {
+            this.setState({ registerBtnDisabled: true })
             this.showAlert('El punto de control seleccionado ya ha sido completado', 'Notificación')
             return
-        } 
-        this.setState({registerBtnDisabled: false, activeCheckpoint: checkpoint})        
+        }
+        this.setState({ registerBtnDisabled: false, activeCheckpoint: checkpoint })
     }
 
     handleScanClick = (e) => {
         e.preventDefault()
         const { activeCheckpoint } = this.state
         const { routes } = this.props
-        this.props.history.push({
-            pathname: '/registerCheckpoint/' + activeCheckpoint.id,
-            state: {checkpoint: activeCheckpoint, route: (Object.values(routes).filter(r => r.id == activeCheckpoint.routeId ))[0]}
+
+        this.setState({
+            currentCheckpoint: activeCheckpoint,
+            currentRoute: (Object.values(routes).filter(r => r.id == activeCheckpoint.routeId))[0],
+            showRegisterCheckpointModal: true
         })
     }
 
     showAlert = (msg, title) => {
         this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
+    }
+
+    handleToggleRegisterCheckpointModal = (value) => {
+        this.setState({ showRegisterCheckpointModal: value })
     }
 
     render() {
@@ -149,20 +159,20 @@ class Checkpoints extends Component {
                                 <IonCol size="1"><IonLabel style={{ fontSize: '12px' }}>ID</IonLabel></IonCol>
                                 <IonCol size="4"><IonLabel style={{ fontSize: '12px' }}>Punto de Control</IonLabel></IonCol>
                                 <IonCol size="4"><IonLabel style={{ fontSize: '12px' }}>Registrar antes de</IonLabel></IonCol>
-                                <IonCol style={{textAlign:'center'}}><IonLabel style={{ fontSize: '12px' }}>Estado</IonLabel></IonCol>
+                                <IonCol style={{ textAlign: 'center' }}><IonLabel style={{ fontSize: '12px' }}>Estado</IonLabel></IonCol>
                             </IonRow>
                         </IonGrid>
                     </IonItem>
                     {
                         checkpoints ?
                             checkpoints.map((cp, index) => (
-                                <IonItem color={cp.id == this.state.activeCheckpoint.id ? 'primary' : null} key={index}   button onClick={e => {e.preventDefault();this.handleCheckpointClick(cp)}}>
+                                <IonItem color={cp.id == this.state.activeCheckpoint.id ? 'primary' : null} key={index} button onClick={e => { e.preventDefault(); this.handleCheckpointClick(cp) }}>
                                     <IonGrid>
                                         <IonRow >
                                             <IonCol size="1"><IonLabel style={{ fontSize: '12px' }}>{cp.id}</IonLabel></IonCol>
                                             <IonCol size="4"><IonLabel style={{ fontSize: '12px' }}>{cp.name}</IonLabel></IonCol>
                                             <IonCol size="4"><IonLabel style={{ fontSize: '12px' }}>15:45 04/03/2020</IonLabel></IonCol>
-                                            <IonCol style={{textAlign:'center'}}>{cp.status == 'COMPLETED' ?  <IonIcon icon={checkmarkOutline}></IonIcon> : <IonIcon icon={closeOutline}></IonIcon>}</IonCol>
+                                            <IonCol style={{ textAlign: 'center' }}>{cp.status == 'COMPLETED' ? <IonIcon icon={checkmarkOutline}></IonIcon> : <IonIcon icon={closeOutline}></IonIcon>}</IonCol>
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>
@@ -181,6 +191,12 @@ class Checkpoints extends Component {
                     <div style={{ textAlign: 'center', position: 'fixed', width: '100%', bottom: '10px' }}>
                         <IonButton disabled={this.state.registerBtnDisabled} onClick={this.handleScanClick}> Escanear Punto de Control</IonButton>
                     </div>
+                    <RegisterCheckpointModal
+                        checkpoint={this.state.currentCheckpoint}
+                        route={this.state.currentRoute}
+                        showRegisterCheckpointModal={this.state.showRegisterCheckpointModal}
+                        handleToggleRegisterCheckpointModal={this.handleToggleRegisterCheckpointModal}
+                    />
                     <IonAlert
                         isOpen={this.state.showAlert}
                         header={this.state.alertTitle}

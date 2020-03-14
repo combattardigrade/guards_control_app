@@ -33,7 +33,7 @@ import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import StartTurn from './pages/StartTurn'
 import EndTurn from './pages/EndTurn'
-import RegisterCheckpoint from './pages/RegisterCheckpoint'
+// import RegisterCheckpoint from './pages/RegisterCheckpointModal'
 import Routes from './pages/Routes'
 import Chat from './pages/Chat'
 import ChatMembers from './pages/ChatMembers'
@@ -92,7 +92,7 @@ class App extends Component {
               <PrivateRoute path='/dashboard' component={Dashboard} auth={auth}/>
               <PrivateRoute path='/startTurn' component={StartTurn} auth={auth}/>
               <PrivateRoute path='/endTurn' component={EndTurn} auth={auth}/>
-              <PrivateRoute path='/registerCheckpoint/:checkpointId' component={RegisterCheckpoint} auth={auth}/>
+              
               <PrivateRoute path='/routes' component={Routes} auth={auth}/>
               <PrivateRoute path='/chat' component={Chat} auth={auth}/>
               <PrivateRoute path='/chatMembers' component={ChatMembers} auth={auth}/> 
