@@ -20,7 +20,7 @@ import { saveRoutes } from '../actions/routes'
 
 
 // Api
-import { getGuardData, sendUserLocation, getAccessLogs, getRoutesByStatus } from '../utils/api'
+import { getGuardData, sendUserLocation, getAccessLogs, getRoutesByStatus, getGuardAccessLogs } from '../utils/api'
 
 // import { Plugins } from '@capacitor/core'
 // const { Geolocation } = Plugins
@@ -67,6 +67,8 @@ class Dashboard extends Component {
                     dispatch(saveRoutes(res.payload))
                 }
             })
+
+        
     }
 
     watchPosition = () => {

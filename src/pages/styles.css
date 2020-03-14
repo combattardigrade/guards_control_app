@@ -1,3 +1,11 @@
-.itemSelected {
-    --brackground: '#3171e09e';
+.dataTitle {
+    font-size: 14px !important;
+    font-weight: bold;
+}
+.dataField {
+    font-size: 12px !important;
+}
+.dataSubtitle {
+    font-weight: bold;
+    font-size: 12px !important;
 }

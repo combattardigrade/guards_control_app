@@ -19,7 +19,7 @@ import {
   archiveOutline, archiveSharp, bookmarkOutline, heartOutline,
   heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp,
   trashOutline, trashSharp, warningOutline, warningSharp, personCircleOutline,
-  flashlightOutline, globeOutline, settingsOutline
+  flashlightOutline, globeOutline, settingsOutline, repeatOutline
 } from 'ionicons/icons';
 import './Menu.css';
 import { menuController } from '@ionic/core';
@@ -49,6 +49,11 @@ class Menu extends Component {
               <IonIcon icon={flashlightOutline}></IonIcon>
               <IonLabel style={{ marginLeft: '10px' }}>Linterna</IonLabel>
               <IonToggle color="success" />
+            </IonItem>
+
+            <IonItem lines="none" onClick={e => {e.preventDefault(); this.goToPage('/historialAccesos')}}>
+              <IonIcon icon={repeatOutline}></IonIcon>
+              <IonLabel style={{ marginLeft: '10px' }}>Historial de Accesos</IonLabel>
             </IonItem>
 
             <IonItem lines="none" >

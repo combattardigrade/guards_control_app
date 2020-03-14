@@ -14,14 +14,22 @@ import {
     documentAttachOutline, chevronBackOutline, searchOutline, imagesOutline, calendarOutline,
 } from 'ionicons/icons'
 
+import './styles.css'
+
+const moment = require('moment')
+
 
 
 class HistorialAccesos extends Component {
 
-
+    handleBackBtn = () => {
+        this.props.history.goBack()
+    }
 
 
     render() {
+
+        const { accessLogs } = this.props
 
         return (
             <IonPage>
@@ -38,48 +46,46 @@ class HistorialAccesos extends Component {
                     <IonItem >
                         <IonGrid>
                             <IonRow>
-                                <IonCol size="4" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonLabel style={{ fontSize: '12px' }}>No.</IonLabel>
+                                <IonCol size="2" style={{ textAlign: 'center' }}>
+                                    <IonLabel className='dataTitle' >No.</IonLabel>
+                                </IonCol>
+                                <IonCol size="3">
+                                    <IonLabel className='dataTitle'>Tipo</IonLabel>
+                                </IonCol>
+                                <IonCol size="3">
+                                    <IonLabel className='dataTitle'>Método</IonLabel>
                                 </IonCol>
                                 <IonCol size="4">
-                                    <IonLabel style={{ fontSize: '12px' }}>Tipo</IonLabel>
-                                </IonCol>
-                                <IonCol size="4">
-                                    <IonLabel style={{ fontSize: '12px' }}>Fecha y Hora</IonLabel>
+                                    <IonLabel className='dataTitle'>Fecha y Hora</IonLabel>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
                     </IonItem>
-                    <IonItem >
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="4" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonLabel style={{ fontSize: '12px' }}>1</IonLabel>
-                                </IonCol>
-                                <IonCol size="4">
-                                    <IonLabel style={{ fontSize: '12px' }}>Entrada</IonLabel>
-                                </IonCol>
-                                <IonCol size="4">
-                                    <IonLabel style={{ fontSize: '12px' }}>15:46 07/02/2020</IonLabel>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem >
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="4" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonLabel style={{ fontSize: '12px' }}>2</IonLabel>
-                                </IonCol>
-                                <IonCol size="4">
-                                    <IonLabel style={{ fontSize: '12px' }}>Salida</IonLabel>
-                                </IonCol>
-                                <IonCol size="4">
-                                    <IonLabel style={{ fontSize: '12px' }}>15:46 07/02/2020</IonLabel>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
+
+                    {
+                        accessLogs &&
+                        Object.values(accessLogs).map((log, index) => (
+                            <IonItem key={index}>
+                                <IonGrid>
+                                    <IonRow>
+                                        <IonCol size="2" style={{ textAlign: 'center' }}>
+                                            <IonLabel style={{ fontSize: '12px' }}>{index}</IonLabel>
+                                        </IonCol>
+                                        <IonCol size="3">
+                                            <IonLabel style={{ fontSize: '12px' }}>{log.accessType == 'ENTRY' ? 'Entrada' : 'Salida'}</IonLabel>
+                                        </IonCol>
+                                        <IonCol size="3">
+                                            <IonLabel style={{ fontSize: '12px' }}>{log.accessMethod}</IonLabel>
+                                        </IonCol>
+                                        <IonCol size="4">
+                                            <IonLabel style={{ fontSize: '12px' }}>{moment(log.createdAt).format('DD/MM/YY HH:MM')}</IonLabel>
+                                        </IonCol>
+                                    </IonRow>
+                                </IonGrid>
+                            </IonItem>
+                        ))
+                    }
+
 
                 </IonContent>
             </IonPage >
@@ -89,8 +95,10 @@ class HistorialAccesos extends Component {
 };
 
 
-function mapStateToProps({ auth, workOrders }) {
-
+function mapStateToProps({ auth, accessLogs }) {
+    return {
+        accessLogs,
+    }
 }
 
 export default connect(mapStateToProps)(HistorialAccesos)
