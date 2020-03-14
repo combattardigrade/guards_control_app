@@ -1,6 +1,6 @@
 {
   "appId": "io.ionic.starter",
-  "appName": "maximo_app",
+  "appName": "guards",
   "bundledWebRuntime": false,
   "npmClient": "npm",
   "webDir": "build",

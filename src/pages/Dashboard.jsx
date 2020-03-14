@@ -22,9 +22,11 @@ import { saveRoutes } from '../actions/routes'
 // Api
 import { getGuardData, sendUserLocation, getAccessLogs, getRoutesByStatus, getGuardAccessLogs } from '../utils/api'
 
+// Plugins
 // import { Plugins } from '@capacitor/core'
 // const { Geolocation } = Plugins
 import { Geolocation } from '@ionic-native/geolocation';
+
 
 class Dashboard extends Component {
 

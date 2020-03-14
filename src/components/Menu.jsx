@@ -24,12 +24,21 @@ import {
 import './Menu.css';
 import { menuController } from '@ionic/core';
 
+//  Plugins
+import { Flashlight } from '@ionic-native/flashlight';
+
 class Menu extends Component {
   goToPage = (page) => {
     this.props.history.push(page)
     menuController.close()
     return
   }
+
+  toggleFlashlight = () => {
+    console.log('flashlight')
+    Flashlight.toggle(function () { }, function () { }, { intensity: 0.9 })
+  }
+
   render() {
     return (
       <IonMenu contentId="main" type="overlay">
@@ -48,10 +57,10 @@ class Menu extends Component {
             <IonItem lines="none" >
               <IonIcon icon={flashlightOutline}></IonIcon>
               <IonLabel style={{ marginLeft: '10px' }}>Linterna</IonLabel>
-              <IonToggle color="success" />
+              <IonToggle onIonChange={e => {e.preventDefault(); this.toggleFlashlight()}} color="success" />
             </IonItem>
 
-            <IonItem lines="none" onClick={e => {e.preventDefault(); this.goToPage('/historialAccesos')}}>
+            <IonItem lines="none" onClick={e => { e.preventDefault(); this.goToPage('/historialAccesos') }}>
               <IonIcon icon={repeatOutline}></IonIcon>
               <IonLabel style={{ marginLeft: '10px' }}>Historial de Accesos</IonLabel>
             </IonItem>
@@ -68,7 +77,7 @@ class Menu extends Component {
           </IonList>
 
           <IonItem lines="none" style={{ position: 'absolute', bottom: '20px', width: '100%' }} onClick={e => { e.preventDefault(); localStorage.clear(); this.goToPage('login') }} >
-            <IonLabel style={{textAlign:'center'}}>Cerrar sesión</IonLabel>
+            <IonLabel style={{ textAlign: 'center' }}>Cerrar sesión</IonLabel>
           </IonItem>
         </IonContent>
       </IonMenu>

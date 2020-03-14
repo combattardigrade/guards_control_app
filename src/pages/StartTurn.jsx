@@ -161,16 +161,16 @@ class StartTurn extends Component {
                                 <IonCol><IonLabel >Localización:</IonLabel></IonCol>
                             </IonRow>
                             <IonRow>
-                                <IonCol> <IonInput value={location && `${location.lat}, ${location.lng}`}></IonInput></IonCol>
+                                <IonCol> <IonInput readonly value={location && `${location.lat}, ${location.lng}`}></IonInput></IonCol>
                             </IonRow>
                         </IonGrid>
                     </IonItem>
 
                     <IonRow>
                         <IonCol>
-                            {
-                                location && <MyMap location={location} />
-                            }
+                            
+                                <MyMap location={location} />
+                            
                         </IonCol>
                     </IonRow>
 
