@@ -10,30 +10,12 @@ const mapStyles = {
 
 class MyMap extends Component {
 
-    // state = {
-    //     stores: [{ lat: 47.49855629475769, lng: -122.14184416996333 },
-    //     { latitude: 47.359423, longitude: -122.021071 },
-    //     { latitude: 47.2052192687988, longitude: -121.988426208496 },
-    //     { latitude: 47.6307081, longitude: -122.1434325 },
-    //     { latitude: 47.3084488, longitude: -122.2140121 },
-    //     { latitude: 47.5524695, longitude: -122.0425407 }]
-    // }
-
-    // displayMarkers = () => {
-    //     return this.state.stores.map((store, index) => {
-    //         return <Marker key={index} id={index} position={{
-    //             lat: store.latitude,
-    //             lng: store.longitude
-    //         }}
-    //             onClick={() => console.log("You clicked me!")} />
-    //     })
-    // }
+    
 
     render() {
 
         const { location, google } = this.props
-
-        
+       
 
         return (
             <Map
@@ -41,6 +23,78 @@ class MyMap extends Component {
                 zoom={15}
                 style={mapStyles}
                 initialCenter={{ lat: location.lat, lng: location.lng }}
+                mapTypeControl={false}
+                styles={[{
+                    featureType: 'poi',
+                    elementType: 'labels.icon',
+                    stylers: [{ visibility: 'off' }] // hide poi (businesses) icons
+                },
+                {
+                    featureType: 'poi',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#e5e5e5' }] // poi geometry color
+                },
+                {
+                    featureType: 'poi.park',
+                    elementType: 'labels.text.stroke',
+                    stylers: [{ color: '#ffffff' }] // hide local businesses labels
+                },
+                {
+                    featureType: 'poi.park',
+                    elementType: 'labels.text.fill',
+                    stylers: [{ color: '#676767' }] // hide local businesses labels
+                },
+                {
+                    featureType: 'landscape',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#f5f5f5' }] // buildings and so on
+                },
+                {
+                    featureType: 'road.arterial',
+                    elementType: 'labels',
+                    stylers: [{ visibility: 'off' }] // hide arterial roads labels
+                },
+                {
+                    featureType: 'road.highway',
+                    elementType: 'geometry', // highway color
+                    stylers: [{ color: '#dadada' }]
+                },
+                {
+                    featureType: 'road.highway',
+                    elementType: 'labels.text.stroke', // highway label text stroke (contorno)
+                    stylers: [{ color: '#ffffff' }]
+                },
+                {
+                    featureType: 'road',
+                    elementType: 'labels.text.fill', // rad label text color (fill)
+                    stylers: [{ color: '#676767' }]
+                },
+                {
+                    featureType: 'road.local',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#ffffff' }] // park roads color
+
+                },
+                {
+                    featureType: 'transit',
+                    elementType: 'labels.icon',
+                    stylers: [{ visibility: 'off' }]
+                },
+                {
+                    featureType: 'transit',
+                    elementType: 'labels.text.fill',
+                    stylers: [{ color: '#676767' }]
+                },
+                {
+                    featureType: 'transit',
+                    elementType: 'labels.text.stroke',
+                    stylers: [{ color: '#ffffff' }]
+                },
+                {
+                    featureType: 'transit.station.bus',
+                    elementType: 'labels.icon',
+                    stylers: [{ visibility: 'off' }]
+                }]}
             >
                 {/* {this.displayMarkers()} */}
                 <Marker id='currentLocation' position={{lat: location.lat, lng: location.lng}} />
@@ -48,6 +102,12 @@ class MyMap extends Component {
         );
     }
 }
+
+const LoadingContainer = (props) => (
+    <div>Loading map...</div>
+  )
 export default GoogleApiWrapper({
-    apiKey: 'AIzaSyAY5scI2sYPDGoLn2INfct1gMw5gFLIHjs'
+    apiKey: 'AIzaSyAY5scI2sYPDGoLn2INfct1gMw5gFLIHjs',
+    LoadingContainer: LoadingContainer,
+    version: 3.31
 })(MyMap);

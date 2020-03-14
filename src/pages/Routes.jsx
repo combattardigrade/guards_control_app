@@ -17,6 +17,8 @@ import {
 import RouteMap from '../components/RouteMap'
 import Checkpoints from './Checkpoints';
 
+import { getMapRoute } from '../utils/api'
+
 class Routes extends Component {
 
     state = {
@@ -42,15 +44,29 @@ class Routes extends Component {
 
     }
 
-    handleShowRoute(index) {        
+    async handleShowRoute(index) {        
         const { routes } = this.props
         this.setState({ checkpoints: routes[index].checkpoints })
+        let checkpoints = routes[index].checkpoints
+        let points = []
+        for (let i = 0; i < checkpoints.length; i++) {
+            if(!checkpoints[i+1]) {
+                break;
+            }
+            let jsonobject = await (await getMapRoute({ fromLocation: { lat: checkpoints[i].lat, lng: checkpoints[i].lng }, toLocation: { lat: checkpoints[i + 1].lat, lng: checkpoints[i + 1].lng } })).json()
+            console.log(jsonobject)
+            let coordinates = jsonobject.routes[0].geometry.coordinates            
+            await coordinates.map((point) => {
+                points.push({ lat: point[1], lng: point[0] })
+            })
+        }
+        this.setState({ points })
     }
 
     render() {
 
         const { routes, location } = this.props
-        const { checkpoints } = this.state
+        const { checkpoints, points } = this.state
 
         return (
             <IonPage>
@@ -67,7 +83,7 @@ class Routes extends Component {
                     <IonRow>
                         <IonCol>
                             {
-                                location && <RouteMap location={location} checkpoints={checkpoints} />
+                                location && <RouteMap location={location} checkpoints={checkpoints} routePoints={points}  />
                             }
                         </IonCol>
                     </IonRow>

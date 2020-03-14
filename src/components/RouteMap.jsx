@@ -12,96 +12,132 @@ const mapStyles = {
 
 class RouteMap extends Component {
 
-    // state = {
-    //     stores: [{ lat: 47.49855629475769, lng: -122.14184416996333 },
-    //     { latitude: 47.359423, longitude: -122.021071 },
-    //     { latitude: 47.2052192687988, longitude: -121.988426208496 },
-    //     { latitude: 47.6307081, longitude: -122.1434325 },
-    //     { latitude: 47.3084488, longitude: -122.2140121 },
-    //     { latitude: 47.5524695, longitude: -122.0425407 }]
-    // }
-
-    // displayMarkers = () => {
-    //     return this.state.stores.map((store, index) => {
-    //         return <Marker key={index} id={index} position={{
-    //             lat: store.latitude,
-    //             lng: store.longitude
-    //         }}
-    //             onClick={() => console.log("You clicked me!")} />
-    //     })
-    // }
-
     state = {
-        points: ''
+        points: '',
+        loading: true
     }
 
-    componentDidMount() {
-
-    }
-
-    async generateRoute() {
-        const { location, checkpoints } = this.props
-        if (checkpoints && checkpoints.length > 0) {
-            let jsonobject = await (await getMapRoute({ fromLocation: { lat: location.lat, lng: location.lng }, toLocation: { lat: checkpoints[0].lat, lng: checkpoints[0].lng } })).json()
-
+    async componentDidMount() {
+        const { checkpoints } = this.props
+        let points = []
+        for (let i = 0; i < checkpoints.length; i++) {
+            if (!checkpoints[i + 1]) {
+                break;
+            }
+            let jsonobject = await (await getMapRoute({ fromLocation: { lat: checkpoints[i].lat, lng: checkpoints[i].lng }, toLocation: { lat: checkpoints[i + 1].lat, lng: checkpoints[i + 1].lng } })).json()
+            console.log(jsonobject)
             let coordinates = jsonobject.routes[0].geometry.coordinates
-            let points = []
-            coordinates.map((point) => {
-                point.push({ lat: point[1], lng: point[0] })
-            })
-            return (< Polyline
-                paths={points}
-                strokeColor="#0000FF"
-                strokeOpacity={0.8}
-                strokeWeight={2}
-            />)
-            console.log('test')
-            // checkpoints.map((checkpoint, index) => {
-            //     let jsonobject = await getMapRoute({fromLocation: {lat: checkpoint.lat,lng: checkpoint.lng}, toLocation: {lat: checkpoints[index + 1].lat,lng: checkpoints[index + 1].lng}})
-            // })
-        }
-    }
-
-    async fetchPolylineRoute(location, checkpoints) {
-
-        if (checkpoints && checkpoints.length > 0) {
-            let jsonobject = await (await getMapRoute({ fromLocation: { lat: location.lat, lng: location.lng }, toLocation: { lat: checkpoints[0].lat, lng: checkpoints[0].lng } })).json()
-
-            let coordinates = jsonobject.routes[0].geometry.coordinates
-            let points = []
             await coordinates.map((point) => {
-                point.push({ lat: point[1], lng: point[0] })
+                points.push({ lat: point[1], lng: point[0] })
             })
-            this.setState({ points: points })
         }
+
+        this.setState({ points: points })
     }
+
+
+
 
     async  handleMarkerClick(props, location) {
-        const { id, position } = props
-        console.log(position)
+        const { position } = props
         let jsonobject = await (await getMapRoute({ fromLocation: { lat: location.lat, lng: location.lng }, toLocation: { lat: position.lat, lng: position.lng } })).json()
         let coordinates = jsonobject.routes[0].geometry.coordinates
         let points = []
         coordinates.map((point) => {
             points.push({ lat: point[1], lng: point[0] })
         })
-        this.setState({ points })
-        console.log(points)
+        this.setState({ points, loading: false })
+
     }
 
     render() {
 
-        const { location, google, checkpoints, } = this.props
-        const { points } = this.state
-        console.log(checkpoints)
+        const { location, google, checkpoints, routePoints } = this.props
+        const { points, loading } = this.state
+
+        
+
 
         return (
+           
             <Map
                 google={google}
                 zoom={15}
+
                 style={mapStyles}
                 initialCenter={{ lat: location.lat, lng: location.lng }}
+                mapTypeControl={false}
+                styles={[{
+                    featureType: 'poi',
+                    elementType: 'labels.icon',
+                    stylers: [{ visibility: 'off' }] // hide poi (businesses) icons
+                },
+                {
+                    featureType: 'poi',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#e5e5e5' }] // poi geometry color
+                },
+                {
+                    featureType: 'poi.park',
+                    elementType: 'labels.text.stroke',
+                    stylers: [{ color: '#ffffff' }] // hide local businesses labels
+                },
+                {
+                    featureType: 'poi.park',
+                    elementType: 'labels.text.fill',
+                    stylers: [{ color: '#676767' }] // hide local businesses labels
+                },
+                {
+                    featureType: 'landscape',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#f5f5f5' }] // buildings and so on
+                },
+                {
+                    featureType: 'road.arterial',
+                    elementType: 'labels',
+                    stylers: [{ visibility: 'off' }] // hide arterial roads labels
+                },
+                {
+                    featureType: 'road.highway',
+                    elementType: 'geometry', // highway color
+                    stylers: [{ color: '#dadada' }]
+                },
+                {
+                    featureType: 'road.highway',
+                    elementType: 'labels.text.stroke', // highway label text stroke (contorno)
+                    stylers: [{ color: '#ffffff' }]
+                },
+                {
+                    featureType: 'road',
+                    elementType: 'labels.text.fill', // rad label text color (fill)
+                    stylers: [{ color: '#676767' }]
+                },
+                {
+                    featureType: 'road.local',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#ffffff' }] // park roads color
 
+                },
+                {
+                    featureType: 'transit',
+                    elementType: 'labels.icon',
+                    stylers: [{ visibility: 'off' }]
+                },
+                {
+                    featureType: 'transit',
+                    elementType: 'labels.text.fill',
+                    stylers: [{ color: '#676767' }]
+                },
+                {
+                    featureType: 'transit',
+                    elementType: 'labels.text.stroke',
+                    stylers: [{ color: '#ffffff' }]
+                },
+                {
+                    featureType: 'transit.station.bus',
+                    elementType: 'labels.icon',
+                    stylers: [{ visibility: 'off' }]
+                }]}
             >
 
                 <Marker
@@ -113,15 +149,28 @@ class RouteMap extends Component {
                 {
                     checkpoints && (
                         checkpoints.map((checkpoint) => (
-                            <Marker key={checkpoint.id} id={checkpoint.id} label={`Punto ${checkpoint.name}`} position={{ lat: checkpoint.lat, lng: checkpoint.lng }} onClick={(props, marker, e) => this.handleMarkerClick(props, location)} />
+                            <Marker key={checkpoint.id} id={checkpoint.id} label={`${checkpoint.name}`} position={{ lat: checkpoint.lat, lng: checkpoint.lng }} onClick={(props, marker, e) => this.handleMarkerClick(props, location)} />
                         ))
                     )
                 }
 
                 {
-                    points &&
+                    points ?                
+                        
+                        <Polyline
+                            path={points}
+                            strokeColor="#3880ff"
+                            strokeOpacity={0.8}
+                            strokeWeight={2}
+                        />
+                    :
+                    null
+                }
+
+                {
+                    routePoints &&
                     <Polyline
-                        path={points}
+                        path={routePoints}
                         strokeColor="#3880ff"
                         strokeOpacity={0.8}
                         strokeWeight={2}
@@ -133,6 +182,11 @@ class RouteMap extends Component {
         );
     }
 }
+const LoadingContainer = (props) => (
+    <div>Loading map...</div>
+)
 export default GoogleApiWrapper({
-    apiKey: 'AIzaSyAY5scI2sYPDGoLn2INfct1gMw5gFLIHjs'
+    apiKey: 'AIzaSyAY5scI2sYPDGoLn2INfct1gMw5gFLIHjs',
+    LoadingContainer: LoadingContainer
 })(RouteMap);
+
