@@ -54,7 +54,7 @@ class Routes extends Component {
                 break;
             }
             let jsonobject = await (await getMapRoute({ fromLocation: { lat: checkpoints[i].lat, lng: checkpoints[i].lng }, toLocation: { lat: checkpoints[i + 1].lat, lng: checkpoints[i + 1].lng } })).json()
-            console.log(jsonobject)
+            
             let coordinates = jsonobject.routes[0].geometry.coordinates            
             await coordinates.map((point) => {
                 points.push({ lat: point[1], lng: point[0] })

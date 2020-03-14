@@ -16,16 +16,62 @@ import {
     businessOutline, phonePortraitOutline, globeOutline, mailOutline
 } from 'ionicons/icons'
 
+import RouteMap from '../components/RouteMap'
+import { getMapRoute } from '../utils/api'
 
+class Checkpoints extends Component {
 
-class Notifications extends Component {
+    state = {
+        showAlert: false,
+        alertTitle: '',
+        alertMsg: '',
+        points: [],
+        checkpoints: ''
+    }
+
+    componentDidMount() {
+        const { routes } = this.props
+        if (routes) {
+            this.setState({ checkpoints: routes[0].checkpoints })
+        }
+
+    }
 
     handleBackBtn = () => {
         this.props.history.goBack()
     }
 
+    handleSelectChange = (e) => {
+        const { routes } = this.props
+        const index = e.target.value
+        
+        this.setState({ checkpoints: 'checkpoints' in routes[index] ? routes[index].checkpoints : '', points: [] })
+        this.handleShowRoute(index)
+    }
+
+    async handleShowRoute(index) {
+        const { routes } = this.props
+        this.setState({ checkpoints: routes[index].checkpoints, points: [] })
+        let checkpoints = routes[index].checkpoints
+        let points = []
+        for (let i = 0; i < checkpoints.length; i++) {
+            if (!checkpoints[i + 1]) {
+                break;
+            }
+            let jsonobject = await (await getMapRoute({ fromLocation: { lat: checkpoints[i].lat, lng: checkpoints[i].lng }, toLocation: { lat: checkpoints[i + 1].lat, lng: checkpoints[i + 1].lng } })).json()
+
+            let coordinates = jsonobject.routes[0].geometry.coordinates
+            await coordinates.map((point) => {
+                points.push({ lat: point[1], lng: point[0] })
+            })
+        }
+        this.setState({ points })
+    }
 
     render() {
+
+        const { routes, location,  } = this.props
+        const { points, checkpoints } = this.state
 
         return (
             <IonPage>
@@ -39,55 +85,70 @@ class Notifications extends Component {
                 </IonHeader>
 
                 <IonContent>
-                    <IonItem >
+
+
+
+                    <IonRow>
+                        <IonCol>
+                            {
+                                location && <RouteMap location={location} checkpoints={checkpoints} routePoints={points} />
+                            }
+                        </IonCol>
+                    </IonRow>
+
+                    <IonItem style={{ marginTop: '30vh' }} >
                         <IonGrid>
                             <IonRow>
                                 <IonCol size="12">
-                                    <IonLabel>Seleccionar Ruta para ver Puntos de Control</IonLabel>
+                                    <IonLabel>Seleccionar Ruta:</IonLabel>
+                                    <IonSelect onIonChange={this.handleSelectChange} placeholder="Seleccionar ruta" style={{ width: '100% !important', maxWidth: '100% !important' }}>
+                                        {
+                                            routes &&
+                                            (
+                                                Object.values(routes).map((route, index) => (
+                                                    <IonSelectOption key={index} value={index}>{route.name}</IonSelectOption>
 
-                                </IonCol>
-                            </IonRow>
-                            <IonRow>
-                                <IonCol size="12">
-                                    <IonSelect placeholder="Select One" style={{ width: '100% !important', maxWidth: '100% !important' }}>
-                                        <IonSelectOption value="1">Ruta#1</IonSelectOption>
-                                        <IonSelectOption value="2">Ruta#2</IonSelectOption>
+                                                ))
+                                            )
+                                        }
                                     </IonSelect>
                                 </IonCol>
                             </IonRow>
-                        </IonGrid>
-                    </IonItem>
 
-                    <IonItem>
-                        Mapa
+                        </IonGrid>
                     </IonItem>
 
                     <IonItem>
                         <IonGrid>
                             <IonRow>
-                                <IonCol><IonLabel style={{fontSize:'12px'}}>Punto de Control</IonLabel></IonCol>
-                                <IonCol><IonLabel style={{fontSize:'12px'}}>Registrar antes de</IonLabel></IonCol>
-                                <IonCol><IonLabel style={{fontSize:'12px'}}>Estado</IonLabel></IonCol>
+                                <IonCol><IonLabel style={{ fontSize: '12px' }}>ID</IonLabel></IonCol>
+                                <IonCol><IonLabel style={{ fontSize: '12px' }}>Punto de Control</IonLabel></IonCol>
+                                <IonCol><IonLabel style={{ fontSize: '12px' }}>Registrar antes de</IonLabel></IonCol>
+                                <IonCol><IonLabel style={{ fontSize: '12px' }}>Estado</IonLabel></IonCol>
                             </IonRow>
-                            <IonRow>
-                                <IonCol><IonLabel style={{fontSize:'12px'}}>Punto A</IonLabel></IonCol>
-                                <IonCol><IonLabel style={{fontSize:'12px'}}>15:45 07/02/2020</IonLabel></IonCol>
-                                <IonCol><IonLabel style={{fontSize:'12px'}}></IonLabel></IonCol>
-                            </IonRow>
-                            <IonRow>
-                                <IonCol><IonLabel style={{fontSize:'12px'}}>Punto B</IonLabel></IonCol>
-                                <IonCol><IonLabel style={{fontSize:'12px'}}>15:45 07/02/2020</IonLabel></IonCol>
-                                <IonCol><IonLabel style={{fontSize:'12px'}}></IonLabel></IonCol>
-                            </IonRow>
-                            <IonRow>
-                                <IonCol><IonLabel style={{fontSize:'12px'}}>Punto C</IonLabel></IonCol>
-                                <IonCol><IonLabel style={{fontSize:'12px'}}>15:45 07/02/2020</IonLabel></IonCol>
-                                <IonCol><IonLabel style={{fontSize:'12px'}}></IonLabel></IonCol>
-                            </IonRow>
+                            {
+                                checkpoints ?
+                                    checkpoints.map((cp, index) => (
+                                        <IonRow key={index}>
+                                            <IonCol><IonLabel style={{ fontSize: '12px' }}>{cp.id}</IonLabel></IonCol>
+                                            <IonCol><IonLabel style={{ fontSize: '12px' }}>{cp.name}</IonLabel></IonCol>
+                                            <IonCol><IonLabel style={{ fontSize: '12px' }}>15:45 04/03/2020</IonLabel></IonCol>
+                                            <IonCol><IonLabel style={{ fontSize: '12px' }}>{cp.status}</IonLabel></IonCol>
+                                        </IonRow>
+                                    ))
+                                    :
+                                    <IonRow>
+                                        <IonCol><IonLabel style={{ fontSize: '12px' }}>-</IonLabel></IonCol>
+                                        <IonCol><IonLabel style={{ fontSize: '12px' }}>-</IonLabel></IonCol>
+                                        <IonCol><IonLabel style={{ fontSize: '12px' }}>-</IonLabel></IonCol>
+                                    </IonRow>
+                            }
+
                         </IonGrid>
                     </IonItem>
 
-                    <div style={{textAlign:'center',position:'absolute', width:'100%', bottom:'10px'}}>
+
+                    <div style={{ textAlign: 'center', position: 'absolute', width: '100%', bottom: '10px' }}>
                         <IonButton> Escanear Punto de Control</IonButton>
                     </div>
 
@@ -99,8 +160,13 @@ class Notifications extends Component {
 };
 
 
-function mapStateToProps({ auth, workOrders }) {
-
+function mapStateToProps({ auth, routes, location }) {
+    return {
+        token: auth && auth.token,
+        routes: routes && routes,
+        location: location && location,
+        
+    }
 }
 
-export default connect(mapStateToProps)(Notifications)
+export default connect(mapStateToProps)(Checkpoints)
