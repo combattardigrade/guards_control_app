@@ -49,7 +49,7 @@ class Menu extends Component {
   }
 
   render() {
-    const { guard } = this.props
+    const { guard, company } = this.props
 
     return (
       <IonMenu contentId="main" type="overlay">
@@ -58,8 +58,8 @@ class Menu extends Component {
             <IonRow>
               <IonCol size="2"><IonIcon style={{ fontSize: '50px' }} icon={personCircleOutline} /></IonCol>
               <IonCol size="8">
-                <IonListHeader style={{ paddingTop: '0px' }}>{guard && guard.username}</IonListHeader>
-                <IonLabel className="dataField" style={{ paddingLeft: '10px' }}>{guard && guard.company.name}</IonLabel>
+                <IonListHeader style={{ paddingTop: '0px' }}>{guard && 'username' in guard ? guard.username : 'No disponible'}</IonListHeader>
+                <IonLabel className="dataField" style={{ paddingLeft: '10px' }}>{company && 'name' in company ? company.name : 'No disponible'}</IonLabel>
               </IonCol>
 
             </IonRow>
@@ -110,10 +110,10 @@ class Menu extends Component {
 
 };
 
-function mapStateToProps({ guard, company }) {
+function mapStateToProps({ guard }) {
   return {
-    guard,
-    company
+    guard: guard && guard,
+    company: guard ? 'company' in guard ? guard.company : null : null
   }
 }
 export default withRouter(connect(mapStateToProps)(Menu))

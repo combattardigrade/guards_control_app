@@ -12,19 +12,60 @@ import { Redirect, Route } from 'react-router-dom';
 import {
     addOutline, peopleOutline, hammerOutline, documentTextOutline, cameraOutline,
     documentAttachOutline, chevronBackOutline, searchOutline, imagesOutline, calendarOutline, wifiOutline, personOutline,
-    businessOutline, phonePortraitOutline, globeOutline
+    businessOutline, phonePortraitOutline, globeOutline, informationCircleOutline, callOutline
 } from 'ionicons/icons'
 
+// Styles
+import './styles.css'
+
+// Modals
+import GuardModal from './GuardModal'
+
+// Plugins
+import { CallNumber } from '@ionic-native/call-number';
+import { Plugins } from '@capacitor/core';
+const { Network, Browser } = Plugins;
 
 
 class Settings extends Component {
 
+    state = {
+        networkStatus: '',
+        showGuardModal: false,
+        
+    }
+
     handleBackBtn = () => {
         this.props.history.goBack()
     }
+    
+    async componentDidMount() {
+        let networkStatus = await Network.getStatus();
+        if (networkStatus.connected) {
+            this.setState({ networkStatus: 'Conectado' })
+        } else {
+            this.setState({ networkStatus: 'Conexión no disponible' })
+        }
 
+    }
+
+    goToWebsite = async (url) => {
+        await Browser.open({ url: `${url}` });
+    }
+
+    makeCall = (phone) =>{
+        CallNumber.callNumber(phone, true)
+        .then(res => console.log('LAUNCHED CALL DIALER'))
+        .catch(err => console.log('ERROR LAUNCHING CALL DIALER', err))      
+    }
+
+    handleToggleGuardModal = (value) => {
+        this.setState({ showGuardModal: value })
+    }
 
     render() {
+        const { guard, company, device } = this.props
+        const { networkStatus } = this.state
 
         return (
             <IonPage>
@@ -45,13 +86,13 @@ class Settings extends Component {
                                     <IonIcon style={{ fontSize: '2em' }} icon={wifiOutline}></IonIcon>
                                 </IonCol>
                                 <IonCol size="10">
-                                    <IonLabel>Estado de la conexión</IonLabel>
-                                    <IonNote>Conexión disponible</IonNote>
+                                    <IonLabel >Estado de la conexión</IonLabel>
+                                    <IonNote className="dataField">{networkStatus ? networkStatus : 'Cargando...'}</IonNote>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
                     </IonItem>
-                    <IonItem button detail>
+                    <IonItem button detail onClick={e => {e.preventDefault(); this.handleToggleGuardModal(true)}}>
                         <IonGrid>
                             <IonRow>
                                 <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
@@ -59,7 +100,7 @@ class Settings extends Component {
                                 </IonCol>
                                 <IonCol size="10">
                                     <IonLabel>Usuario</IonLabel>
-                                    <IonNote>User123</IonNote>
+                                    <IonNote className="dataField">{guard.username}</IonNote>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
@@ -72,7 +113,7 @@ class Settings extends Component {
                                 </IonCol>
                                 <IonCol size="10">
                                     <IonLabel>Empresa</IonLabel>
-                                    <IonNote>Empresa Nueva, S.A. de C.V.</IonNote>
+                                    <IonNote className="dataField">{company.name}</IonNote>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
@@ -85,12 +126,12 @@ class Settings extends Component {
                                 </IonCol>
                                 <IonCol size="10">
                                     <IonLabel>IMEI Dispositivo</IonLabel>
-                                    <IonNote>cxzcxzcxzcxz</IonNote>
+                                    <IonNote className="dataField">{device.uuid}</IonNote>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
                     </IonItem>
-                    <IonItem button detail>
+                    <IonItem button detail onClick={e => {e.preventDefault(); this.goToWebsite(company.website)}}>
                         <IonGrid>
                             <IonRow>
                                 <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
@@ -98,7 +139,20 @@ class Settings extends Component {
                                 </IonCol>
                                 <IonCol size="10">
                                     <IonLabel>Sitio Web Empresa</IonLabel>
-                                    <IonNote>www.empresa.com</IonNote>
+                                    <IonNote className="dataField">{company.website}</IonNote>
+                                </IonCol>
+                            </IonRow>
+                        </IonGrid>
+                    </IonItem>
+                    <IonItem button detail onClick={e => {e.preventDefault(); this.makeCall(company.phone)}}>
+                        <IonGrid>
+                            <IonRow>
+                                <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
+                                    <IonIcon style={{ fontSize: '2em' }} icon={callOutline}></IonIcon>
+                                </IonCol>
+                                <IonCol size="10">
+                                    <IonLabel>Teléfono de la Central</IonLabel>
+                                    <IonNote className="dataField">{company.phone}</IonNote>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
@@ -107,19 +161,25 @@ class Settings extends Component {
                         <IonGrid>
                             <IonRow>
                                 <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={documentTextOutline}></IonIcon>
+                                    <IonIcon style={{ fontSize: '2em' }} icon={informationCircleOutline}></IonIcon>
                                 </IonCol>
                                 <IonCol size="10">
-                                    <IonLabel>Teléfono de la Central</IonLabel>
-                                    <IonNote>+123 5658 4574</IonNote>
+                                    <IonLabel>Versión de la App</IonLabel>
+                                    <IonNote className="dataField"><span style={{ textTransform: 'capitalize' }}>{device.platform}</span> v{'appVersion' in device && device.appVersion ? device.appVersion : '1.0.0'}</IonNote>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
                     </IonItem>
-                    
-                     <div style={{bottom:'20px', position:'absolute', textAlign:'center', width:'100%'}}>
-                         <IonLabel>Android v.1.0.1</IonLabel>
-                     </div>
+
+                    <GuardModal
+                        guard={guard}
+                        showGuardModal={this.state.showGuardModal}
+                        handleToggleGuardModal={this.handleToggleGuardModal}
+                        
+                    />
+                    {/* <div style={{ bottom: '20px', position: 'absolute', textAlign: 'center', width: '100%' }}>
+                        <IonLabel className="dataField" ><span style={{ textTransform: 'capitalize' }}>{device.platform}</span> v{'appVersion' in device && device.appVersion ? device.appVersion : '1.0.0'}</IonLabel>
+                    </div> */}
                 </IonContent>
             </IonPage >
 
@@ -128,8 +188,12 @@ class Settings extends Component {
 };
 
 
-function mapStateToProps({ auth, workOrders }) {
-
+function mapStateToProps({ auth, guard, device }) {
+    return {
+        guard,
+        company: guard && ('company' in guard && guard.company),
+        device,
+    }
 }
 
 export default connect(mapStateToProps)(Settings)
