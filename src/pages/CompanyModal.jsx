@@ -33,7 +33,7 @@ class CompanyModal extends Component {
                         <IonButtons slot="end" onClick={e => { e.preventDefault(); handleToggleCompanyModal(false) }}>
                             <IonIcon style={{ fontSize: '28px' }} icon={closeOutline}></IonIcon>
                         </IonButtons>
-                        <IonTitle>Empresa</IonTitle>
+                        <IonTitle>Mi Empresa</IonTitle>
                     </IonToolbar>
                 </IonHeader>
 
