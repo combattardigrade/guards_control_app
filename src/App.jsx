@@ -46,7 +46,7 @@ import Settings from './pages/Settings'
 import Notifications from './pages/Notifications'
 import Checkpoints from './pages/Checkpoints'
 import HistorialAccesos from './pages/HistorialAccesos'
-import Report from './pages/Report'
+
 import Bitacora from './pages/Bitacora'
 
 // Actions
@@ -105,7 +105,7 @@ class App extends Component {
               <PrivateRoute path="/notifications" component={Notifications} auth={auth}/>
               <PrivateRoute path="/checkpoints" component={Checkpoints} auth={auth}/>
               <PrivateRoute path="/historialAccesos" component={HistorialAccesos} auth={auth}/>
-              <PrivateRoute path="/report" component={Report} auth={auth}/>
+              
               <PrivateRoute path="/bitacora" component={Bitacora} auth={auth}/>
               
             </IonRouterOutlet>

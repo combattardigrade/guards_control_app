@@ -5,6 +5,7 @@ import location from './location'
 import guard from './guard'
 import accessLogs from './accessLogs'
 import routes from './routes'
+import reports from './reports'
 
 export default combineReducers({
     auth,
@@ -13,4 +14,5 @@ export default combineReducers({
     guard,
     accessLogs,
     routes,
+    reports
 })

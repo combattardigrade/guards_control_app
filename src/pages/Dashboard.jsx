@@ -17,10 +17,11 @@ import { saveLocation } from '../actions/location'
 import { saveGuardData } from '../actions/guard'
 import { saveAccessLogs } from '../actions/accessLogs'
 import { saveRoutes } from '../actions/routes'
+import { saveReports } from '../actions/reports'
 
 
 // Api
-import { getGuardData, sendUserLocation, getAccessLogs, getRoutesByStatus, getGuardAccessLogs } from '../utils/api'
+import { getGuardData, sendUserLocation, getAccessLogs, getRoutesByStatus, getReports } from '../utils/api'
 
 // Plugins
 // import { Plugins } from '@capacitor/core'
@@ -38,7 +39,7 @@ class Dashboard extends Component {
 
     componentDidMount() {
         const { token, dispatch } = this.props
-        
+
         // Start watching position
         this.watchPosition()
 
@@ -52,25 +53,34 @@ class Dashboard extends Component {
             })
 
         // Get Access Logs
-        getAccessLogs({token})
+        getAccessLogs({ token })
             .then(data => data.json())
             .then(res => {
-                if(res.status == 'OK') {                    
+                if (res.status == 'OK') {
                     dispatch(saveAccessLogs(res.payload))
                 }
             })
 
         // Get Routes
-        getRoutesByStatus({status: 'ACTIVE', token})
+        getRoutesByStatus({ status: 'ACTIVE', token })
             .then(data => data.json())
             .then(res => {
-                if(res.status == 'OK') {
+                if (res.status == 'OK') {
                     console.log(res.payload)
                     dispatch(saveRoutes(res.payload))
                 }
             })
 
-        
+        // Get Reports
+        getReports({ token })
+            .then(data => data.json())
+            .then(res => {
+                if (res.status == 'OK') {
+                    dispatch(saveReports(res.payload))
+                }
+            })
+
+
     }
 
     watchPosition = () => {
@@ -270,7 +280,7 @@ class Dashboard extends Component {
                         </IonRow>
                     </IonGrid>
 
-                    
+
 
                     <IonAlert
                         isOpen={this.state.showAlert}

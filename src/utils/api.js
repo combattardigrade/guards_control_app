@@ -1,4 +1,4 @@
-const API = 'http://genesisblock.ddns.net:3000/api'
+export const API = 'http://genesisblock.ddns.net:3000/api'
 const MAPBOX_DIRECTIONS_API = 'https://api.mapbox.com/directions/v5/mapbox/walking/'
 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiY29tYmF0dGFyZGlncmFkZSIsImEiOiJjanJsOXJqeDYwNmFkM3ltdXdmdG5kOTFqIn0.C14U4oY3yTlrtX_2mDFlCQ'
 
@@ -106,6 +106,25 @@ export function sendReport(params) {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + params.token
         }
-    })
-    
+    })    
 }
+
+export function getReports(params) {
+    return fetch(API + '/reports', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    })  
+}
+
+// export function getPhoto(params) {
+//     return fetch(API + `/photo/${params.photoId}`, {
+//         method: 'GET',
+//         headers: {
+            
+//             'Authorization': 'Bearer ' + params.token
+//         }
+//     })  
+// }

@@ -14,14 +14,46 @@ import {
     documentAttachOutline, chevronBackOutline, searchOutline, imagesOutline, calendarOutline,
 } from 'ionicons/icons'
 
+import './styles.css'
+
+import ReportModal from './ReportModal'
+// Api
+import { getPhoto } from '../utils/api'
+
+const moment = require('moment')
+
 
 
 class HistorialReportes extends Component {
 
+    state = {
+        report: '',
+        showReportModal: false,
+        base64Img: ''
+    }
+
+    handleBackBtn = () => {
+        this.props.history.goBack()
+    }
+
+    handleToggleReportModal = (value) => {
+        this.setState({ showReportModal: value })
+    }
+
+    handleShowReport = (index) => {
+        const { reports, token } = this.props
+        const report = (Object.values(reports).filter((r, i) => i == index))[0]
+        this.setState({
+            report,
+            showReportModal: true
+        })       
+    }
 
 
 
     render() {
+
+        const { reports } = this.props
 
         return (
             <IonPage>
@@ -30,154 +62,59 @@ class HistorialReportes extends Component {
                         <IonButtons slot="start" onClick={e => { e.preventDefault(); this.handleBackBtn() }}>
                             <IonIcon style={{ fontSize: '28px' }} icon={chevronBackOutline}></IonIcon>
                         </IonButtons>
-                        <IonTitle>Bitácoras Diarias</IonTitle>
+                        <IonTitle>Historial Reportes</IonTitle>
                     </IonToolbar>
                 </IonHeader>
 
                 <IonContent>
-                    <IonItem button detail>
+                    <IonItem >
                         <IonGrid>
                             <IonRow>
-                                <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={documentTextOutline}></IonIcon>
+                                <IonCol size="2" style={{ textAlign: 'center' }}>
+                                    <IonLabel className='dataTitle' >ID</IonLabel>
                                 </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>Ventana Rota</IonLabel>
-                                    <IonNote>01/02/2020</IonNote>
+                                <IonCol size="3">
+                                    <IonLabel className='dataTitle'>Título</IonLabel>
+                                </IonCol>
+                                <IonCol size="3">
+                                    <IonLabel className='dataTitle'>Descripción</IonLabel>
+                                </IonCol>
+                                <IonCol size="4">
+                                    <IonLabel className='dataTitle'>Fecha y Hora</IonLabel>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
                     </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={documentTextOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>Ventana Rota</IonLabel>
-                                    <IonNote>01/02/2020</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={documentTextOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>Ventana Rota</IonLabel>
-                                    <IonNote>01/02/2020</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={documentTextOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>Ventana Rota</IonLabel>
-                                    <IonNote>01/02/2020</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={documentTextOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>Ventana Rota</IonLabel>
-                                    <IonNote>01/02/2020</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={documentTextOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>Ventana Rota</IonLabel>
-                                    <IonNote>01/02/2020</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={documentTextOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>Ventana Rota</IonLabel>
-                                    <IonNote>01/02/2020</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={documentTextOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>Ventana Rota</IonLabel>
-                                    <IonNote>01/02/2020</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={documentTextOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>Ventana Rota</IonLabel>
-                                    <IonNote>01/02/2020</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={documentTextOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>Ventana Rota</IonLabel>
-                                    <IonNote>01/02/2020</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={documentTextOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>Ventana Rota</IonLabel>
-                                    <IonNote>01/02/2020</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
+
+                    {
+                        reports &&
+                        Object.values(reports).map((report, index) => (
+                            <IonItem key={index} button detail onClick={e => { e.preventDefault(); this.handleShowReport(index) }}>
+                                <IonGrid>
+                                    <IonRow>
+                                        <IonCol size="2" style={{ textAlign: 'center' }}>
+                                            <IonLabel style={{ fontSize: '12px' }}>{report.id}</IonLabel>
+                                        </IonCol>
+                                        <IonCol size="3">
+                                            <IonLabel style={{ fontSize: '12px' }}>{report.title}</IonLabel>
+                                        </IonCol>
+                                        <IonCol size="3" >
+                                            <IonLabel style={{ fontSize: '12px' }}>{report.description.substring(0, 11) + '...'}</IonLabel>
+                                        </IonCol>
+                                        <IonCol size="4">
+                                            <IonLabel style={{ fontSize: '12px' }}>{moment(report.createdAt).format('DD/MM/YY HH:MM')}</IonLabel>
+                                        </IonCol>
+                                    </IonRow>
+                                </IonGrid>
+                            </IonItem>
+                        ))
+                    }
+                    <ReportModal
+                        report={this.state.report}
+                        showReportModal={this.state.showReportModal}
+                        handleToggleReportModal={this.handleToggleReportModal}
+                        base64Img={this.state.base64Img}
+                    />
 
                 </IonContent>
             </IonPage >
@@ -187,8 +124,10 @@ class HistorialReportes extends Component {
 };
 
 
-function mapStateToProps({ auth, workOrders }) {
-
+function mapStateToProps({ auth, reports }) {
+    return {
+        reports,
+    }
 }
 
 export default connect(mapStateToProps)(HistorialReportes)

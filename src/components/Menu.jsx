@@ -19,7 +19,7 @@ import {
   archiveOutline, archiveSharp, bookmarkOutline, heartOutline,
   heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp,
   trashOutline, trashSharp, warningOutline, warningSharp, personCircleOutline,
-  flashlightOutline, globeOutline, settingsOutline, repeatOutline
+  flashlightOutline, globeOutline, settingsOutline, repeatOutline, layersOutline, folderOutline
 } from 'ionicons/icons';
 import './Menu.css';
 import { menuController } from '@ionic/core';
@@ -66,12 +66,12 @@ class Menu extends Component {
             </IonItem>
 
             <IonItem lines="none" onClick={e => { e.preventDefault(); this.goToPage('/historialReportes') }}>
-              <IonIcon icon={repeatOutline}></IonIcon>
-              <IonLabel style={{ marginLeft: '10px' }}>Historial de Reporte</IonLabel>
+              <IonIcon icon={layersOutline}></IonIcon>
+              <IonLabel style={{ marginLeft: '10px' }}>Historial de Reportes</IonLabel>
             </IonItem>
 
             <IonItem lines="none" onClick={e => { e.preventDefault(); this.goToPage('/historialBitacoras') }}>
-              <IonIcon icon={repeatOutline}></IonIcon>
+              <IonIcon icon={folderOutline}></IonIcon>
               <IonLabel style={{ marginLeft: '10px' }}>Historial de Bitácoras</IonLabel>
             </IonItem>
 
