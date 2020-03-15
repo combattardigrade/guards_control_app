@@ -126,7 +126,7 @@ class EndTurn extends Component {
         return (
             <IonPage>
                 <IonHeader>
-                    <IonToolbar>
+                    <IonToolbar color="dark">
                         <IonButtons slot="start" onClick={e => { e.preventDefault(); this.handleBackBtn() }}>
                             <IonIcon style={{ fontSize: '28px' }} icon={chevronBackOutline}></IonIcon>
                         </IonButtons>

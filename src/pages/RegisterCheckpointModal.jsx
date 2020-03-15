@@ -92,7 +92,7 @@ class RegisterCheckpointModal extends Component {
         return (
             <IonModal isOpen={showRegisterCheckpointModal} >
                 <IonHeader>
-                    <IonToolbar>
+                    <IonToolbar color="dark">
                         <IonButtons slot="end" onClick={e => { e.preventDefault(); handleToggleRegisterCheckpointModal(false) }}>
                             <IonIcon style={{ fontSize: '28px' }} icon={closeOutline}></IonIcon>
                         </IonButtons>

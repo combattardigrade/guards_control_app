@@ -27,7 +27,7 @@ class GuardModal extends Component {
         return (
             <IonModal isOpen={showGuardModal} >
                 <IonHeader>
-                    <IonToolbar>
+                    <IonToolbar color="dark">
                         <IonButtons slot="end" onClick={e => { e.preventDefault(); handleToggleGuardModal(false) }}>
                             <IonIcon style={{ fontSize: '28px' }} icon={closeOutline}></IonIcon>
                         </IonButtons>

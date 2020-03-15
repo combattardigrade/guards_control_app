@@ -161,7 +161,7 @@ class SendReport extends Component {
 
         return (
             <IonPage>
-                <IonHeader>
+                <IonHeader color="dark">
                     <IonToolbar>
                         <IonButtons slot="start" onClick={e => { e.preventDefault(); this.handleBackBtn() }}>
                             <IonIcon style={{ fontSize: '28px' }} icon={chevronBackOutline}></IonIcon>

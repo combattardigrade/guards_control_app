@@ -47,7 +47,6 @@ import Notifications from './pages/Notifications'
 import Checkpoints from './pages/Checkpoints'
 import HistorialAccesos from './pages/HistorialAccesos'
 
-import Bitacora from './pages/Bitacora'
 
 // Actions
 import { saveDeviceData } from './actions/device'
@@ -106,7 +105,7 @@ class App extends Component {
               <PrivateRoute path="/checkpoints" component={Checkpoints} auth={auth}/>
               <PrivateRoute path="/historialAccesos" component={HistorialAccesos} auth={auth}/>
               
-              <PrivateRoute path="/bitacora" component={Bitacora} auth={auth}/>
+              
               
             </IonRouterOutlet>
           </IonSplitPane>

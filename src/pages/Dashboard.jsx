@@ -27,6 +27,9 @@ import {
     getRoutesByStatus, getReports, getBitacoras
 } from '../utils/api'
 
+// Styles
+import './styles.css'
+
 // Plugins
 // import { Plugins } from '@capacitor/core'
 // const { Geolocation } = Plugins
@@ -176,8 +179,8 @@ class Dashboard extends Component {
 
         return (
             <IonPage>
-                <IonHeader>
-                    <IonToolbar>
+                <IonHeader >
+                    <IonToolbar color="dark">
                         <IonButtons slot="start">
                             <IonMenuButton />
                         </IonButtons>

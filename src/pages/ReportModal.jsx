@@ -28,7 +28,7 @@ class ReportModal extends Component {
         return (
             <IonModal isOpen={showReportModal} >
                 <IonHeader>
-                    <IonToolbar>
+                    <IonToolbar color="dark">
                         <IonButtons slot="end" onClick={e => { e.preventDefault(); handleToggleReportModal(false) }}>
                             <IonIcon style={{ fontSize: '28px' }} icon={closeOutline}></IonIcon>
                         </IonButtons>

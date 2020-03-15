@@ -30,7 +30,7 @@ class BitacoraModal extends Component {
         return (
             <IonModal isOpen={showBitacoraModal} >
                 <IonHeader>
-                    <IonToolbar>
+                    <IonToolbar color="dark">
                         <IonButtons slot="end" onClick={e => { e.preventDefault(); handleToggleBitacoraModal(false) }}>
                             <IonIcon style={{ fontSize: '28px' }} icon={closeOutline}></IonIcon>
                         </IonButtons>
