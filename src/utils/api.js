@@ -86,9 +86,20 @@ export function getMapRoute(params) {
     })
 }
 
-export function completeCheckpoint(params) {
-    
+export function completeCheckpoint(params) {    
     return fetch(API + '/completeCheckpoint', {
+        method: 'POST',
+        body: JSON.stringify(params),
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    })    
+}
+
+
+export function sendReport(params) {    
+    return fetch(API + '/report', {
         method: 'POST',
         body: JSON.stringify(params),
         headers: {
@@ -98,4 +109,3 @@ export function completeCheckpoint(params) {
     })
     
 }
-

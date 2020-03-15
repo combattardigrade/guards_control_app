@@ -9,3 +9,11 @@
     font-weight: bold;
     font-size: 12px !important;
 }
+
+.spinnerCenter {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center; 
+    height: 50%;
+}

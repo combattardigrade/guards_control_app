@@ -65,6 +65,16 @@ class Menu extends Component {
               <IonLabel style={{ marginLeft: '10px' }}>Historial de Accesos</IonLabel>
             </IonItem>
 
+            <IonItem lines="none" onClick={e => { e.preventDefault(); this.goToPage('/historialReportes') }}>
+              <IonIcon icon={repeatOutline}></IonIcon>
+              <IonLabel style={{ marginLeft: '10px' }}>Historial de Reporte</IonLabel>
+            </IonItem>
+
+            <IonItem lines="none" onClick={e => { e.preventDefault(); this.goToPage('/historialBitacoras') }}>
+              <IonIcon icon={repeatOutline}></IonIcon>
+              <IonLabel style={{ marginLeft: '10px' }}>Historial de Bitácoras</IonLabel>
+            </IonItem>
+
             <IonItem lines="none" >
               <IonIcon icon={globeOutline}></IonIcon>
               <IonLabel style={{ marginLeft: '10px' }}>Web de la Empresa</IonLabel>

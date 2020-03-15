@@ -204,7 +204,7 @@ class Dashboard extends Component {
                                 </IonItem>
                             </IonCol>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('report') }}>
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('sendReport') }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={cameraOutline}></IonIcon></IonCol>
@@ -270,7 +270,7 @@ class Dashboard extends Component {
                         </IonRow>
                     </IonGrid>
 
-
+                    
 
                     <IonAlert
                         isOpen={this.state.showAlert}
