@@ -119,12 +119,16 @@ export function getReports(params) {
     })  
 }
 
-// export function getPhoto(params) {
-//     return fetch(API + `/photo/${params.photoId}`, {
-//         method: 'GET',
-//         headers: {
-            
-//             'Authorization': 'Bearer ' + params.token
-//         }
-//     })  
-// }
+export function getCompanyData(params) {
+    return fetch(API + '/company/' + params.companyId, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    }) 
+}
+
+
+
+

@@ -1,3 +1,5 @@
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import {
   IonContent,
   IonIcon,
@@ -13,7 +15,7 @@ import {
   IonToggle,
   IonButton
 } from '@ionic/react';
-import React, { Component } from 'react';
+
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {
   archiveOutline, archiveSharp, bookmarkOutline, heartOutline,
@@ -22,10 +24,13 @@ import {
   flashlightOutline, globeOutline, settingsOutline, repeatOutline, layersOutline, folderOutline
 } from 'ionicons/icons';
 import './Menu.css';
+import '../pages/styles.css'
 import { menuController } from '@ionic/core';
 
 //  Plugins
 import { Flashlight } from '@ionic-native/flashlight';
+import { Plugins } from '@capacitor/core';
+const { Browser } = Plugins;
 
 class Menu extends Component {
   goToPage = (page) => {
@@ -39,14 +44,23 @@ class Menu extends Component {
     Flashlight.toggle(function () { }, function () { }, { intensity: 0.9 })
   }
 
+  goToWebsite = async (url) => {
+    await Browser.open({ url });
+  }
+
   render() {
+    const { guard } = this.props
+
     return (
       <IonMenu contentId="main" type="overlay">
         <IonContent>
           <IonList id="inbox-list">
             <IonRow>
               <IonCol size="2"><IonIcon style={{ fontSize: '50px' }} icon={personCircleOutline} /></IonCol>
-              <IonCol size="8"><IonListHeader style={{ paddingTop: '10px' }}>Usuario</IonListHeader></IonCol>
+              <IonCol size="8">
+                <IonListHeader style={{ paddingTop: '0px' }}>{guard && guard.username}</IonListHeader>
+                <IonLabel className="dataField" style={{ paddingLeft: '10px' }}>{guard && guard.company.name}</IonLabel>
+              </IonCol>
 
             </IonRow>
           </IonList>
@@ -57,7 +71,7 @@ class Menu extends Component {
             <IonItem lines="none" >
               <IonIcon icon={flashlightOutline}></IonIcon>
               <IonLabel style={{ marginLeft: '10px' }}>Linterna</IonLabel>
-              <IonToggle onIonChange={e => {e.preventDefault(); this.toggleFlashlight()}} color="success" />
+              <IonToggle onIonChange={e => { e.preventDefault(); this.toggleFlashlight() }} color="success" />
             </IonItem>
 
             <IonItem lines="none" onClick={e => { e.preventDefault(); this.goToPage('/historialAccesos') }}>
@@ -75,7 +89,7 @@ class Menu extends Component {
               <IonLabel style={{ marginLeft: '10px' }}>Historial de Bitácoras</IonLabel>
             </IonItem>
 
-            <IonItem lines="none" >
+            <IonItem lines="none" onClick={e => {e.preventDefault(); this.goToWebsite(guard.company.website)}}>
               <IonIcon icon={globeOutline}></IonIcon>
               <IonLabel style={{ marginLeft: '10px' }}>Web de la Empresa</IonLabel>
             </IonItem>
@@ -96,4 +110,10 @@ class Menu extends Component {
 
 };
 
-export default withRouter(Menu);
+function mapStateToProps({ guard, company }) {
+  return {
+    guard,
+    company
+  }
+}
+export default withRouter(connect(mapStateToProps)(Menu))

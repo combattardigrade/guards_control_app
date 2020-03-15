@@ -18,10 +18,14 @@ import { saveGuardData } from '../actions/guard'
 import { saveAccessLogs } from '../actions/accessLogs'
 import { saveRoutes } from '../actions/routes'
 import { saveReports } from '../actions/reports'
+import { saveCompanyData } from '../actions/company'
 
 
 // Api
-import { getGuardData, sendUserLocation, getAccessLogs, getRoutesByStatus, getReports } from '../utils/api'
+import {
+    getGuardData, sendUserLocation, getAccessLogs,
+    getRoutesByStatus, getReports, getCompanyData
+} from '../utils/api'
 
 // Plugins
 // import { Plugins } from '@capacitor/core'
@@ -48,9 +52,10 @@ class Dashboard extends Component {
             .then(data => data.json())
             .then(res => {
                 if (res.status == 'OK') {
-                    dispatch(saveGuardData(res.payload))
+                    dispatch(saveGuardData(res.payload))                    
                 }
             })
+            
 
         // Get Access Logs
         getAccessLogs({ token })
@@ -79,6 +84,8 @@ class Dashboard extends Component {
                     dispatch(saveReports(res.payload))
                 }
             })
+
+
 
 
     }
