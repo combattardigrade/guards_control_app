@@ -129,6 +129,17 @@ export function getCompanyData(params) {
     }) 
 }
 
+export function sendBitacora(params) {    
+    return fetch(API + '/bitacora', {
+        method: 'POST',
+        body: JSON.stringify(params),
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    })    
+}
+
 
 
 

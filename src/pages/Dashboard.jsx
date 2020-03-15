@@ -235,13 +235,13 @@ class Dashboard extends Component {
                         </IonRow>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('bitacora') }}>
+                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('sendBitacora') }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={readerOutline}></IonIcon></IonCol>
                                         </IonRow>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonLabel>Bitácoras</IonLabel></IonCol>
+                                            <IonCol><IonLabel>Enviar Bitácora</IonLabel></IonCol>
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>

@@ -56,7 +56,7 @@ class SendReport extends Component {
 
     handleSendClick = async (e) => {
         e.preventDefault()
-        console.log('SEND REPORT BTN CLICKed')
+        console.log('SEND REPORT BTN CLICKED')
         const { token, location } = this.props
         const { reportTitle, reportDescription, reportPhoto } = this.state
 
