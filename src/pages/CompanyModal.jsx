@@ -12,26 +12,28 @@ import {
 import { Redirect, Route } from 'react-router-dom';
 import {
     closeOutline, callOutline, personCircleOutline, keyOutline, keypadOutline, 
-    locationOutline, manOutline, searchOutline, mailOutline, radioOutline, peopleOutline
+    locationOutline, manOutline, searchOutline, mailOutline, radioOutline, peopleOutline, globeOutline, businessOutline
 } from 'ionicons/icons'
 
 
 const moment = require('moment')
 
-class GuardModal extends Component {
+class CompanyModal extends Component {
 
     render() {
 
-        const { guard, showGuardModal, handleToggleGuardModal } = this.props
+        const { guard, company,  showCompanyModal, handleToggleCompanyModal } = this.props
+
+
 
         return (
-            <IonModal isOpen={showGuardModal} >
+            <IonModal isOpen={showCompanyModal} >
                 <IonHeader>
                     <IonToolbar>
-                        <IonButtons slot="end" onClick={e => { e.preventDefault(); handleToggleGuardModal(false) }}>
+                        <IonButtons slot="end" onClick={e => { e.preventDefault(); handleToggleCompanyModal(false) }}>
                             <IonIcon style={{ fontSize: '28px' }} icon={closeOutline}></IonIcon>
                         </IonButtons>
-                        <IonTitle>Mi Cuenta</IonTitle>
+                        <IonTitle>Empresa</IonTitle>
                     </IonToolbar>
                 </IonHeader>
 
@@ -43,8 +45,8 @@ class GuardModal extends Component {
                                     <IonIcon style={{ fontSize: '2em' }} icon={searchOutline}></IonIcon>
                                 </IonCol>
                                 <IonCol size="10">
-                                    <IonLabel>ID de usuario</IonLabel>
-                                    <IonNote className="dataField">{guard.id}</IonNote>
+                                    <IonLabel>ID Empresa</IonLabel>
+                                    <IonNote className="dataField">{company && company.id}</IonNote>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
@@ -53,24 +55,24 @@ class GuardModal extends Component {
                         <IonGrid>
                             <IonRow>
                                 <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={personCircleOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>Usuario</IonLabel>
-                                    <IonNote className="dataField">{guard.username}</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem lines="full">
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={manOutline}></IonIcon>
+                                    <IonIcon style={{ fontSize: '2em' }} icon={businessOutline}></IonIcon>
                                 </IonCol>
                                 <IonCol size="10">
                                     <IonLabel>Nombre</IonLabel>
-                                    <IonNote className="dataField">{guard.name}</IonNote>
+                                    <IonNote className="dataField">{company && company.name}</IonNote>
+                                </IonCol>
+                            </IonRow>
+                        </IonGrid>
+                    </IonItem>
+                    <IonItem lines="full">
+                        <IonGrid>
+                            <IonRow>
+                                <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
+                                    <IonIcon style={{ fontSize: '2em' }} icon={globeOutline}></IonIcon>
+                                </IonCol>
+                                <IonCol size="10">
+                                    <IonLabel>Página Web</IonLabel>
+                                    <IonNote className="dataField">{company && company.name}</IonNote>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
@@ -83,7 +85,7 @@ class GuardModal extends Component {
                                 </IonCol>
                                 <IonCol size="10">
                                     <IonLabel>Email</IonLabel>
-                                    <IonNote className="dataField">{guard.email}</IonNote>
+                                    <IonNote className="dataField">{company && company.email}</IonNote>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
@@ -92,41 +94,17 @@ class GuardModal extends Component {
                         <IonGrid>
                             <IonRow>
                                 <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={personCircleOutline}></IonIcon>
+                                    <IonIcon style={{ fontSize: '2em' }} icon={callOutline}></IonIcon>
                                 </IonCol>
                                 <IonCol size="10">
                                     <IonLabel>Teléfono</IonLabel>
-                                    <IonNote className="dataField">{guard.phone}</IonNote>
+                                    <IonNote className="dataField">{company && company.phone}</IonNote>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
                     </IonItem>
-                    <IonItem lines="full">
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={locationOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>Dirección</IonLabel>
-                                    <IonNote className="dataField">{guard.address}</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem lines="full">
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
-                                    <IonIcon style={{ fontSize: '2em' }} icon={peopleOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>Tipo de usuario</IonLabel>
-                                    <IonNote className="dataField">{guard.userType.toUpperCase()}</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
+                    
+                    
                     <IonItem lines="full">
                         <IonGrid>
                             <IonRow>
@@ -135,7 +113,7 @@ class GuardModal extends Component {
                                 </IonCol>
                                 <IonCol size="10">
                                     <IonLabel>Estado</IonLabel>
-                                    <IonNote className="dataField">{guard.status}</IonNote>
+                                    <IonNote className="dataField">{company && company.status == 1 ? 'ACTIVA' : 'INACTIVA'}</IonNote>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
@@ -151,9 +129,9 @@ class GuardModal extends Component {
 
 // function mapStateToProps({ guard }) {
 //     return {
-//         guard: guard && guard
-
+//         guard: guard && guard,
+//         company: guard ? 'company' in guard ? guard.company : null : null
 //     }
 // }
 
-export default GuardModal
+export default CompanyModal

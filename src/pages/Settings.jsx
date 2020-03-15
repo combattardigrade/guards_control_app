@@ -20,6 +20,7 @@ import './styles.css'
 
 // Modals
 import GuardModal from './GuardModal'
+import CompanyModal from './CompanyModal'
 
 // Plugins
 import { CallNumber } from '@ionic-native/call-number';
@@ -32,7 +33,7 @@ class Settings extends Component {
     state = {
         networkStatus: '',
         showGuardModal: false,
-        
+        showCompanyModal: false
     }
 
     handleBackBtn = () => {
@@ -61,6 +62,11 @@ class Settings extends Component {
 
     handleToggleGuardModal = (value) => {
         this.setState({ showGuardModal: value })
+    }
+
+    handleToggleCompanyModal = (value) => {
+        console.log('test')
+        this.setState({ showCompanyModal: value })
     }
 
     render() {
@@ -105,7 +111,7 @@ class Settings extends Component {
                             </IonRow>
                         </IonGrid>
                     </IonItem>
-                    <IonItem button detail>
+                    <IonItem button detail onClick={e => {e.preventDefault(); this.handleToggleCompanyModal(true)}}>
                         <IonGrid>
                             <IonRow>
                                 <IonCol size="2" style={{ textAlign: 'center', paddingTop: '10px' }}>
@@ -174,8 +180,13 @@ class Settings extends Component {
                     <GuardModal
                         guard={guard}
                         showGuardModal={this.state.showGuardModal}
-                        handleToggleGuardModal={this.handleToggleGuardModal}
-                        
+                        handleToggleGuardModal={this.handleToggleGuardModal}                        
+                    />
+                    <CompanyModal
+                        guard={guard}
+                        company={company}
+                        showCompanyModal={this.state.showCompanyModal}
+                        handleToggleCompanyModal={this.handleToggleCompanyModal}                        
                     />
                     {/* <div style={{ bottom: '20px', position: 'absolute', textAlign: 'center', width: '100%' }}>
                         <IonLabel className="dataField" ><span style={{ textTransform: 'capitalize' }}>{device.platform}</span> v{'appVersion' in device && device.appVersion ? device.appVersion : '1.0.0'}</IonLabel>
@@ -191,7 +202,7 @@ class Settings extends Component {
 function mapStateToProps({ auth, guard, device }) {
     return {
         guard,
-        company: guard && ('company' in guard && guard.company),
+        company: guard ? 'company' in guard ? guard.company : null : null,
         device,
     }
 }
