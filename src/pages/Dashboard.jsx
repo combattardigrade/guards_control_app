@@ -18,20 +18,20 @@ import { saveGuardData } from '../actions/guard'
 import { saveAccessLogs } from '../actions/accessLogs'
 import { saveRoutes } from '../actions/routes'
 import { saveReports } from '../actions/reports'
-import { saveCompanyData } from '../actions/company'
+import { saveBitacoras } from '../actions/bitacoras'
 
 
 // Api
 import {
     getGuardData, sendUserLocation, getAccessLogs,
-    getRoutesByStatus, getReports, getCompanyData
+    getRoutesByStatus, getReports, getBitacoras
 } from '../utils/api'
 
 // Plugins
 // import { Plugins } from '@capacitor/core'
 // const { Geolocation } = Plugins
 import { Geolocation } from '@ionic-native/geolocation';
-
+import { CallNumber } from '@ionic-native/call-number';
 
 class Dashboard extends Component {
 
@@ -85,9 +85,14 @@ class Dashboard extends Component {
                 }
             })
 
-
-
-
+        // Get Bitacoras
+        getBitacoras({token})
+            .then(data => data.json())
+            .then(res => {
+                if(res.status == 'OK') {
+                    dispatch(saveBitacoras(res.payload))
+                }
+            }) 
     }
 
     watchPosition = () => {
@@ -128,8 +133,7 @@ class Dashboard extends Component {
                 })
 
 
-        })
-
+        })   
     }
 
     handleWorkOrderClick = async (wonum) => {
@@ -153,17 +157,22 @@ class Dashboard extends Component {
         } else {
             this.showAlert('No fue posible obtener el estado del guardia. Por favor, inténtalo nuevamente', 'Error')
         }
-
-
     }
 
     goToPage = (page) => {
         this.props.history.push(page)
     }
 
+    makeCall = (phone) =>{
+        CallNumber.callNumber(phone, true)
+        .then(res => console.log('LAUNCHED CALL DIALER'))
+        .catch(err => console.log('ERROR LAUNCHING CALL DIALER', err))      
+    }
+
 
     render() {
 
+        const { company } = this.props
 
         return (
             <IonPage>
@@ -273,7 +282,7 @@ class Dashboard extends Component {
                                 </IonItem>
                             </IonCol>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button>
+                                <IonItem disabled={company ? false : true} style={{ border: '2px solid whitesmoke' }} lines="none" button  onClick={e => {e.preventDefault(); this.makeCall(company.phone)}}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon icon={callOutline}></IonIcon></IonCol>
@@ -310,8 +319,8 @@ class Dashboard extends Component {
 function mapStateToProps({ auth, guard }) {
     return {
         token: auth.token,
-        guard: guard && guard
-
+        guard: guard && guard,
+        company: guard ? 'company' in guard ? guard.company : null : null,
 
     }
 }

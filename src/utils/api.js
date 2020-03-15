@@ -140,6 +140,16 @@ export function sendBitacora(params) {
     })    
 }
 
+export function getBitacoras(params) {
+    return fetch(API + '/bitacoras/', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    }) 
+}
+
 
 
 

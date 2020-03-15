@@ -7,6 +7,7 @@ import accessLogs from './accessLogs'
 import routes from './routes'
 import reports from './reports'
 import company from './company'
+import bitacoras from './bitacoras'
 
 export default combineReducers({
     auth,
@@ -16,5 +17,6 @@ export default combineReducers({
     accessLogs,
     routes,
     reports,
-    company
+    company,
+    bitacoras
 })

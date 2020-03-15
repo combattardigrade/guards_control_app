@@ -28,8 +28,7 @@ class HistorialReportes extends Component {
 
     state = {
         report: '',
-        showReportModal: false,
-        base64Img: ''
+        showReportModal: false,        
     }
 
     handleBackBtn = () => {
@@ -113,7 +112,7 @@ class HistorialReportes extends Component {
                         report={this.state.report}
                         showReportModal={this.state.showReportModal}
                         handleToggleReportModal={this.handleToggleReportModal}
-                        base64Img={this.state.base64Img}
+                        
                     />
 
                 </IonContent>

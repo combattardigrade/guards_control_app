@@ -14,14 +14,37 @@ import {
     documentAttachOutline, chevronBackOutline, searchOutline, imagesOutline, calendarOutline
 } from 'ionicons/icons'
 
+import BitacoraModal from './BitacoraModal'
 
+const moment = require('moment')
 
 class HistorialBitacoras extends Component {
 
+    state = {
+        bitacora: '',
+        showBitacoraModal: false,
+    }
 
+    handleBackBtn = () => {
+        this.props.history.goBack()
+    }
 
+    handleToggleBitacoraModal = (value) => {
+        this.setState({ showBitacoraModal: value })
+    }
+
+    handleShowBitacora = (index) => {
+        const { bitacoras } = this.props
+        const bitacora = (Object.values(bitacoras).filter((b, i) => i == index))[0]
+        this.setState({
+            bitacora,
+            showBitacoraModal: true
+        })
+    }
 
     render() {
+
+        const { bitacoras } = this.props
 
         return (
             <IonPage>
@@ -35,160 +58,54 @@ class HistorialBitacoras extends Component {
                 </IonHeader>
 
                 <IonContent>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{textAlign:'center',paddingTop:'10px'}}>
-                                    <IonIcon style={{fontSize:'2em'}} icon={calendarOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>01/02/2020</IonLabel>
-                                    <IonNote>No se presentaron incidencias</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{textAlign:'center',paddingTop:'10px'}}>
-                                    <IonIcon style={{fontSize:'2em'}} icon={calendarOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>01/02/2020</IonLabel>
-                                    <IonNote>No se presentaron incidencias</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{textAlign:'center',paddingTop:'10px'}}>
-                                    <IonIcon style={{fontSize:'2em'}} icon={calendarOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>01/02/2020</IonLabel>
-                                    <IonNote>No se presentaron incidencias</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{textAlign:'center',paddingTop:'10px'}}>
-                                    <IonIcon style={{fontSize:'2em'}} icon={calendarOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>01/02/2020</IonLabel>
-                                    <IonNote>No se presentaron incidencias</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{textAlign:'center',paddingTop:'10px'}}>
-                                    <IonIcon style={{fontSize:'2em'}} icon={calendarOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>01/02/2020</IonLabel>
-                                    <IonNote>No se presentaron incidencias</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{textAlign:'center',paddingTop:'10px'}}>
-                                    <IonIcon style={{fontSize:'2em'}} icon={calendarOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>01/02/2020</IonLabel>
-                                    <IonNote>No se presentaron incidencias</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{textAlign:'center',paddingTop:'10px'}}>
-                                    <IonIcon style={{fontSize:'2em'}} icon={calendarOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>01/02/2020</IonLabel>
-                                    <IonNote>No se presentaron incidencias</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{textAlign:'center',paddingTop:'10px'}}>
-                                    <IonIcon style={{fontSize:'2em'}} icon={calendarOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>01/02/2020</IonLabel>
-                                    <IonNote>No se presentaron incidencias</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{textAlign:'center',paddingTop:'10px'}}>
-                                    <IonIcon style={{fontSize:'2em'}} icon={calendarOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>01/02/2020</IonLabel>
-                                    <IonNote>No se presentaron incidencias</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{textAlign:'center',paddingTop:'10px'}}>
-                                    <IonIcon style={{fontSize:'2em'}} icon={calendarOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>01/02/2020</IonLabel>
-                                    <IonNote>No se presentaron incidencias</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
-                    <IonItem button detail>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="2" style={{textAlign:'center',paddingTop:'10px'}}>
-                                    <IonIcon style={{fontSize:'2em'}} icon={calendarOutline}></IonIcon>
-                                </IonCol>
-                                <IonCol size="10">
-                                    <IonLabel>01/02/2020</IonLabel>
-                                    <IonNote>No se presentaron incidencias</IonNote>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
+                    {
+                        bitacoras
+                            ?
+                            Object.values(bitacoras).map((bitacora, index) => (
+                                <IonItem button detail key={index} onClick={e => { e.preventDefault(); this.handleShowBitacora(index) }}>
+                                    <IonGrid>
+                                        <IonRow>
+                                            <IonCol size="2" style={{ textAlign: 'center', paddingTop: '35px',  }}>
+                                                <IonIcon style={{ fontSize: '2em' }} icon={calendarOutline}></IonIcon>
+                                            </IonCol>
+                                            <IonCol size="10">
+                                                <IonLabel className="dataTitle" style={{marginBottom:'5px'}}>Día: {moment(bitacora.createdAt).format('DD/MM/YYYY')}</IonLabel>
+                                                <IonLabel className="dataSubtitle">Activiades:</IonLabel>
+                                                <IonNote className="dataField">{bitacora.resumenActividades.replace(/(\r\n|\n|\r)/gm, "").substring(0, 40)}...</IonNote>
+                                                <IonLabel className="dataSubtitle">Incidentes:</IonLabel>
+                                                <IonNote className="dataField">{bitacora.resumenIncidencias.replace(/(\r\n|\n|\r)/gm, "").substring(0, 40)}...</IonNote>
+                                            </IonCol>
+                                        </IonRow>
+                                    </IonGrid>
+                                </IonItem>
+                            ))
+                            :
+                            <IonItem>
 
+                            </IonItem>
+                    }
+
+
+
+                    <BitacoraModal
+                        bitacora={this.state.bitacora}
+                        showBitacoraModal={this.state.showBitacoraModal}
+                        handleToggleBitacoraModal={this.handleToggleBitacoraModal}
+                    />
                 </IonContent>
             </IonPage >
+
+
 
         );
     }
 };
 
 
-function mapStateToProps({ auth, workOrders }) {
-
+function mapStateToProps({ bitacoras }) {
+    return {
+        bitacoras,
+    }
 }
 
 export default connect(mapStateToProps)(HistorialBitacoras)
