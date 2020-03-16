@@ -121,16 +121,17 @@ class StartTurn extends Component {
         this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
     }
 
-    // ionViewDidEnter() {
-    //     const { location } = this.props
-    //     if (location) {
-    //         this.setState({ loading: false })
-    //     }
-    // }
+    ionViewDidEnter() {
+        const { location } = this.props
+        if (location) {            
+            this.setState({ loading: false })
+        }        
+    }    
 
     render() {
 
-        const { location, guard, loading } = this.props
+        const { location, guard,  } = this.props
+        const { loading } = this.state
 
         return (
             <IonPage>
@@ -179,7 +180,7 @@ class StartTurn extends Component {
                         <IonCol>
 
                             {
-                                location ? <MyMap location={location} /> : null
+                                location && loading == false ? <MyMap location={location} /> : null
                             }
 
                         </IonCol>

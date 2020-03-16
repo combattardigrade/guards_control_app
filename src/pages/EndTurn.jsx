@@ -33,11 +33,12 @@ class EndTurn extends Component {
     state = {
         showAlert: false,
         alertTitle: '',
-        alertMsg: ''
+        alertMsg: '',
+        loading: true,
     }
 
     handleBackBtn = () => {
-        this.props.history.goBack()
+        this.props.history.replace('/dashboard')
     }
 
     handleScanner = async (e) => {
@@ -119,9 +120,17 @@ class EndTurn extends Component {
         this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
     }
 
+    ionViewDidEnter() {
+        const { location } = this.props
+        if (location) {            
+            this.setState({ loading: false })
+        }        
+    }  
+
     render() {
 
         const { location, guard } = this.props
+        const { loading } = this.state
 
         return (
             <IonPage>
@@ -169,7 +178,7 @@ class EndTurn extends Component {
                     <IonRow>
                         <IonCol>
                             {
-                                location ? <MyMap location={location} /> : null
+                                location && loading == false ? <MyMap location={location} /> : null
                             }
                         </IonCol>
                     </IonRow>

@@ -17,27 +17,6 @@ class RouteMap extends Component {
         loading: true
     }
 
-    async componentDidMount() {
-        // const { checkpoints } = this.props
-        // let points = []
-        // for (let i = 0; i < checkpoints.length; i++) {
-        //     if (!checkpoints[i + 1]) {
-        //         break;
-        //     }
-        //     let jsonobject = await (await getMapRoute({ fromLocation: { lat: checkpoints[i].lat, lng: checkpoints[i].lng }, toLocation: { lat: checkpoints[i + 1].lat, lng: checkpoints[i + 1].lng } })).json()
-        //     console.log(jsonobject)
-        //     let coordinates = jsonobject.routes[0].geometry.coordinates
-        //     await coordinates.map((point) => {
-        //         points.push({ lat: point[1], lng: point[0] })
-        //     })
-        // }
-
-        // this.setState({ points: points })
-    }
-
-
-
-
     async  handleMarkerClick(props, location) {
         const { position } = props
         let jsonobject = await (await getMapRoute({ fromLocation: { lat: location.lat, lng: location.lng }, toLocation: { lat: position.lat, lng: position.lng } })).json()
@@ -54,9 +33,6 @@ class RouteMap extends Component {
 
         const { location, google, checkpoints, routePoints } = this.props
         const { points, loading } = this.state
-
-        
-
 
         return (
            

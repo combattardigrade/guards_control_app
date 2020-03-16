@@ -15,7 +15,7 @@ class MyMap extends Component {
     render() {
 
         const { location, google } = this.props
-       
+       console.log('map location',location)
 
         return (
             <Map

@@ -25,7 +25,8 @@ class Routes extends Component {
         showAlert: false,
         alertTitle: '',
         alertMsg: '',
-        checkpoints: ''
+        checkpoints: '',
+        loading: true
     }
 
     handleBackBtn = () => {
@@ -39,7 +40,8 @@ class Routes extends Component {
     ionViewDidEnter() {
         const { routes } = this.props
         if (routes) {
-            this.setState({ checkpoints: routes[0].checkpoints })
+            //this.setState({ checkpoints: routes[0].checkpoints, loading: false })
+            this.handleShowRoute(0)
         }
 
     }
@@ -60,13 +62,13 @@ class Routes extends Component {
                 points.push({ lat: point[1], lng: point[0] })
             })
         }
-        this.setState({ points })
+        this.setState({ points, loading: false })
     }
 
     render() {
 
         const { routes, location } = this.props
-        const { checkpoints, points } = this.state
+        const { checkpoints, points, loading } = this.state
 
         return (
             <IonPage>
@@ -83,7 +85,11 @@ class Routes extends Component {
                     <IonRow>
                         <IonCol>
                             {
-                                location && checkpoints && points ? <RouteMap location={location} checkpoints={checkpoints} routePoints={points} /> : null
+
+                                (location && checkpoints && points &&loading == false)
+                                    ?                                    
+                                    <RouteMap location={location} checkpoints={checkpoints} routePoints={points} />
+                                    : <div>Loading map...</div>
                             }
                         </IonCol>
                     </IonRow>
