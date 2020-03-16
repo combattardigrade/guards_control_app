@@ -18,6 +18,18 @@
     height: 50%;
 }
 
-.toolbar-background {
-    background-color: blue;
-  }
+.dashBtnIcon {
+    font-size:  2em;
+}
+.dashBtnText{
+    font-size: 14px !important;
+    margin-top: -10px;
+}
+
+.chatInput > input {
+    padding:10px !important;    
+}
+
+.lastMessage {
+    margin-bottom: 70px !important;
+}

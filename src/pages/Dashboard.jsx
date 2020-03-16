@@ -8,7 +8,7 @@ import {
 import {
     notificationsOutline, keyOutline, shieldCheckmarkOutline, repeatOutline,
     navigateOutline, cameraOutline, readerOutline, alertCircleOutline,
-    chatboxEllipsesOutline, callOutline
+    chatboxEllipsesOutline, callOutline, ellipse
 
 } from 'ionicons/icons'
 
@@ -19,12 +19,14 @@ import { saveAccessLogs } from '../actions/accessLogs'
 import { saveRoutes } from '../actions/routes'
 import { saveReports } from '../actions/reports'
 import { saveBitacoras } from '../actions/bitacoras'
-
+import { saveChatMessages } from '../actions/chatMessages'
+import { saveNetworkData } from '../actions/network'
 
 // Api
 import {
     getGuardData, sendUserLocation, getAccessLogs,
-    getRoutesByStatus, getReports, getBitacoras
+    getRoutesByStatus, getReports, getBitacoras,
+    getLastMessages
 } from '../utils/api'
 
 // Styles
@@ -35,6 +37,9 @@ import './styles.css'
 // const { Geolocation } = Plugins
 import { Geolocation } from '@ionic-native/geolocation';
 import { CallNumber } from '@ionic-native/call-number';
+import { Plugins } from '@capacitor/core';
+const { Network } = Plugins;
+
 
 class Dashboard extends Component {
 
@@ -50,15 +55,18 @@ class Dashboard extends Component {
         // Start watching position
         this.watchPosition()
 
+        // Start watching network
+        this.watchNetwork()
+
         // Get Guard Data
         getGuardData({ token })
             .then(data => data.json())
             .then(res => {
                 if (res.status == 'OK') {
-                    dispatch(saveGuardData(res.payload))                    
+                    dispatch(saveGuardData(res.payload))
                 }
             })
-            
+
 
         // Get Access Logs
         getAccessLogs({ token })
@@ -89,13 +97,22 @@ class Dashboard extends Component {
             })
 
         // Get Bitacoras
-        getBitacoras({token})
+        getBitacoras({ token })
             .then(data => data.json())
             .then(res => {
-                if(res.status == 'OK') {
+                if (res.status == 'OK') {
                     dispatch(saveBitacoras(res.payload))
                 }
-            }) 
+            })
+
+        // Get Chat Messages
+        getLastMessages({ page: 1, token })
+            .then(data => data.json())
+            .then(res => {
+                if (res.status == 'OK') {
+                    dispatch(saveChatMessages(res.payload))
+                }
+            })
     }
 
     watchPosition = () => {
@@ -122,7 +139,7 @@ class Dashboard extends Component {
                 altitudeAccuracy: data.coords.altitudeAccuracy,
                 timestamp: data.timestamp
             }
-            console.log()
+
             // Send User Location to server
             sendUserLocation({ ...locationData, token })
                 .then(data => data.json())
@@ -136,7 +153,22 @@ class Dashboard extends Component {
                 })
 
 
-        })   
+        })
+    }
+
+    watchNetwork = async () => {
+        const { network, dispatch } = this.props
+
+        if (!network) {
+            let status = await Network.getStatus()
+            dispatch(saveNetworkData(status))
+        }
+
+        Network.addListener('networkStatusChange', (status) => {
+            console.log('Network status changes', status)
+            // Save network status
+            dispatch(saveNetworkData(status))
+        })
     }
 
     handleWorkOrderClick = async (wonum) => {
@@ -166,16 +198,16 @@ class Dashboard extends Component {
         this.props.history.push(page)
     }
 
-    makeCall = (phone) =>{
+    makeCall = (phone) => {
         CallNumber.callNumber(phone, true)
-        .then(res => console.log('LAUNCHED CALL DIALER'))
-        .catch(err => console.log('ERROR LAUNCHING CALL DIALER', err))      
+            .then(res => console.log('LAUNCHED CALL DIALER'))
+            .catch(err => console.log('ERROR LAUNCHING CALL DIALER', err))
     }
 
 
     render() {
 
-        const { company } = this.props
+        const { company, network } = this.props
 
         return (
             <IonPage>
@@ -186,7 +218,7 @@ class Dashboard extends Component {
                         </IonButtons>
                         <IonTitle>Dashboard</IonTitle>
                         <IonButtons slot="end">
-                            <IonButton><IonIcon icon={notificationsOutline}></IonIcon></IonButton>
+                            <IonButton><IonIcon color={network ? network.connected == true ? 'success' : 'danger' : 'danger'} icon={ellipse}></IonIcon></IonButton>
                         </IonButtons>
                     </IonToolbar>
                 </IonHeader>
@@ -195,25 +227,53 @@ class Dashboard extends Component {
                     <IonGrid>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={this.handleAccessBtn}>
+                                <IonItem color="primary" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={this.handleAccessBtn}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonIcon icon={repeatOutline}></IonIcon></IonCol>
+                                            <IonCol><IonIcon className="dashBtnIcon" icon={repeatOutline}></IonIcon></IonCol>
                                         </IonRow>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonLabel>Acceso</IonLabel></IonCol>
+                                            <IonCol><IonLabel className="dashBtnText">Acceso</IonLabel></IonCol>
+                                        </IonRow>
+                                    </IonGrid>
+                                </IonItem>
+                            </IonCol>
+
+                            <IonCol size="6">
+                                <IonItem color="danger" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button >
+                                    <IonGrid>
+                                        <IonRow style={{ textAlign: 'center' }}>
+                                            <IonCol><IonIcon className="dashBtnIcon" icon={alertCircleOutline}></IonIcon></IonCol>
+                                        </IonRow>
+                                        <IonRow style={{ textAlign: 'center' }}>
+                                            <IonCol><IonLabel className="dashBtnText">Pánico</IonLabel></IonCol>
+                                        </IonRow>
+                                    </IonGrid>
+                                </IonItem>
+                            </IonCol>
+
+                        </IonRow>
+                        <IonRow>
+                            <IonCol size="6">
+                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('checkpoints') }}>
+                                    <IonGrid>
+                                        <IonRow style={{ textAlign: 'center' }}>
+                                            <IonCol><IonIcon className="dashBtnIcon" icon={shieldCheckmarkOutline}></IonIcon></IonCol>
+                                        </IonRow>
+                                        <IonRow style={{ textAlign: 'center' }}>
+                                            <IonCol><IonLabel className="dashBtnText">Puntos de Control</IonLabel></IonCol>
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>
                             </IonCol>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('checkpoints') }}>
+                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('routes') }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonIcon icon={shieldCheckmarkOutline}></IonIcon></IonCol>
+                                            <IonCol><IonIcon className="dashBtnIcon" icon={navigateOutline}></IonIcon></IonCol>
                                         </IonRow>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonLabel>Puntos de Control</IonLabel></IonCol>
+                                            <IonCol><IonLabel className="dashBtnText">Rutas</IonLabel></IonCol>
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>
@@ -221,51 +281,25 @@ class Dashboard extends Component {
                         </IonRow>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('routes') }}>
+                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('sendBitacora') }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonIcon icon={navigateOutline}></IonIcon></IonCol>
+                                            <IonCol><IonIcon className="dashBtnIcon" icon={readerOutline}></IonIcon></IonCol>
                                         </IonRow>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonLabel>Rutas</IonLabel></IonCol>
+                                            <IonCol><IonLabel className="dashBtnText">Enviar Bitácora</IonLabel></IonCol>
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>
                             </IonCol>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('sendReport') }}>
+                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('sendReport') }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonIcon icon={cameraOutline}></IonIcon></IonCol>
+                                            <IonCol><IonIcon className="dashBtnIcon" icon={cameraOutline}></IonIcon></IonCol>
                                         </IonRow>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonLabel>Reportar</IonLabel></IonCol>
-                                        </IonRow>
-                                    </IonGrid>
-                                </IonItem>
-                            </IonCol>
-                        </IonRow>
-                        <IonRow>
-                            <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('sendBitacora') }}>
-                                    <IonGrid>
-                                        <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonIcon icon={readerOutline}></IonIcon></IonCol>
-                                        </IonRow>
-                                        <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonLabel>Enviar Bitácora</IonLabel></IonCol>
-                                        </IonRow>
-                                    </IonGrid>
-                                </IonItem>
-                            </IonCol>
-                            <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button >
-                                    <IonGrid>
-                                        <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonIcon icon={alertCircleOutline}></IonIcon></IonCol>
-                                        </IonRow>
-                                        <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonLabel>Pánico</IonLabel></IonCol>
+                                            <IonCol><IonLabel className="dashBtnText">Reportar</IonLabel></IonCol>
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>
@@ -273,25 +307,25 @@ class Dashboard extends Component {
                         </IonRow>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem style={{ border: '2px solid whitesmoke' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('chat') }}>
+                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('chat') }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonIcon icon={chatboxEllipsesOutline}></IonIcon></IonCol>
+                                            <IonCol><IonIcon className="dashBtnIcon" icon={chatboxEllipsesOutline}></IonIcon></IonCol>
                                         </IonRow>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonLabel>Chat</IonLabel></IonCol>
+                                            <IonCol><IonLabel className="dashBtnText">Chat</IonLabel></IonCol>
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>
                             </IonCol>
                             <IonCol size="6">
-                                <IonItem disabled={company ? false : true} style={{ border: '2px solid whitesmoke' }} lines="none" button  onClick={e => {e.preventDefault(); this.makeCall(company.phone)}}>
+                                <IonItem color="dark" disabled={company ? false : true} style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => { e.preventDefault(); this.makeCall(company.phone) }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonIcon icon={callOutline}></IonIcon></IonCol>
+                                            <IonCol><IonIcon className="dashBtnIcon" icon={callOutline}></IonIcon></IonCol>
                                         </IonRow>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonLabel>Llamar a Central</IonLabel></IonCol>
+                                            <IonCol><IonLabel className="dashBtnText">Llamar a Central</IonLabel></IonCol>
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>
@@ -319,12 +353,12 @@ class Dashboard extends Component {
 };
 
 
-function mapStateToProps({ auth, guard }) {
+function mapStateToProps({ auth, guard, network }) {
     return {
         token: auth.token,
         guard: guard && guard,
         company: guard ? 'company' in guard ? guard.company : null : null,
-
+        network,
     }
 }
 

@@ -6,7 +6,7 @@ import {
     IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar,
     IonItem, IonLabel, IonRefresher, IonRefresherContent, IonGrid, IonRow,
     IonCol, IonTabs, IonTab, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon,
-    IonFab, IonFabButton, IonModal, IonButton, IonBackButton, IonInput, IonNote
+    IonFab, IonFabButton, IonModal, IonButton, IonBackButton, IonInput, IonNote, withIonLifeCycle
 } from '@ionic/react';
 import { Redirect, Route } from 'react-router-dom';
 import {
@@ -29,14 +29,14 @@ class Routes extends Component {
     }
 
     handleBackBtn = () => {
-        this.props.history.goBack()
+        this.props.history.replace('/dashboard')
     }
 
     showAlert = (msg, title) => {
         this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
     }
 
-    componentDidMount() {
+    ionViewDidEnter() {
         const { routes } = this.props
         if (routes) {
             this.setState({ checkpoints: routes[0].checkpoints })
@@ -44,18 +44,18 @@ class Routes extends Component {
 
     }
 
-    async handleShowRoute(index) {        
+    async handleShowRoute(index) {
         const { routes } = this.props
         this.setState({ checkpoints: routes[index].checkpoints })
         let checkpoints = routes[index].checkpoints
         let points = []
         for (let i = 0; i < checkpoints.length; i++) {
-            if(!checkpoints[i+1]) {
+            if (!checkpoints[i + 1]) {
                 break;
             }
             let jsonobject = await (await getMapRoute({ fromLocation: { lat: checkpoints[i].lat, lng: checkpoints[i].lng }, toLocation: { lat: checkpoints[i + 1].lat, lng: checkpoints[i + 1].lng } })).json()
-            
-            let coordinates = jsonobject.routes[0].geometry.coordinates            
+
+            let coordinates = jsonobject.routes[0].geometry.coordinates
             await coordinates.map((point) => {
                 points.push({ lat: point[1], lng: point[0] })
             })
@@ -83,7 +83,7 @@ class Routes extends Component {
                     <IonRow>
                         <IonCol>
                             {
-                                location && <RouteMap location={location} checkpoints={checkpoints} routePoints={points}  />
+                                location && checkpoints && points ? <RouteMap location={location} checkpoints={checkpoints} routePoints={points} /> : null
                             }
                         </IonCol>
                     </IonRow>
@@ -129,4 +129,4 @@ function mapStateToProps({ auth, routes, location }) {
 
 }
 
-export default connect(mapStateToProps)(Routes)
+export default connect(mapStateToProps)(withIonLifeCycle(Routes))

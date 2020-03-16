@@ -8,6 +8,9 @@ import routes from './routes'
 import reports from './reports'
 import company from './company'
 import bitacoras from './bitacoras'
+import chatMessages from './chatMessages'
+import chatMembers from './chatMembers'
+import network from './network'
 
 export default combineReducers({
     auth,
@@ -18,5 +21,8 @@ export default combineReducers({
     routes,
     reports,
     company,
-    bitacoras
+    bitacoras,
+    chatMessages,
+    chatMembers,
+    network,
 })

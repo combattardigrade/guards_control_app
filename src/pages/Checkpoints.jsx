@@ -7,7 +7,7 @@ import {
     IonItem, IonLabel, IonRefresher, IonRefresherContent, IonGrid, IonRow,
     IonCol, IonTabs, IonTab, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon,
     IonFab, IonFabButton, IonModal, IonButton, IonBackButton, IonInput, IonNote, IonTextarea,
-    IonSelect, IonSelectOption, IonAlert,
+    IonSelect, IonSelectOption, IonAlert, withIonLifeCycle
 } from '@ionic/react';
 import { Redirect, Route } from 'react-router-dom';
 import {
@@ -32,19 +32,19 @@ class Checkpoints extends Component {
         activeCheckpoint: '',
         showRegisterCheckpointModal: false,
         currentCheckpoint: '',
-        currentRoute: ''
+        currentRoute: '',
+        loading: true
     }
 
-    componentDidMount() {
+    ionViewDidEnter() {             
         const { routes } = this.props
         if (routes) {
-            this.setState({ checkpoints: routes[0].checkpoints })
+            this.setState({ checkpoints: routes[0].checkpoints, loading: false })
         }
-
     }
 
     handleBackBtn = () => {
-        this.props.history.goBack()
+        this.props.history.replace('/dashboard')
     }
 
     handleSelectChange = (e) => {
@@ -106,7 +106,7 @@ class Checkpoints extends Component {
     render() {
 
         const { routes, location, } = this.props
-        const { points, checkpoints } = this.state
+        const { points, checkpoints, loading } = this.state
 
         return (
             <IonPage>
@@ -126,7 +126,7 @@ class Checkpoints extends Component {
                     <IonRow>
                         <IonCol>
                             {
-                                location && <RouteMap location={location} checkpoints={checkpoints} routePoints={points} />
+                                location && checkpoints && points ? <RouteMap location={location} checkpoints={checkpoints} routePoints={points} /> : null
                             }
                         </IonCol>
                     </IonRow>
@@ -225,4 +225,4 @@ function mapStateToProps({ auth, routes, location }) {
     }
 }
 
-export default connect(mapStateToProps)(Checkpoints)
+export default connect(mapStateToProps)(withIonLifeCycle(Checkpoints))

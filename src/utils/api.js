@@ -150,6 +150,36 @@ export function getBitacoras(params) {
     }) 
 }
 
+export function sendMessage(params) {    
+    return fetch(API + '/chat/sendMessage', {
+        method: 'POST',
+        body: JSON.stringify(params),
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    })    
+}
+
+export function getLastMessages(params) {
+    return fetch(API + '/chat/getMessages/' + params.page, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    })  
+}
+
+export function getCompanyActiveMembers(params) {
+    return fetch(API + '/companyMembers/' + params.companyId, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    }) 
+}
 
 
 

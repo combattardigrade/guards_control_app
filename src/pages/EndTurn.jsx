@@ -6,7 +6,7 @@ import {
     IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar,
     IonItem, IonLabel, IonRefresher, IonRefresherContent, IonGrid, IonRow,
     IonCol, IonTabs, IonTab, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon,
-    IonFab, IonFabButton, IonModal, IonButton, IonBackButton, IonInput, IonNote, IonAlert
+    IonFab, IonFabButton, IonModal, IonButton, IonBackButton, IonInput, IonNote, IonAlert, withIonLifeCycle
 } from '@ionic/react';
 import { Redirect, Route } from 'react-router-dom';
 import {
@@ -169,7 +169,7 @@ class EndTurn extends Component {
                     <IonRow>
                         <IonCol>
                             {
-                                location && <MyMap location={location} />
+                                location ? <MyMap location={location} /> : null
                             }
                         </IonCol>
                     </IonRow>
@@ -211,4 +211,4 @@ function mapStateToProps({ auth, token, location, guard, device }) {
     }
 }
 
-export default connect(mapStateToProps)(EndTurn)
+export default connect(mapStateToProps)(withIonLifeCycle(EndTurn))

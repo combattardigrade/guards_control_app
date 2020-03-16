@@ -6,7 +6,7 @@ import {
     IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar,
     IonItem, IonLabel, IonRefresher, IonRefresherContent, IonGrid, IonRow,
     IonCol, IonTabs, IonTab, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon,
-    IonFab, IonFabButton, IonModal, IonButton, IonBackButton, IonInput, IonNote, IonAlert
+    IonFab, IonFabButton, IonModal, IonButton, IonBackButton, IonInput, IonNote, IonAlert, withIonLifeCycle
 } from '@ionic/react';
 import { Redirect, Route } from 'react-router-dom';
 import {
@@ -33,25 +33,27 @@ class StartTurn extends Component {
     state = {
         showAlert: false,
         alertTitle: '',
-        alertMsg: ''
+        alertMsg: '',
+        loading: true
     }
 
     handleBackBtn = () => {
-        this.props.history.goBack()
+        this.props.history.replace('/dashboard')
     }
 
     handleScanner = async (e) => {
         console.log('QR SCANNER STARTED')
         const { token, location, device, dispatch } = this.props
         const accessCode = '17dadc0d75f84cd57f5ec4a97e6f45a2'
-       
-        registerAccess({accessCode, lat: location.lat, lng: location.lng, 
+
+        registerAccess({
+            accessCode, lat: location.lat, lng: location.lng,
             imei: device.uuid, accessMethod: 'QR_CODE', accessType: 'ENTRY', token: token
         })
             .then(data => data.json())
             .then(res => {
                 console.log(res)
-                if(res.status == 'OK') {
+                if (res.status == 'OK') {
                     dispatch(updateGuardStatus('ON_PATROL'))
                     dispatch(saveNewAccessLog(res.payload))
                     // show success page
@@ -119,9 +121,16 @@ class StartTurn extends Component {
         this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
     }
 
+    // ionViewDidEnter() {
+    //     const { location } = this.props
+    //     if (location) {
+    //         this.setState({ loading: false })
+    //     }
+    // }
+
     render() {
 
-        const { location, guard } = this.props
+        const { location, guard, loading } = this.props
 
         return (
             <IonPage>
@@ -168,9 +177,11 @@ class StartTurn extends Component {
 
                     <IonRow>
                         <IonCol>
-                            
-                                <MyMap location={location} />
-                            
+
+                            {
+                                location ? <MyMap location={location} /> : null
+                            }
+
                         </IonCol>
                     </IonRow>
 
@@ -211,4 +222,4 @@ function mapStateToProps({ auth, token, location, guard, device }) {
     }
 }
 
-export default connect(mapStateToProps)(StartTurn)
+export default connect(mapStateToProps)(withIonLifeCycle(StartTurn))

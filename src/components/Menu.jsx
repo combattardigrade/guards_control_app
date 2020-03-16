@@ -68,39 +68,39 @@ class Menu extends Component {
           <IonList id="labels-list">
             <IonListHeader>Menú</IonListHeader>
 
-            <IonItem lines="none" >
+            <IonItem lines="full" >
               <IonIcon icon={flashlightOutline}></IonIcon>
               <IonLabel style={{ marginLeft: '10px' }}>Linterna</IonLabel>
               <IonToggle onIonChange={e => { e.preventDefault(); this.toggleFlashlight() }} color="success" />
             </IonItem>
 
-            <IonItem lines="none" onClick={e => { e.preventDefault(); this.goToPage('/historialAccesos') }}>
+            <IonItem lines="full" button onClick={e => { e.preventDefault(); this.goToPage('/historialAccesos') }}>
               <IonIcon icon={repeatOutline}></IonIcon>
               <IonLabel style={{ marginLeft: '10px' }}>Historial de Accesos</IonLabel>
             </IonItem>
 
-            <IonItem lines="none" onClick={e => { e.preventDefault(); this.goToPage('/historialReportes') }}>
+            <IonItem lines="full"  button onClick={e => { e.preventDefault(); this.goToPage('/historialReportes') }}>
               <IonIcon icon={layersOutline}></IonIcon>
               <IonLabel style={{ marginLeft: '10px' }}>Historial de Reportes</IonLabel>
             </IonItem>
 
-            <IonItem lines="none" onClick={e => { e.preventDefault(); this.goToPage('/historialBitacoras') }}>
+            <IonItem lines="full" button onClick={e => { e.preventDefault(); this.goToPage('/historialBitacoras') }}>
               <IonIcon icon={folderOutline}></IonIcon>
               <IonLabel style={{ marginLeft: '10px' }}>Historial de Bitácoras</IonLabel>
             </IonItem>
 
-            <IonItem lines="none" onClick={e => {e.preventDefault(); this.goToWebsite(guard.company.website)}}>
+            <IonItem lines="full" button onClick={e => {e.preventDefault(); this.goToWebsite(guard.company.website)}}>
               <IonIcon icon={globeOutline}></IonIcon>
               <IonLabel style={{ marginLeft: '10px' }}>Web de la Empresa</IonLabel>
             </IonItem>
 
-            <IonItem lines="none" onClick={e => { e.preventDefault(); this.goToPage('settings') }}>
+            <IonItem lines="full" button onClick={e => { e.preventDefault(); this.goToPage('settings') }}>
               <IonIcon icon={settingsOutline}></IonIcon>
               <IonLabel style={{ marginLeft: '10px' }}>Ajustes</IonLabel>
             </IonItem>
           </IonList>
 
-          <IonItem lines="none" style={{ position: 'absolute', bottom: '20px', width: '100%' }} onClick={e => { e.preventDefault(); localStorage.clear(); this.goToPage('login') }} >
+          <IonItem lines="none" button style={{ position: 'absolute', bottom: '20px', width: '100%' }} onClick={e => { e.preventDefault(); localStorage.clear(); this.goToPage('login') }} >
             <IonLabel style={{ textAlign: 'center' }}>Cerrar sesión</IonLabel>
           </IonItem>
         </IonContent>
