@@ -181,5 +181,25 @@ export function getCompanyActiveMembers(params) {
     }) 
 }
 
+export function startPanicAlert(params) {
+    return fetch(API + '/alert', {
+        method: 'POST',
+        body: JSON.stringify(params),
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    }) 
+}
+
+export function stopPanicAlert(params) {
+    return fetch(API + '/alert', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    }) 
+}
 
 

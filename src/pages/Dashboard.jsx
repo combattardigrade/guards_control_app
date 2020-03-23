@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import {
     IonButtons, IonButton, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle,
     IonToolbar, IonIcon, IonItem, IonLabel, IonRefresher, IonRefresherContent,
-    IonGrid, IonRow, IonCol, IonAlert
+    IonGrid, IonRow, IonCol, IonAlert, IonToast
 } from '@ionic/react';
 import {
     notificationsOutline, keyOutline, shieldCheckmarkOutline, repeatOutline,
@@ -21,12 +21,13 @@ import { saveReports } from '../actions/reports'
 import { saveBitacoras } from '../actions/bitacoras'
 import { saveChatMessages } from '../actions/chatMessages'
 import { saveNetworkData } from '../actions/network'
+import { toggleAlert } from '../actions/alert'
 
 // Api
 import {
     getGuardData, sendUserLocation, getAccessLogs,
     getRoutesByStatus, getReports, getBitacoras,
-    getLastMessages
+    getLastMessages, startPanicAlert, stopPanicAlert
 } from '../utils/api'
 
 // Styles
@@ -45,6 +46,8 @@ class Dashboard extends Component {
 
     state = {
         showAlert: false,
+        showPanicAlert: false,
+        showPanicToast: false,        
         alertMsg: '',
         alertTitle: ''
     }
@@ -194,6 +197,38 @@ class Dashboard extends Component {
         }
     }
 
+    handlePanicAlertActivation = () => {
+        const { token, location, dispatch } = this.props
+        console.log('PANIC_ALERT_ACTIVATED')
+        this.setState({ showPanicToast: true })
+        startPanicAlert({ lat: location.lat, lng: location.lng, token })
+            .then(data => data.json())
+            .then((res) => {
+                if(res.status == 'OK') {
+                    dispatch(toggleAlert(true))
+                }
+            })
+    }
+
+    handlePanicBtn = (e) => {
+        e.preventDefault()        
+        const { token, panicAlert, dispatch } = this.props
+        if (panicAlert == true) {
+            this.setState({ showPanicToast: false })
+            // stop panic alert request
+            stopPanicAlert({ token })
+                .then(data => data.json())
+                .then((res) => {
+                    if(res.status == 'OK') {
+                        dispatch(toggleAlert(false))
+                    }
+                })
+        } else {
+            this.setState({ showPanicAlert: true })
+            // start panic alert request
+        }
+    }
+
     goToPage = (page) => {
         this.props.history.push(page)
     }
@@ -207,7 +242,7 @@ class Dashboard extends Component {
 
     render() {
 
-        const { company, network } = this.props
+        const { company, network, panicAlert } = this.props
 
         return (
             <IonPage>
@@ -240,13 +275,13 @@ class Dashboard extends Component {
                             </IonCol>
 
                             <IonCol size="6">
-                                <IonItem color="danger" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button >
+                                <IonItem color={panicAlert == true ? 'success' : 'danger'} style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={this.handlePanicBtn} >
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon className="dashBtnIcon" icon={alertCircleOutline}></IonIcon></IonCol>
                                         </IonRow>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonLabel className="dashBtnText">Pánico</IonLabel></IonCol>
+                                            <IonCol><IonLabel className="dashBtnText">{panicAlert == true ? 'Detener Alerta' : 'Pánico'}</IonLabel></IonCol>
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>
@@ -333,7 +368,37 @@ class Dashboard extends Component {
                         </IonRow>
                     </IonGrid>
 
+                    <IonToast
+                        isOpen={this.state.showPanicToast}
+                        onDidDismiss={() => { this.setState({ showPanicToast: false }) }}
+                        message="¡Alerta de Pánico Activada!"
+                        position="bottom"
+                        color="danger"
+                    />
 
+                    <IonAlert
+                        isOpen={this.state.showPanicAlert}
+                        onDidDismiss={() => this.setState({ showPanicAlert: false })}
+                        header={'Confirmar Alerta'}
+                        message={'¿Estás seguro que quieres activar la Alerta de Pánico?'}
+                        buttons={[
+                            {
+                                text: 'Cancelar',
+                                role: 'cancel',
+                                cssClass: 'secondary',
+                                handler: blah => {
+                                    console.log('CANCEL_PANIC_ALERT_ACTIVATION');
+                                }
+                            },
+                            {
+                                text: 'ACTIVAR',
+                                handler: () => {
+                                    console.log('ACTIVATE_PANIC_ALERT');
+                                    this.handlePanicAlertActivation()
+                                }
+                            }
+                        ]}
+                    />
 
                     <IonAlert
                         isOpen={this.state.showAlert}
@@ -353,12 +418,13 @@ class Dashboard extends Component {
 };
 
 
-function mapStateToProps({ auth, guard, network }) {
+function mapStateToProps({ auth, guard, network, alert }) {
     return {
         token: auth.token,
         guard: guard && guard,
         company: guard ? 'company' in guard ? guard.company : null : null,
         network,
+        panicAlert: alert
     }
 }
 

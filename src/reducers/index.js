@@ -11,6 +11,7 @@ import bitacoras from './bitacoras'
 import chatMessages from './chatMessages'
 import chatMembers from './chatMembers'
 import network from './network'
+import alert from './alert'
 
 export default combineReducers({
     auth,
@@ -25,4 +26,5 @@ export default combineReducers({
     chatMessages,
     chatMembers,
     network,
+    alert,
 })

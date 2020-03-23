@@ -115,7 +115,8 @@ class SendReport extends Component {
             quality: 30,
             resultType: 'Base64',
             saveGallery: true,
-            source: 'CAMERA'
+            source: 'CAMERA',
+            direction: 'REAR'
         }
         try {
             const photoData = await Camera.getPhoto(options)

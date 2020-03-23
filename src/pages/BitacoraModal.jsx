@@ -54,7 +54,7 @@ class BitacoraModal extends Component {
                         <IonGrid>
                             <IonRow>
                                 <IonCol>
-                                    <IonLabel className="dataTitle">Resumen de incidencias:</IonLabel>
+                                    <IonLabel className="dataTitle">Resumen de Incidentes:</IonLabel>
                                     <IonNote className="dataField">{bitacora.resumenIncidencias}</IonNote>
                                 </IonCol>
                             </IonRow>
