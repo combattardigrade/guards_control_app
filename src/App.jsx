@@ -47,28 +47,15 @@ import Checkpoints from './pages/Checkpoints'
 import HistorialAccesos from './pages/HistorialAccesos'
 
 
-// Actions
-import { saveDeviceData } from './actions/device'
 
-// Plugins
-const { Device } = Plugins;
+
+
 
 class App extends Component {
 
   state = {
     selectedPage: '',
     setSelectedPage: ''
-  }
-
-  async componentDidMount() {
-    const { dispatch } = this.props
-    Device.getInfo()
-      .then((info) => {
-        dispatch(saveDeviceData(info))
-      })
-
-
-
   }
 
   render() {

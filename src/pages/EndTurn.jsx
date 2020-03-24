@@ -75,6 +75,7 @@ class EndTurn extends Component {
                     })
             } else {
                 // save offline AccessLog
+                dispatch(updateGuardStatus('ON_STAND_BY'))
                 dispatch(saveOfflineAccessLog(accessLog))
                 return
             }

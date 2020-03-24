@@ -77,6 +77,7 @@ class StartTurn extends Component {
                     })
             } else {
                 // save offline AccessLog
+                dispatch(updateGuardStatus('ON_PATROL'))
                 dispatch(saveOfflineAccessLog(accessLog))
                 return
             }

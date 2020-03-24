@@ -23,6 +23,7 @@ import { saveChatMessages } from '../actions/chatMessages'
 import { saveNetworkData } from '../actions/network'
 import { toggleAlert } from '../actions/alert'
 import { saveOfflineUserLocation } from '../actions/offlineData'
+import { saveDeviceData } from '../actions/device'
 
 // Api
 import {
@@ -40,6 +41,7 @@ import './styles.css'
 import { Geolocation } from '@ionic-native/geolocation';
 import { CallNumber } from '@ionic-native/call-number';
 import { Plugins } from '@capacitor/core';
+const { Device } = Plugins;
 const { Network } = Plugins;
 
 
@@ -117,6 +119,11 @@ class Dashboard extends Component {
                     dispatch(saveChatMessages(res.payload))
                 }
             })
+
+        Device.getInfo()
+            .then((info) => {
+                dispatch(saveDeviceData(info))
+            })
     }
 
     watchPosition = () => {
@@ -158,6 +165,7 @@ class Dashboard extends Component {
                     })
             } else {
                 dispatch(saveOfflineUserLocation(locationData))
+                dispatch(saveLocation(locationData))
             }
         })
     }
@@ -421,13 +429,14 @@ class Dashboard extends Component {
 };
 
 
-function mapStateToProps({ auth, guard, network, alert, offlineData }) {
+function mapStateToProps({ auth, guard, network, alert, offlineData, device }) {
     return {
         token: auth.token,
         guard: guard && guard,
         company: guard ? 'company' in guard ? guard.company : null : null,
         network,
         panicAlert: alert,
+        device,
         offlineData
     }
 }

@@ -10,8 +10,14 @@ import { IonGrid, IonRow, IonCol, IonNote, IonItem, IonIcon,
 import { personCircleOutline } from 'ionicons/icons'
 import ExploreContainer from '../components/ExploreContainer'
 import { save } from 'ionicons/icons'
+
+// Actions
+import { saveDeviceData } from '../actions/device'
+
+// Plugins
 import { Plugins } from '@capacitor/core'
-const { Modals } = Plugins
+const { Device } = Plugins;
+
 
 class Signup extends Component {
 
@@ -22,8 +28,11 @@ class Signup extends Component {
     }
 
     componentDidMount() {
-       
-
+       const { dispatch } = this.props
+        Device.getInfo()
+            .then((info) => {
+                dispatch(saveDeviceData(info))
+            })
     }
     
     showAlert = (msg, title) => {
@@ -210,7 +219,7 @@ class Signup extends Component {
 
 function mapStateToProps({ device }) {
     return {
-        device: device.device
+        device: device && device
     }
 }
 
