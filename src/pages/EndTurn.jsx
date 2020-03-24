@@ -90,34 +90,50 @@ class EndTurn extends Component {
     handleNFC = async (e) => {
         console.log('NFC SCANNER STARTED')
         e.preventDefault()
-        console.log(NFC)
+        const { token, location, device, network, dispatch } = this.props
         try {
-
-            // Receive NFC event
-            // https://stackoverflow.com/questions/26688456/my-cordova-application-not-launching-after-nfc-tag-detect
-            // To Do
-
-            NFC.addTagDiscoveredListener(
-                function (nfcEvent) {
-                    var tag = nfcEvent.tag,
-                        ndefMessage = tag.ndefMessage;
-
-                    // dump the raw json of the message
-                    // note: real code will need to decode
-                    // the payload from each record
-                    alert(JSON.stringify(ndefMessage));
-
-                    // assuming the first record in the message has
-                    // a payload that can be converted to a string.
-                    alert(NFC.bytesToString(ndefMessage[0].payload).substring(3));
+            // Receive NFC event       
+            NFC.addNdefListener(
+                () => {
+                    console.log('success')
                 },
-                function () { // success callback
-                    alert("Waiting for NDEF tag");
-                },
-                function (error) { // error callback
-                    alert("Error adding NDEF listener " + JSON.stringify(error));
+                () => {
+                    console.log('err')
                 }
-            );
+            ).subscribe((event) => {
+                const payload = event.tag.ndefMessage[0]["payload"]
+                let accessCode = NFC.bytesToString(payload)
+                accessCode = accessCode.replace('en', '')
+                console.log(`NFC access code: ${accessCode}`)
+
+                const accessLog = {
+                    accessCode, lat: location.lat, lng: location.lng,
+                    imei: device.uuid, accessMethod: 'NFC', accessType: 'EXIT', token: token
+                }
+                // If connencted send to server
+                if (network && network.connected == true) {
+                    registerAccess(accessLog)
+                        .then(data => data.json())
+                        .then(res => {
+                            console.log(res)
+                            if (res.status == 'OK') {
+                                dispatch(updateGuardStatus('ON_STAND_BY'))
+                                dispatch(saveNewAccessLog(res.payload))
+                                // show success page
+                            }
+                        })
+                        .catch(err => {
+                            console.log(err)
+                            this.showAlert('message' in err ? err.message : 'Ocurrió un error al intentar registrar el acceso', 'Error')
+                            return
+                        })
+                } else {
+                    // save offline AccessLog
+                    dispatch(updateGuardStatus('ON_STAND_BY'))
+                    dispatch(saveOfflineAccessLog(accessLog))
+                    return
+                }
+            })
         }
         catch (err) {
             console.log(err)
