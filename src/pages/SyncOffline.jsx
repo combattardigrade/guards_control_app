@@ -18,13 +18,22 @@ import { save } from 'ionicons/icons'
 // Api
 import {
     registerAccess, completeCheckpoint, getRoutesByStatus,
-
+    sendReport, getReports, sendBitacora, getBitacoras, 
+    sendUserLocation, 
 } from '../utils/api'
 
 // Actions
 import { updateGuardStatus } from '../actions/guard'
 import { saveNewAccessLog } from '../actions/accessLogs'
 import { saveRoutes } from '../actions/routes'
+import { saveReports } from '../actions/reports'
+import { saveBitacoras } from '../actions/bitacoras'
+import { saveLocation } from '../actions/location'
+import {
+    removeOfflineAccessLogs, removeOfflineCheckpoints,
+    removeOfflineReports, removeOfflineBitacoras,
+    removeOfflineUserLocations
+} from '../actions/offlineData'
 
 // Plugins
 import { Plugins } from '@capacitor/core'
@@ -52,17 +61,9 @@ class SyncOffline extends Component {
         this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
     }
 
-    handleSubmit = async (e) => {
-        const { device } = this.props
-
-        e.preventDefault()
-
-    }
-
     handleBackBtn = () => {
         this.props.history.goBack()
     }
-
 
     handleUploadAccessLogs = async (e) => {
         e.preventDefault()
@@ -86,6 +87,7 @@ class SyncOffline extends Component {
                 }
             }
             console.log('REMOVE_OFFLINE_ACCESS_LOGS')
+            dispatch(removeOfflineAccessLogs())
             this.setState({ accessLogsLoading: false })
         } else {
             this.showAlert('Sin conexión. No fue posible enviar los datos al servidor')
@@ -115,6 +117,7 @@ class SyncOffline extends Component {
             if (res.status == 'OK') {                
                 dispatch(saveRoutes(res.payload))
             }
+            dispatch(removeOfflineCheckpoints())
             this.setState({ checkpointsLoading: false })
         } else {
             this.showAlert('Sin conexión. No fue posible enviar los datos al servidor')
@@ -122,16 +125,92 @@ class SyncOffline extends Component {
         }
     }
 
-    handleUploadReports = (e) => {
+    handleUploadReports = async (e) => {
         e.preventDefault()
+        console.log('UPLOAD_OFFLINE_REPORTS')
+        const { network, offlineData, token, dispatch } = this.props
+
+        if (network && network.connected == true) {
+            this.setState({ reportsLoading: true })
+            for (let report of offlineData.reports) {
+                try {
+                    await sendReport(report)   
+                }
+                catch (e) {
+                    console.log(e)
+                }
+            }
+            console.log('REMOVE_OFFLINE_REPORTS')
+            // Get Reports
+            let data = await getReports({ token })
+            let res = await data.json()
+            if (res.status == 'OK') {                
+                dispatch(saveReports(res.payload))
+            }
+            dispatch(removeOfflineReports())
+            this.setState({ reportsLoading: false })
+        } else {
+            this.showAlert('Sin conexión. No fue posible enviar los datos al servidor')
+            return
+        }
     }
 
-    handleUploadBitacoras = (e) => {
+    handleUploadBitacoras = async (e) => {
         e.preventDefault()
+        console.log('UPLOAD_OFFLINE_BITACORAS')
+        const { network, offlineData, token, dispatch } = this.props
+
+        if (network && network.connected == true) {
+            this.setState({ bitacorasLoading: true })
+            for (let bitacora of offlineData.bitacoras) {
+                try {
+                    await sendBitacora(bitacora)   
+                }
+                catch (e) {
+                    console.log(e)
+                }
+            }
+            console.log('REMOVE_OFFLINE_BITACORAS')
+            // Get Reports
+            let data = await getBitacoras({ token })
+            let res = await data.json()
+            if (res.status == 'OK') {                
+                dispatch(saveBitacoras(res.payload))
+            }
+            dispatch(removeOfflineBitacoras())
+            this.setState({ bitacorasLoading: false })
+        } else {
+            this.showAlert('Sin conexión. No fue posible enviar los datos al servidor')
+            return
+        }
     }
 
-    handleUploadUserLocations = (e) => {
+    handleUploadUserLocations = async (e) => {
         e.preventDefault()
+        console.log('UPLOAD_OFFLINE_USER_LOCATIONS')
+        const { network, offlineData, dispatch } = this.props
+
+        if(network && network.connected == true) {
+            this.setState({ userLocationsLoading: true })
+            for(let userLocation of offlineData.userLocations) {
+                try {
+                    let data = await sendUserLocation(userLocation)   
+                    let res = await data.json()
+                    if(res.status == 'OK') {
+                        dispatch(saveLocation(userLocation))
+                    }
+                }
+                catch (e) {
+                    console.log(e)
+                }
+            }
+            console.log('REMOVE_OFFLINE_USER_LOCATIONS')
+            dispatch(removeOfflineUserLocations())
+            this.setState({ userLocationsLoading: false })
+        } else {
+            this.showAlert('Sin conexión. No fue posible enviar los datos al servidor')
+            return
+        }
     }
 
 
