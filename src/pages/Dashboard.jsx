@@ -59,7 +59,7 @@ class Dashboard extends Component {
         const { token, dispatch } = this.props
 
         // Start watching position
-        this.watchPosition()
+        // this.watchPosition()
 
         // Start watching network
         this.watchNetwork()

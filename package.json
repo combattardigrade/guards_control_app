@@ -14,7 +14,7 @@
     "@ionic-native/flashlight": "^5.22.0",
     "@ionic-native/geolocation": "^5.22.0",
     "@ionic-native/network": "^5.22.0",
-    "@ionic-native/nfc": "^5.22.0",
+    "@ionic-native/nfc": "^5.23.0",
     "@ionic-native/qr-scanner": "^5.22.0",
     "@ionic/react": "^5.0.0",
     "@ionic/react-router": "^5.0.0",
