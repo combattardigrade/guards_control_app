@@ -24,6 +24,7 @@ import { registerAccess } from '../utils/api'
 // Actions
 import { updateGuardStatus } from '../actions/guard'
 import { saveNewAccessLog } from '../actions/accessLogs'
+import { saveOfflineAccessLog } from '../actions/offlineData'
 
 const moment = require('moment')
 
@@ -43,32 +44,40 @@ class EndTurn extends Component {
 
     handleScanner = async (e) => {
         console.log('QR SCANNER STARTED')
-        const { token, location, device, dispatch } = this.props
-        const accessCode = '17dadc0d75f84cd57f5ec4a97e6f45a2'
-       
-        registerAccess({accessCode, lat: location.lat, lng: location.lng, 
-            imei: device.uuid, accessMethod: 'QR_CODE', accessType: 'EXIT', token: token
-        })
-            .then(data => data.json())
-            .then(res => {
-                console.log(res)
-                if(res.status == 'OK') {
-                    dispatch(updateGuardStatus('ON_STAND_BY'))
-                    dispatch(saveNewAccessLog(res.payload))
-                    // show success page
-                }
-            })
-            .catch(err => {
-                console.log(err)
-                this.showAlert('message' in err ? err.message : 'Ocurrió un error al intentar registrar el acceso', 'Error')
-                return
-            })
+        const { token, location, device, network, dispatch } = this.props
 
         e.preventDefault()
-        try {
 
+        try {
             const data = await BarcodeScanner.scan({ preferFrontCamera: false, formats: 'QR_CODE', showTorchButton: true })
             console.log(`Barcode data: ${data.text}`)
+            const accessCode = data.text
+            const accessLog = {
+                accessCode, lat: location.lat, lng: location.lng,
+                imei: device.uuid, accessMethod: 'QR_CODE', accessType: 'EXIT', token: token
+            }
+            // If connected send to server
+            if (network && network.connected == true) {
+                registerAccess(accessLog)
+                    .then(data => data.json())
+                    .then(res => {
+                        console.log(res)
+                        if (res.status == 'OK') {
+                            dispatch(updateGuardStatus('ON_STAND_BY'))
+                            dispatch(saveNewAccessLog(res.payload))
+                            // show success page
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err)
+                        this.showAlert('message' in err ? err.message : 'Ocurrió un error al intentar registrar el acceso', 'Error')
+                        return
+                    })
+            } else {
+                // save offline AccessLog
+                dispatch(saveOfflineAccessLog(accessLog))
+                return
+            }
         }
         catch (err) {
             console.log(err)
@@ -122,10 +131,10 @@ class EndTurn extends Component {
 
     ionViewDidEnter() {
         const { location } = this.props
-        if (location) {            
+        if (location) {
             this.setState({ loading: false })
-        }        
-    }  
+        }
+    }
 
     render() {
 
@@ -211,12 +220,13 @@ class EndTurn extends Component {
 };
 
 
-function mapStateToProps({ auth, token, location, guard, device }) {
+function mapStateToProps({ auth, token, location, guard, device, network }) {
     return {
         token: auth && auth.token,
         location: location && location,
         guard: guard && guard,
-        device: device && device
+        device: device && device,
+        network: network && network
     }
 }
 

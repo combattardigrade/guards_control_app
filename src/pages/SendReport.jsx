@@ -22,6 +22,9 @@ import './styles.css'
 // Api
 import { sendReport } from '../utils/api'
 
+// Actions 
+import { saveOfflineReport } from '../actions/offlineData'
+
 // Plugins
 import { Plugins } from '@capacitor/core'
 const { Camera } = Plugins
@@ -57,7 +60,7 @@ class SendReport extends Component {
     handleSendClick = async (e) => {
         e.preventDefault()
         console.log('SEND REPORT BTN CLICKED')
-        const { token, location } = this.props
+        const { token, location, network, dispatch } = this.props
         const { reportTitle, reportDescription, reportPhoto } = this.state
 
         if (!reportTitle || !reportDescription) {
@@ -76,33 +79,47 @@ class SendReport extends Component {
             token,
         }
 
-        sendReport(params)
-            .then(data => data.json())
-            .then(res => {
-                console.log(res)
-                if (res.status == 'OK') {
-                    // Clear report data
-                    this.setState({ 
-                        photoData: '', 
-                        showPhotoPreview: false, 
-                        reportTitle: '', 
-                        reportDescription: '', 
-                        loading: false, 
-                        showSentMessage: true 
-                    })
-                    return
-                } else if (res.status == 'ERROR') {
-                    this.showAlert('message' in res ? res.message : 'Ocurrió un error al intentar enviar el reporte')
+        if (network && network.connected == true) {
+            sendReport(params)
+                .then(data => data.json())
+                .then(res => {
+                    console.log(res)
+                    if (res.status == 'OK') {
+                        // Clear report data
+                        this.setState({
+                            photoData: '',
+                            showPhotoPreview: false,
+                            reportTitle: '',
+                            reportDescription: '',
+                            loading: false,
+                            showSentMessage: true
+                        })
+                        return
+                    } else if (res.status == 'ERROR') {
+                        this.showAlert('message' in res ? res.message : 'Ocurrió un error al intentar enviar el reporte')
+                        this.setState({ loading: false })
+                        return
+                    }
+                })
+                .catch((err) => {
+                    console.log(err)
+                    this.showAlert('message' in err ? err.message : 'Ocurrió un error al intentar enviar el reporte')
                     this.setState({ loading: false })
                     return
-                }
+                })
+        } else {
+            dispatch(saveOfflineReport(params))
+            // Clear report data
+            this.setState({
+                photoData: '',
+                showPhotoPreview: false,
+                reportTitle: '',
+                reportDescription: '',
+                loading: false,
+                showSentMessage: true
             })
-            .catch((err) => {
-                console.log(err)
-                this.showAlert('message' in err ? err.message : 'Ocurrió un error al intentar enviar el reporte')
-                this.setState({ loading: false })
-                return
-            })
+            return
+        }
     }
 
     handleTakePhotoBtn = async (e) => {
@@ -163,7 +180,7 @@ class SendReport extends Component {
         return (
             <IonPage>
                 <IonHeader>
-                    <IonToolbar  color="dark">
+                    <IonToolbar color="dark">
                         <IonButtons slot="start" onClick={e => { e.preventDefault(); this.handleBackBtn() }}>
                             <IonIcon style={{ fontSize: '28px' }} icon={chevronBackOutline}></IonIcon>
                         </IonButtons>
@@ -278,10 +295,11 @@ class SendReport extends Component {
 };
 
 
-function mapStateToProps({ auth, location }) {
+function mapStateToProps({ auth, location, network }) {
     return {
         token: auth && auth.token,
         location: location && location,
+        network: network && network
     }
 }
 

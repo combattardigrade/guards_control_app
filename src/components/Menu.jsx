@@ -27,10 +27,14 @@ import './Menu.css';
 import '../pages/styles.css'
 import { menuController } from '@ionic/core';
 
+// Actions
+import { userLogout } from '../actions/auth'
+
 //  Plugins
 import { Flashlight } from '@ionic-native/flashlight';
 import { Plugins } from '@capacitor/core';
 const { Browser } = Plugins;
+
 
 class Menu extends Component {
   goToPage = (page) => {
@@ -46,6 +50,13 @@ class Menu extends Component {
 
   goToWebsite = async (url) => {
     await Browser.open({ url });
+  }
+
+  handleUserLogout = (e) => {
+    e.preventDefault()
+    const { dispatch } = this.props
+    dispatch(userLogout())
+    this.goToPage('login')
   }
 
   render() {
@@ -100,7 +111,7 @@ class Menu extends Component {
             </IonItem>
           </IonList>
 
-          <IonItem lines="none" button style={{ position: 'absolute', bottom: '20px', width: '100%' }} onClick={e => { e.preventDefault(); localStorage.clear(); this.goToPage('login') }} >
+          <IonItem lines="none" button style={{ position: 'absolute', bottom: '20px', width: '100%' }} onClick={this.handleUserLogout} >
             <IonLabel style={{ textAlign: 'center' }}>Cerrar sesión</IonLabel>
           </IonItem>
         </IonContent>

@@ -22,6 +22,7 @@ import { saveBitacoras } from '../actions/bitacoras'
 import { saveChatMessages } from '../actions/chatMessages'
 import { saveNetworkData } from '../actions/network'
 import { toggleAlert } from '../actions/alert'
+import { saveOfflineUserLocation } from '../actions/offlineData'
 
 // Api
 import {
@@ -47,7 +48,7 @@ class Dashboard extends Component {
     state = {
         showAlert: false,
         showPanicAlert: false,
-        showPanicToast: false,        
+        showPanicToast: false,
         alertMsg: '',
         alertTitle: ''
     }
@@ -119,7 +120,7 @@ class Dashboard extends Component {
     }
 
     watchPosition = () => {
-        const { dispatch, token } = this.props
+        const { dispatch, token, network } = this.props
 
         let watch = Geolocation.watchPosition({
             maximumAge: 3000,
@@ -143,19 +144,21 @@ class Dashboard extends Component {
                 timestamp: data.timestamp
             }
 
-            // Send User Location to server
-            sendUserLocation({ ...locationData, token })
-                .then(data => data.json())
-                .then(res => {
-                    console.log(res)
-                    if (!('status' in res) || res.status != 'OK') {
-                        // backup data until connection is restored
-                        // To Do...
-                    }
-                    dispatch(saveLocation(locationData))
-                })
-
-
+            if (network && network.connected == true) {
+                // Send User Location to server
+                sendUserLocation({ ...locationData, token })
+                    .then(data => data.json())
+                    .then(res => {
+                        console.log(res)
+                        if (!('status' in res) || res.status != 'OK') {
+                            // backup data until connection is restored
+                            // To Do...
+                        }
+                        dispatch(saveLocation(locationData))
+                    })
+            } else {
+                dispatch(saveOfflineUserLocation(locationData))
+            }
         })
     }
 
@@ -204,14 +207,14 @@ class Dashboard extends Component {
         startPanicAlert({ lat: location.lat, lng: location.lng, token })
             .then(data => data.json())
             .then((res) => {
-                if(res.status == 'OK') {
+                if (res.status == 'OK') {
                     dispatch(toggleAlert(true))
                 }
             })
     }
 
     handlePanicBtn = (e) => {
-        e.preventDefault()        
+        e.preventDefault()
         const { token, panicAlert, dispatch } = this.props
         if (panicAlert == true) {
             this.setState({ showPanicToast: false })
@@ -219,7 +222,7 @@ class Dashboard extends Component {
             stopPanicAlert({ token })
                 .then(data => data.json())
                 .then((res) => {
-                    if(res.status == 'OK') {
+                    if (res.status == 'OK') {
                         dispatch(toggleAlert(false))
                     }
                 })
@@ -418,13 +421,14 @@ class Dashboard extends Component {
 };
 
 
-function mapStateToProps({ auth, guard, network, alert }) {
+function mapStateToProps({ auth, guard, network, alert, offlineData }) {
     return {
         token: auth.token,
         guard: guard && guard,
         company: guard ? 'company' in guard ? guard.company : null : null,
         network,
-        panicAlert: alert
+        panicAlert: alert,
+        offlineData
     }
 }
 

@@ -21,6 +21,9 @@ import './styles.css'
 // Api
 import { sendBitacora } from '../utils/api'
 
+// Actions
+import { saveOfflineBitacora } from '../actions/offlineData'
+
 // Plugins
 import { Plugins } from '@capacitor/core'
 const { Camera } = Plugins
@@ -56,7 +59,7 @@ class SendBitacora extends Component {
     handleSendClick = (e) => {
         e.preventDefault()
         console.log('SEND BITACORA BTN CLICKED')
-        const { token } = this.props
+        const { token, network, dispatch } = this.props
         const { activitiesDescription, incidentsDescription, bitacoraPhoto } = this.state
 
         if (!activitiesDescription || !incidentsDescription) {
@@ -72,34 +75,47 @@ class SendBitacora extends Component {
             photoData: bitacoraPhoto,
             token,
         }
-
-        sendBitacora(params)
-            .then(data => data.json())
-            .then(res => {
-                console.log(res)
-                if (res.status == 'OK') {
-                    // Clear bitacora data
-                    this.setState({
-                        photoData: '',
-                        showPhotoPreview: false,
-                        activitiesDescription: '',
-                        incidentsDescription: '',
-                        loading: false,
-                        showSentMessage: true
-                    })
-                    return
-                } else if (res.status == 'ERROR') {
-                    this.showAlert('message' in res ? res.message : 'Ocurrió un error al intentar enviar la bitácora diaria')
+        if (network && network.connected == true) {
+            sendBitacora(params)
+                .then(data => data.json())
+                .then(res => {
+                    console.log(res)
+                    if (res.status == 'OK') {
+                        // Clear bitacora data
+                        this.setState({
+                            photoData: '',
+                            showPhotoPreview: false,
+                            activitiesDescription: '',
+                            incidentsDescription: '',
+                            loading: false,
+                            showSentMessage: true
+                        })
+                        return
+                    } else if (res.status == 'ERROR') {
+                        this.showAlert('message' in res ? res.message : 'Ocurrió un error al intentar enviar la bitácora diaria')
+                        this.setState({ loading: false })
+                        return
+                    }
+                })
+                .catch((err) => {
+                    console.log(err)
+                    this.showAlert('message' in err ? err.message : 'Ocurrió un error al intentar enviar el bitácora diaria')
                     this.setState({ loading: false })
                     return
-                }
-            })
-            .catch((err) => {
-                console.log(err)
-                this.showAlert('message' in err ? err.message : 'Ocurrió un error al intentar enviar el bitácora diaria')
-                this.setState({ loading: false })
-                return
-            })
+                })
+        } else {
+            dispatch(saveOfflineBitacora(params))
+            // Clear bitacora data
+            this.setState({
+                photoData: '',
+                showPhotoPreview: false,
+                activitiesDescription: '',
+                incidentsDescription: '',
+                loading: false,
+                showSentMessage: true
+            })            
+            return
+        }
     }
 
     handleTakePhotoBtn = async (e) => {
@@ -266,7 +282,7 @@ class SendBitacora extends Component {
                         duration="2000"
                         onDidDismiss={() => this.setState({ showSentMessage: false })}
                     />
-                
+
                 </IonContent>
             </IonPage >
 
@@ -275,9 +291,10 @@ class SendBitacora extends Component {
 };
 
 
-function mapStateToProps({ auth }) {
+function mapStateToProps({ auth, network }) {
     return {
-        token: auth && auth.token
+        token: auth && auth.token,
+        network
     }
 }
 

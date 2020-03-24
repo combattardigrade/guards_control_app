@@ -12,8 +12,10 @@ import chatMessages from './chatMessages'
 import chatMembers from './chatMembers'
 import network from './network'
 import alert from './alert'
+import offlineData from './offlineData'
+import storage from 'redux-persist/lib/storage'
 
-export default combineReducers({
+const appReducer = combineReducers({
     auth,
     device,
     location,
@@ -27,4 +29,15 @@ export default combineReducers({
     chatMembers,
     network,
     alert,
+    offlineData
 })
+
+const rootReducer = (state, action) => {    
+    if(action.type == 'USER_LOGOUT') {
+        storage.removeItem('persist:root')
+        state = undefined
+    }
+    return appReducer(state, action)
+}
+
+export default rootReducer

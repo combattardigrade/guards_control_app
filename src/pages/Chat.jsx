@@ -6,7 +6,7 @@ import {
     IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar,
     IonItem, IonLabel, IonRefresher, IonRefresherContent, IonGrid, IonRow,
     IonCol, IonTabs, IonTab, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon,
-    IonFab, IonFabButton, IonModal, IonButton, IonBackButton, IonInput, IonNote
+    IonFab, IonFabButton, IonModal, IonButton, IonBackButton, IonInput, IonNote, withIonLifeCycle 
 } from '@ionic/react';
 import { Redirect, Route } from 'react-router-dom';
 import {
@@ -81,7 +81,7 @@ class Chat extends Component {
             })
     }
 
-    componentDidMount() {
+    ionViewWillEnter() {
         const { company, dispatch, token } = this.props
 
         // Get Chat Members
@@ -249,4 +249,4 @@ function mapStateToProps({ auth, guard, chatMessages, chatMembers }) {
     }
 }
 
-export default connect(mapStateToProps)(Chat)
+export default connect(mapStateToProps)(withIonLifeCycle(Chat))

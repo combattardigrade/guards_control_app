@@ -16,6 +16,7 @@ import {
 
 // Actions
 import { saveRoutes } from '../actions/routes'
+import { saveOfflineCheckpoint } from '../actions/offlineData'
 
 // Api
 import { completeCheckpoint, getRoutesByStatus } from '../utils/api'
@@ -33,44 +34,51 @@ class RegisterCheckpointModal extends Component {
         alertMsg: ''
     }
 
-      
+
 
     handleScanner = async (e) => {
 
         e.preventDefault()
         console.log('QR SCANNER STARTED')
-        const { token, checkpoint, dispatch } = this.props
-        const code = '5342543254'
-
-        completeCheckpoint({ checkpointId: checkpoint.id, code: code, token })
-            .then(data => data.json())
-            .then(res => {
-                console.log(res)
-                if (res.status == 'OK') {
-                    
-                    // Get Routes
-                    getRoutesByStatus({ status: 'ACTIVE', token })
-                        .then(data => data.json())
-                        .then(res => {
-                            if (res.status == 'OK') {
-                                console.log(res.payload)
-                                dispatch(saveRoutes(res.payload))
-                            }
-                        })
-                    // show success page
-                    console.log('CHECKPOINT COMPLETED SUCCESSFULLY')
-                }
-            })
-            .catch(err => {
-                console.log(err)
-                this.showAlert('message' in err ? err.message : 'Ocurrió un error al intentar registrar el acceso', 'Error')
-                return
-            })
-
+        const { token, checkpoint, dispatch, network } = this.props
 
         try {
             const data = await BarcodeScanner.scan({ preferFrontCamera: false, formats: 'QR_CODE', showTorchButton: true })
             console.log(`Barcode data: ${data.text}`)
+            const code = data.text
+            const checkpointData = { checkpointId: checkpoint.id, code: code, token }
+
+            if (network && network.connected == true) {
+                completeCheckpoint(checkpointData)
+                    .then(data => data.json())
+                    .then(res => {
+                        console.log(res)
+                        if (res.status == 'OK') {
+
+                            // Get Routes
+                            getRoutesByStatus({ status: 'ACTIVE', token })
+                                .then(data => data.json())
+                                .then(res => {
+                                    if (res.status == 'OK') {
+                                        console.log(res.payload)
+                                        dispatch(saveRoutes(res.payload))
+                                    }
+                                })
+                            // show success page
+                            console.log('CHECKPOINT COMPLETED SUCCESSFULLY')
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err)
+                        this.showAlert('message' in err ? err.message : 'Ocurrió un error al intentar registrar el acceso', 'Error')
+                        return
+                    })
+            } else {
+                // save offline checkpoint
+                dispatch(saveOfflineCheckpoint(checkpointData))
+                return
+            }
+
         }
         catch (err) {
             console.log(err)
@@ -83,7 +91,7 @@ class RegisterCheckpointModal extends Component {
         this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
     }
 
-    
+
 
     render() {
 
@@ -194,12 +202,12 @@ class RegisterCheckpointModal extends Component {
 };
 
 
-function mapStateToProps({ auth, location }, ownProps) {
+function mapStateToProps({ auth, location, network }, ownProps) {
     console.log(ownProps)
     return {
         token: auth && auth.token,
         location: location && location,
-        
+        network: network && network
     }
 }
 
