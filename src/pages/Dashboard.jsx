@@ -127,8 +127,8 @@ class Dashboard extends Component {
     }
 
     watchPosition = () => {
-        const { dispatch, token, network } = this.props
-
+        
+        const self = this
         let watch = Geolocation.watchPosition({
             maximumAge: 3000,
             timeout: 5000,
@@ -136,6 +136,8 @@ class Dashboard extends Component {
         })
 
         watch.subscribe((data) => {
+            const { dispatch, token, network } = self.props
+
             if ('code' in data) {
                 console.log(`Location error code ${data.code}. ${data.message}`)
                 return
@@ -156,15 +158,11 @@ class Dashboard extends Component {
                 sendUserLocation({ ...locationData, token })
                     .then(data => data.json())
                     .then(res => {
-                        console.log(res)
-                        if (!('status' in res) || res.status != 'OK') {
-                            // backup data until connection is restored
-                            // To Do...
-                        }
+                        console.log(res)                        
                         dispatch(saveLocation(locationData))
                     })
             } else {
-                dispatch(saveOfflineUserLocation(locationData))
+                dispatch(saveOfflineUserLocation({ ...locationData, token }))
                 dispatch(saveLocation(locationData))
             }
         })
