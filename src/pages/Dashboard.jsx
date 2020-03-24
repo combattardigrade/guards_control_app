@@ -8,7 +8,7 @@ import {
 import {
     notificationsOutline, keyOutline, shieldCheckmarkOutline, repeatOutline,
     navigateOutline, cameraOutline, readerOutline, alertCircleOutline,
-    chatboxEllipsesOutline, callOutline, ellipse
+    chatboxEllipsesOutline, callOutline, ellipse, cloudUploadOutline
 
 } from 'ionicons/icons'
 
@@ -240,6 +240,19 @@ class Dashboard extends Component {
         }
     }
 
+    handleUploadOfflineDataBtn = (e) => {
+        e.preventDefault()
+        const { network } = this.props
+
+        if (network && network.connected == true) {
+            this.goToPage('syncOffline')
+            return
+        } else {
+            this.showAlert('Sin conexión. No es posible realizar la sincronización con el servidor.', 'Error')
+            return
+        }
+    }
+
     goToPage = (page) => {
         this.props.history.push(page)
     }
@@ -376,6 +389,21 @@ class Dashboard extends Component {
                                     </IonGrid>
                                 </IonItem>
                             </IonCol>
+                        </IonRow>
+                        <IonRow>
+                            <IonCol size="6">
+                                <IonItem color="success" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={this.handleUploadOfflineDataBtn}>
+                                    <IonGrid>
+                                        <IonRow style={{ textAlign: 'center' }}>
+                                            <IonCol><IonIcon className="dashBtnIcon" icon={cloudUploadOutline}></IonIcon></IonCol>
+                                        </IonRow>
+                                        <IonRow style={{ textAlign: 'center' }}>
+                                            <IonCol><IonLabel className="dashBtnText">Enviar Datos Locales</IonLabel></IonCol>
+                                        </IonRow>
+                                    </IonGrid>
+                                </IonItem>
+                            </IonCol>
+
                         </IonRow>
                     </IonGrid>
 

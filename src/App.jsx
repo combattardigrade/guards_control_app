@@ -45,10 +45,7 @@ import Settings from './pages/Settings'
 import Notifications from './pages/Notifications'
 import Checkpoints from './pages/Checkpoints'
 import HistorialAccesos from './pages/HistorialAccesos'
-
-
-
-
+import SyncOffline from './pages/SyncOffline'
 
 
 class App extends Component {
@@ -90,7 +87,7 @@ class App extends Component {
               <PrivateRoute path="/notifications" component={Notifications} auth={auth}/>
               <PrivateRoute path="/checkpoints" component={Checkpoints} auth={auth}/>
               <PrivateRoute path="/historialAccesos" component={HistorialAccesos} auth={auth}/>
-              
+              <PrivateRoute path="/syncOffline" component={SyncOffline} auth={auth}/>
               
               
             </IonRouterOutlet>
