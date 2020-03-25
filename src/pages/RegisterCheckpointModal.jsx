@@ -87,6 +87,68 @@ class RegisterCheckpointModal extends Component {
         }
     }
 
+    handleNFC = async (e) => {
+        e.preventDefault()
+        console.log('NFC SCANNER STARTED')
+        const { token, checkpoint, dispatch, network } = this.props        
+
+        try {
+            // Receive NFC event       
+            NFC.addNdefListener(
+                () => {
+                    console.log('success')
+                },
+                () => {
+                    console.log('err')
+                }
+            ).subscribe((event) => {
+                const payload = event.tag.ndefMessage[0]["payload"]
+                let code = NFC.bytesToString(payload)
+                code = code.replace('en', '')
+                console.log(`NFC access code: ${code}`)
+
+                const checkpointData = { checkpointId: checkpoint.id, code: code, token }
+
+                // If connencted send to server
+                if (network && network.connected == true) {
+                    completeCheckpoint(checkpointData)
+                        .then(data => data.json())
+                        .then(res => {
+                            console.log(res)
+                            if (res.status == 'OK') {
+
+                                // Get Routes
+                                getRoutesByStatus({ status: 'ACTIVE', token })
+                                    .then(data => data.json())
+                                    .then(res => {
+                                        if (res.status == 'OK') {
+                                            console.log(res.payload)
+                                            dispatch(saveRoutes(res.payload))
+                                        }
+                                    })
+                                // show success page
+                                console.log('CHECKPOINT COMPLETED SUCCESSFULLY')
+                            }
+                        })
+                        .catch(err => {
+                            console.log(err)
+                            this.showAlert('message' in err ? err.message : 'Ocurrió un error al intentar registrar el acceso', 'Error')
+                            return
+                        })
+                } else {
+                    // save offline checkpoint
+                    dispatch(saveOfflineCheckpoint(checkpointData))
+                    return
+                }
+            })
+        }
+        catch (err) {
+            console.log(err)
+            this.showAlert('Ocurrió un error al intentar escanear el código QR.', 'Error')
+            return
+        }
+    }
+
     showAlert = (msg, title) => {
         this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
     }
@@ -166,7 +228,7 @@ class RegisterCheckpointModal extends Component {
                     <IonGrid>
                         <IonRow>
                             <IonCol size="12" style={{ paddingBottom: '0px' }}>
-                                <ion-button expand="full" type="submit" className="ion-no-margin">Escanear punto con NFC</ion-button>
+                                <ion-button onClick={this.handleNFC} expand="full" type="submit" className="ion-no-margin">Escanear punto con NFC</ion-button>
                             </IonCol>
                         </IonRow>
                         <IonRow>
