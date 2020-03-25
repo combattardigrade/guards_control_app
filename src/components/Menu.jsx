@@ -21,7 +21,7 @@ import {
   archiveOutline, archiveSharp, bookmarkOutline, heartOutline,
   heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp,
   trashOutline, trashSharp, warningOutline, warningSharp, personCircleOutline,
-  flashlightOutline, globeOutline, settingsOutline, repeatOutline, layersOutline, folderOutline
+  flashlightOutline, globeOutline, settingsOutline, repeatOutline, layersOutline, folderOutline, carOutline
 } from 'ionicons/icons';
 import './Menu.css';
 import '../pages/styles.css'
@@ -61,9 +61,10 @@ class Menu extends Component {
 
   render() {
     const { guard, company } = this.props
+    
 
     return (
-      <IonMenu contentId="main" type="overlay">
+      <IonMenu contentId="main" type="overlay" disabled={this.props.location.pathname !== '/dashboard' ? true : false}>
         <IonContent>
           <IonList id="inbox-list">
             <IonRow>
@@ -90,7 +91,7 @@ class Menu extends Component {
               <IonLabel style={{ marginLeft: '10px' }}>Historial de Accesos</IonLabel>
             </IonItem>
 
-            <IonItem lines="full"  button onClick={e => { e.preventDefault(); this.goToPage('/historialReportes') }}>
+            <IonItem lines="full" button onClick={e => { e.preventDefault(); this.goToPage('/historialReportes') }}>
               <IonIcon icon={layersOutline}></IonIcon>
               <IonLabel style={{ marginLeft: '10px' }}>Historial de Reportes</IonLabel>
             </IonItem>
@@ -100,9 +101,14 @@ class Menu extends Component {
               <IonLabel style={{ marginLeft: '10px' }}>Historial de Bitácoras</IonLabel>
             </IonItem>
 
-            <IonItem lines="full" button onClick={e => {e.preventDefault(); this.goToWebsite(guard.company.website)}}>
+            <IonItem lines="full" button onClick={e => { e.preventDefault(); this.goToWebsite(guard.company.website) }}>
               <IonIcon icon={globeOutline}></IonIcon>
               <IonLabel style={{ marginLeft: '10px' }}>Web de la Empresa</IonLabel>
+            </IonItem>
+
+            <IonItem lines="full" button onClick={e => { e.preventDefault(); this.goToWebsite(guard.company.website) }}>
+              <IonIcon icon={carOutline}></IonIcon>
+              <IonLabel style={{ marginLeft: '10px' }}>Seguimiento Vehículo</IonLabel>
             </IonItem>
 
             <IonItem lines="full" button onClick={e => { e.preventDefault(); this.goToPage('settings') }}>
