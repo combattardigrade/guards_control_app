@@ -26,6 +26,9 @@ import { updateGuardStatus } from '../actions/guard'
 import { saveNewAccessLog } from '../actions/accessLogs'
 import { saveOfflineAccessLog } from '../actions/offlineData'
 
+// Components
+import SuccessModal from './SuccessModal'
+
 import './styles.css'
 
 const moment = require('moment')
@@ -37,7 +40,13 @@ class StartTurn extends Component {
         showAlert: false,
         alertTitle: '',
         alertMsg: '',
-        loading: true
+        loading: true,
+        showSuccessModal: false,
+    }
+
+    handleSuccessModalBtn = () => {
+        this.setState({ showSuccessModal: false })
+        this.props.history.replace('/dashboard')
     }
 
     handleBackBtn = () => {
@@ -222,6 +231,18 @@ class StartTurn extends Component {
 
                         {/* <IonButton color="light" expand="full" type="submit" className="ion-no-margin">Ver Historial de Accesos</IonButton> */}
                     </div>
+
+                    {
+                        this.state.showSuccessModal && (
+                            <SuccessModal
+                                showSuccessModal={this.state.showSuccessModal}
+                                handleSuccessModalBtn={this.handleSuccessModalBtn}
+                                title="¡Éxito!"
+                                description="¡Salida Registrada Correctamente!"
+
+                            />
+                        )
+                    }
                     <IonAlert
                         isOpen={this.state.showAlert}
                         header={this.state.alertTitle}

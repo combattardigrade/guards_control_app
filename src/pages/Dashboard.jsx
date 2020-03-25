@@ -2,8 +2,8 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import {
     IonButtons, IonButton, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle,
-    IonToolbar, IonIcon, IonItem, IonLabel, IonRefresher, IonRefresherContent,
-    IonGrid, IonRow, IonCol, IonAlert, IonToast
+    IonToolbar, IonIcon, IonItem, IonLabel, 
+    IonGrid, IonRow, IonCol, IonAlert, IonToast, withIonLifeCycle
 } from '@ionic/react';
 import {
     notificationsOutline, keyOutline, shieldCheckmarkOutline, repeatOutline,
@@ -55,7 +55,7 @@ class Dashboard extends Component {
         alertTitle: ''
     }
 
-    componentDidMount() {
+    ionViewWillEnter() {
         const { token, dispatch } = this.props
 
         // Start watching position
@@ -467,4 +467,4 @@ function mapStateToProps({ auth, guard, network, alert, offlineData, device }) {
     }
 }
 
-export default connect(mapStateToProps)(Dashboard)
+export default connect(mapStateToProps)(withIonLifeCycle(Dashboard))

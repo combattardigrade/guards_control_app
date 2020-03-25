@@ -24,6 +24,9 @@ import { sendBitacora } from '../utils/api'
 // Actions
 import { saveOfflineBitacora } from '../actions/offlineData'
 
+// Components
+import SuccessModal from './SuccessModal'
+
 // Plugins
 import { Plugins } from '@capacitor/core'
 const { Camera } = Plugins
@@ -41,11 +44,17 @@ class SendBitacora extends Component {
         incidentsDescription: '',
         bitacoraPhoto: '',
         showPhotoPreview: false,
-        showSentMessage: false
+        showSentMessage: false,
+        showSuccessModal: false,
     }
 
     handleBackBtn = () => {
         this.props.history.goBack()
+    }
+
+    handleSuccessModalBtn = () => {
+        this.setState({ showSuccessModal: false })
+        this.props.history.replace('/dashboard')
     }
 
     handleActivitiesChange = (e) => {
@@ -261,7 +270,7 @@ class SendBitacora extends Component {
                                 <IonSpinner name="crescent" style={{ textAlign: 'center' }} />
                             </div>
                     }
-
+                    
                     <IonAlert
                         isOpen={this.state.showAlert}
                         header={this.state.alertTitle}

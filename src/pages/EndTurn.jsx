@@ -26,6 +26,9 @@ import { updateGuardStatus } from '../actions/guard'
 import { saveNewAccessLog } from '../actions/accessLogs'
 import { saveOfflineAccessLog } from '../actions/offlineData'
 
+// Components
+import SuccessModal from './SuccessModal'
+
 const moment = require('moment')
 
 
@@ -36,6 +39,12 @@ class EndTurn extends Component {
         alertTitle: '',
         alertMsg: '',
         loading: true,
+        showSuccessModal: false,
+    }
+
+    handleSuccessModalBtn = () => {
+        this.setState({ showSuccessModal: false })
+        this.props.history.replace('/dashboard')
     }
 
     handleBackBtn = () => {
@@ -66,6 +75,7 @@ class EndTurn extends Component {
                             dispatch(updateGuardStatus('ON_STAND_BY'))
                             dispatch(saveNewAccessLog(res.payload))
                             // show success page
+                            this.setState({ showSuccessModal: true })
                         }
                     })
                     .catch(err => {
@@ -120,6 +130,7 @@ class EndTurn extends Component {
                                 dispatch(updateGuardStatus('ON_STAND_BY'))
                                 dispatch(saveNewAccessLog(res.payload))
                                 // show success page
+                                this.setState({ showSuccessModal: true })
                             }
                         })
                         .catch(err => {
@@ -218,6 +229,19 @@ class EndTurn extends Component {
 
                         {/* <IonButton color="light" expand="full" type="submit" className="ion-no-margin">Ver Historial de Accesos</IonButton> */}
                     </div>
+
+                    {
+                        this.state.showSuccessModal && (
+                            <SuccessModal
+                                showSuccessModal={this.state.showSuccessModal}
+                                handleSuccessModalBtn={this.handleSuccessModalBtn}
+                                title="¡Éxito!"
+                                description="¡Entrada Registrada Correctamente!"
+
+                            />
+                        )
+                    }
+
                     <IonAlert
                         isOpen={this.state.showAlert}
                         header={this.state.alertTitle}
