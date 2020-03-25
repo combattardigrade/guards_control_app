@@ -105,15 +105,12 @@ class Chat extends Component {
                                 if (res.status == 'OK') {
                                     console.log(res)
 
-                                    // Send audio message through sockets
-                                    // Send message through sockets
-                                    // socket.emit('message', {
-                                    //     room: company.id,
-                                    //     msg: res.payload,
-                                    // })
-
-
-
+                                    // Send audio message through sockets                                    
+                                    socket.emit('message', {
+                                        room: company.id,
+                                        msg: res.payload,
+                                    })
+                                    
                                     // Save message in locaStorage
                                     dispatch(saveNewChatMessage(res.payload))
                                 }
