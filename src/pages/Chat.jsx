@@ -6,7 +6,7 @@ import {
     IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar,
     IonItem, IonLabel, IonRefresher, IonRefresherContent, IonGrid, IonRow,
     IonCol, IonTabs, IonTab, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon,
-    IonFab, IonFabButton, IonModal, IonButton, IonBackButton, IonInput, IonNote, withIonLifeCycle 
+    IonFab, IonFabButton, IonModal, IonButton, IonBackButton, IonInput, IonNote, withIonLifeCycle
 } from '@ionic/react';
 import { Redirect, Route } from 'react-router-dom';
 import {
@@ -21,11 +21,14 @@ import './styles.css'
 import ChatMembersModal from './ChatMembersModal'
 
 // Api
-import { sendMessage, getCompanyActiveMembers } from '../utils/api'
+import { sendMessage, getCompanyActiveMembers, sendAudioMessage, API } from '../utils/api'
 
 // Actions
 import { saveNewChatMessage } from '../actions/chatMessages'
 import { saveChatMembers } from '../actions/chatMembers'
+
+// Plugins
+import { MediaCapture } from '@ionic-native/media-capture'
 
 const moment = require('moment')
 
@@ -43,7 +46,7 @@ class Chat extends Component {
     }
 
     handleBackBtn = () => {
-        this.setState({goBack: true})
+        this.setState({ goBack: true })
         this.props.history.goBack()
     }
 
@@ -81,14 +84,59 @@ class Chat extends Component {
             })
     }
 
+    handleRecAudioMsg = (e) => {
+        e.preventDefault()
+        console.log('RECORDING_AUDIO_MESSAGE')
+        const { token, company, dispatch } = this.props
+        MediaCapture.captureAudio({ limit: 1, duration: 30 })
+            .then(
+                (mediaFile) => {
+                    console.log(mediaFile)
+                    const audioFile = mediaFile[0]
+                    const fileReader = new FileReader()
+
+                    fileReader.onload = function (readerEvt) {
+                        const audioBase64 = readerEvt.target.result
+                        // Send audio message to server                      
+
+                        sendAudioMessage({ audioData: audioBase64, token })
+                            .then(data => data.json())
+                            .then(res => {
+                                if (res.status == 'OK') {
+                                    console.log(res)
+
+                                    // Send audio message through sockets
+                                    // Send message through sockets
+                                    // socket.emit('message', {
+                                    //     room: company.id,
+                                    //     msg: res.payload,
+                                    // })
+
+
+
+                                    // Save message in locaStorage
+                                    dispatch(saveNewChatMessage(res.payload))
+                                }
+                            })
+
+                    }
+                    let file = new window.File(audioFile.name, audioFile.localURL, audioFile.type, audioFile.lastModifiedDate, audioFile.size);
+                    fileReader.readAsDataURL(file)
+                },
+                (err) => {
+                    console.error(err)
+                }
+            )
+    }
+
     ionViewWillEnter() {
         const { company, dispatch, token } = this.props
 
         // Get Chat Members
-        getCompanyActiveMembers({companyId: company.id, token})
+        getCompanyActiveMembers({ companyId: company.id, token })
             .then(data => data.json())
             .then(res => {
-                if(res.status == 'OK') {
+                if (res.status == 'OK') {
                     dispatch(saveChatMembers(res.payload.users))
                 }
             })
@@ -119,14 +167,14 @@ class Chat extends Component {
 
     componentDidUpdate() {
         // Do not scroll when going back to previous page
-        if(this.state.goBack == true) return
+        if (this.state.goBack == true) return
         // Scroll to bottom
         setTimeout(() => {
             this.scrollToBottom()
         }, 500)
     }
 
-    scrollToBottom = () => {        
+    scrollToBottom = () => {
         this.messagesEnd.current.scrollIntoView({ behavior: "smooth" });
     }
 
@@ -154,44 +202,76 @@ class Chat extends Component {
                     </IonToolbar>
                 </IonHeader>
 
-                <IonContent>
+                <IonContent scrollEvents={true}>
 
                     {
                         chatMessages
                             ?
                             Object.values(chatMessages).map((message, index) => {
                                 if (message.userId == guard.id) {
-                                    return (
-                                        <Fragment key={index}>
-                                            <IonItem className={index + 1 == totalMessages && 'lastMessage'} lines="none" ref={index + 1 == totalMessages && (this.messagesEnd)}>
-                                                <IonGrid>
-                                                    <IonRow>
-                                                        <IonCol size="8" offset="4" style={{ backgroundColor: '#2dd36f', borderRadius: '5px', padding: '5px 10px', textAlign: 'right', borderBottom: '2px solid rgb(35, 179, 93)' }}>
-                                                            <IonLabel style={{ whiteSpace: 'normal', fontSize: '.9em', color: 'white', }}>{message.messageText}</IonLabel>
-                                                            <IonLabel style={{ whiteSpace: 'normal', fontSize: '.6em', marginTop: '5px', color: 'white', textAlign: 'right' }}>{moment(message.createdAt).fromNow()} </IonLabel>
-                                                        </IonCol>
-                                                    </IonRow>
-                                                </IonGrid>
-                                            </IonItem>
-
-                                        </Fragment>
-                                    )
+                                    if (message.messageType == 'text') {
+                                        return (
+                                            <Fragment key={index}>
+                                                <IonItem className={index + 1 == totalMessages && 'lastMessage'} lines="none" ref={index + 1 == totalMessages && (this.messagesEnd)}>
+                                                    <IonGrid>
+                                                        <IonRow>
+                                                            <IonCol size="8" offset="4" style={{ backgroundColor: '#2dd36f', borderRadius: '5px', padding: '5px 10px', textAlign: 'right', borderBottom: '2px solid rgb(35, 179, 93)' }}>
+                                                                <IonLabel style={{ whiteSpace: 'normal', fontSize: '.9em', color: 'white', }}>{message.messageText}</IonLabel>
+                                                                <IonLabel style={{ whiteSpace: 'normal', fontSize: '.6em', marginTop: '5px', color: 'white', textAlign: 'right' }}>{moment(message.createdAt).fromNow()} </IonLabel>
+                                                            </IonCol>
+                                                        </IonRow>
+                                                    </IonGrid>
+                                                </IonItem>
+                                            </Fragment>
+                                        )
+                                    } else if (message.messageType == 'audio') {
+                                        return (
+                                            <Fragment key={index}>
+                                                <IonItem className={index + 1 == totalMessages && 'lastMessage'} lines="none" ref={index + 1 == totalMessages && (this.messagesEnd)}>
+                                                    <IonGrid>
+                                                        <IonRow>
+                                                            <IonCol size="8" offset="4" style={{ borderRadius: '5px', padding: '5px 0px', textAlign: 'right', }}>
+                                                                <audio volume='1' controls style={{ width: '100%' }}><source src={API + '/audio/' + message.audioId} /></audio>
+                                                                <IonLabel style={{ whiteSpace: 'normal', fontSize: '.6em', marginTop: '5px', textAlign: 'right' }}>{moment(message.createdAt).fromNow()} </IonLabel>
+                                                            </IonCol>
+                                                        </IonRow>
+                                                    </IonGrid>
+                                                </IonItem>
+                                            </Fragment>
+                                        )
+                                    }
                                 } else {
-                                    return (
-                                        <Fragment key={index}>
-                                            <IonItem className={index + 1 == totalMessages && 'lastMessage'} lines="none" ref={index + 1 == totalMessages && (this.messagesEnd)} >
-                                                <IonGrid>
-                                                    <IonRow>
-                                                        <IonCol size="8" style={{ backgroundColor: '#f4f5f8', borderRadius: '5px', padding: '5px 10px', textAlign: 'left', borderBottom: '2px solid rgba(126, 124, 124, 0.26)' }}>
-                                                            <IonLabel style={{ whiteSpace: 'normal', fontSize: '.9em' }}>{message.messageText}</IonLabel>
-                                                            <IonLabel style={{ whiteSpace: 'normal', fontSize: '.6em', marginTop: '5px' }}>{'user' in message && message.user.username} • {moment(message.createdAt).fromNow()} </IonLabel>
-                                                        </IonCol>
-                                                    </IonRow>
-                                                </IonGrid>
-                                            </IonItem>
-
-                                        </Fragment>
-                                    )
+                                    if (message.messageType == 'text') {
+                                        return (
+                                            <Fragment key={index}>
+                                                <IonItem className={index + 1 == totalMessages && 'lastMessage'} lines="none" ref={index + 1 == totalMessages && (this.messagesEnd)} >
+                                                    <IonGrid>
+                                                        <IonRow>
+                                                            <IonCol size="8" style={{ backgroundColor: '#f4f5f8', borderRadius: '5px', padding: '5px 10px', textAlign: 'left', borderBottom: '2px solid rgba(126, 124, 124, 0.26)' }}>
+                                                                <IonLabel style={{ whiteSpace: 'normal', fontSize: '.9em' }}>{message.messageText}</IonLabel>
+                                                                <IonLabel style={{ whiteSpace: 'normal', fontSize: '.6em', marginTop: '5px' }}>{'user' in message && message.user.username} • {moment(message.createdAt).fromNow()} </IonLabel>
+                                                            </IonCol>
+                                                        </IonRow>
+                                                    </IonGrid>
+                                                </IonItem>
+                                            </Fragment>
+                                        )
+                                    } else if (message.messageType == 'audio') {
+                                        return (
+                                            <Fragment key={index}>
+                                                <IonItem className={index + 1 == totalMessages && 'lastMessage'} lines="none" ref={index + 1 == totalMessages && (this.messagesEnd)}>
+                                                    <IonGrid>
+                                                        <IonRow>
+                                                            <IonCol size="8" style={{ borderRadius: '5px', padding: '5px 0px', textAlign: 'left' }}>
+                                                                <audio volume='1' controls style={{ width: '100%' }}><source src={API + '/audio/' + message.audioId} /></audio>
+                                                                <IonLabel style={{ whiteSpace: 'normal', fontSize: '.6em', marginTop: '5px' }}>{'user' in message && message.user.username} • {moment(message.createdAt).fromNow()} </IonLabel>
+                                                            </IonCol>
+                                                        </IonRow>
+                                                    </IonGrid>
+                                                </IonItem>
+                                            </Fragment>
+                                        )
+                                    }
                                 }
                             })
                             :
@@ -227,9 +307,9 @@ class Chat extends Component {
 
                     <ChatMembersModal
                         chatMembers={chatMembers}
-                        
+
                         showChatMembersModal={this.state.showChatMembersModal}
-                        handleToggleChatMembersModal={this.handleToggleChatMembersModal}                        
+                        handleToggleChatMembersModal={this.handleToggleChatMembersModal}
                     />
                 </IonContent>
             </IonPage >

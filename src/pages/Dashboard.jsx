@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import {
     IonButtons, IonButton, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle,
-    IonToolbar, IonIcon, IonItem, IonLabel, 
+    IonToolbar, IonIcon, IonItem, IonLabel,
     IonGrid, IonRow, IonCol, IonAlert, IonToast, withIonLifeCycle
 } from '@ionic/react';
 import {
@@ -124,10 +124,13 @@ class Dashboard extends Component {
             .then((info) => {
                 dispatch(saveDeviceData(info))
             })
+        // https://stackoverflow.com/questions/21177210/phonegap-cordova-media-api-when-play-audio-from-url-ui-freeze-a-few-seconds
+        // var myAudio = new window.Audio("http://genesisblock.ddns.net:3000/api/audio/2");
+        // myAudio.play();
     }
 
     watchPosition = () => {
-        
+
         const self = this
         let watch = Geolocation.watchPosition({
             maximumAge: 3000,
@@ -158,7 +161,7 @@ class Dashboard extends Component {
                 sendUserLocation({ ...locationData, token })
                     .then(data => data.json())
                     .then(res => {
-                        console.log(res)                        
+                        console.log(res)
                         dispatch(saveLocation(locationData))
                     })
             } else {
