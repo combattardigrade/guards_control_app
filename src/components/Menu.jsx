@@ -106,9 +106,9 @@ class Menu extends Component {
               <IonLabel style={{ marginLeft: '10px' }}>Web de la Empresa</IonLabel>
             </IonItem>
 
-            <IonItem lines="full" button onClick={e => { e.preventDefault(); this.goToWebsite(guard.company.website) }}>
+            <IonItem lines="full" button onClick={e => { e.preventDefault(); this.goToPage('/carTracking') }}>
               <IonIcon icon={carOutline}></IonIcon>
-              <IonLabel style={{ marginLeft: '10px' }}>Seguimiento Vehículo</IonLabel>
+              <IonLabel style={{ marginLeft: '10px' }}>Seguimiento de Vehículo</IonLabel>
             </IonItem>
 
             <IonItem lines="full" button onClick={e => { e.preventDefault(); this.goToPage('settings') }}>

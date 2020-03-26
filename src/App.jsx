@@ -46,7 +46,7 @@ import Notifications from './pages/Notifications'
 import Checkpoints from './pages/Checkpoints'
 import HistorialAccesos from './pages/HistorialAccesos'
 import SyncOffline from './pages/SyncOffline'
-
+import CarTracking from './pages/CarTracking'
 
 class App extends Component {
 
@@ -70,14 +70,11 @@ class App extends Component {
               <Route path="/" render={() => <Redirect to="/login" />} exact={true} />
               <Route path="/login" component={Login} />
               <Route path="/signup" component={Signup} />
-
               <PrivateRoute path='/dashboard' component={Dashboard} auth={auth}/>
               <PrivateRoute path='/startTurn' component={StartTurn} auth={auth}/>
-              <PrivateRoute path='/endTurn' component={EndTurn} auth={auth}/>
-              
+              <PrivateRoute path='/endTurn' component={EndTurn} auth={auth}/>              
               <PrivateRoute path='/routes' component={Routes} auth={auth}/>
-              <PrivateRoute path='/chat' component={Chat} auth={auth}/>
-              
+              <PrivateRoute path='/chat' component={Chat} auth={auth}/>              
               <PrivateRoute path="/sendReport" component={SendReport} auth={auth}/>
               <PrivateRoute path="/sendBitacora" component={SendBitacora} auth={auth} />
               <PrivateRoute path="/historialBitacoras" component={HistorialBitacoras} auth={auth}/>
@@ -88,7 +85,7 @@ class App extends Component {
               <PrivateRoute path="/checkpoints" component={Checkpoints} auth={auth}/>
               <PrivateRoute path="/historialAccesos" component={HistorialAccesos} auth={auth}/>
               <PrivateRoute path="/syncOffline" component={SyncOffline} auth={auth}/>
-              
+              <PrivateRoute path="/carTracking" component={CarTracking} auth={auth}/>
               
             </IonRouterOutlet>
           </IonSplitPane>

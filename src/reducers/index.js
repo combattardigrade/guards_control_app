@@ -13,6 +13,7 @@ import chatMembers from './chatMembers'
 import network from './network'
 import alert from './alert'
 import offlineData from './offlineData'
+import carTracking from './carTracking'
 import storage from 'redux-persist/lib/storage'
 
 const appReducer = combineReducers({
@@ -29,7 +30,8 @@ const appReducer = combineReducers({
     chatMembers,
     network,
     alert,
-    offlineData
+    offlineData,
+    carTracking,
 })
 
 const rootReducer = (state, action) => {    

@@ -25,6 +25,7 @@ import { toggleAlert } from '../actions/alert'
 import { saveOfflineUserLocation } from '../actions/offlineData'
 import { saveDeviceData } from '../actions/device'
 
+
 // Api
 import {
     getGuardData, sendUserLocation, getAccessLogs,
@@ -57,7 +58,7 @@ class Dashboard extends Component {
 
     ionViewWillEnter() {
         const { token, dispatch } = this.props
-
+        
         // Start watching position
         this.watchPosition()
 
@@ -127,6 +128,8 @@ class Dashboard extends Component {
         // https://stackoverflow.com/questions/21177210/phonegap-cordova-media-api-when-play-audio-from-url-ui-freeze-a-few-seconds
         // var myAudio = new window.Audio("http://genesisblock.ddns.net:3000/api/audio/2");
         // myAudio.play();
+
+       
     }
 
     watchPosition = () => {

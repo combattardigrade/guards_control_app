@@ -213,4 +213,14 @@ export function stopPanicAlert(params) {
     }) 
 }
 
+export function toggleCarTracking(params) {
+    return fetch(API + '/toggleCarTracking', {
+        method: 'POST',
+        body: JSON.stringify(params),
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    }) 
+}
 
