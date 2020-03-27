@@ -21,7 +21,7 @@ import './styles.css'
 import ChatMembersModal from './ChatMembersModal'
 
 // Api
-import { sendMessage, getCompanyActiveMembers, sendAudioMessage, API } from '../utils/api'
+import { sendMessage, getCompanyActiveMembers, sendAudioMessage, API, SOCKETS_HOST } from '../utils/api'
 
 // Actions
 import { saveNewChatMessage } from '../actions/chatMessages'
@@ -32,8 +32,8 @@ import { MediaCapture } from '@ionic-native/media-capture'
 
 const moment = require('moment')
 
-const endpoint = 'http://genesisblock.ddns.net:2053'
-const socket = socketIOClient(endpoint)
+
+const socket = socketIOClient(SOCKETS_HOST)
 
 class Chat extends Component {
     messagesEnd = React.createRef()
@@ -110,7 +110,7 @@ class Chat extends Component {
                                         room: company.id,
                                         msg: res.payload,
                                     })
-                                    
+
                                     // Save message in locaStorage
                                     dispatch(saveNewChatMessage(res.payload))
                                 }

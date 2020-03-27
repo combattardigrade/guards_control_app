@@ -36,10 +36,12 @@ class Checkpoints extends Component {
         loading: true
     }
 
-    ionViewDidEnter() {             
+    ionViewDidEnter() {
         const { routes } = this.props
         if (routes) {
-            this.setState({ checkpoints: routes[0].checkpoints, loading: false })
+            //this.setState({ checkpoints: routes[0].checkpoints, loading: false })
+            this.handleShowRoute(0)
+            
         }
     }
 
@@ -124,9 +126,9 @@ class Checkpoints extends Component {
 
 
                     <IonRow>
-                        <IonCol>
+                        <IonCol>                            
                             {
-                                location && checkpoints && points ? <RouteMap location={location} checkpoints={checkpoints} routePoints={points} /> : null
+                                location && checkpoints && points ? <RouteMap location={location} checkpoints={checkpoints} routePoints={points} /> : <div>Loading map...</div>
                             }
                         </IonCol>
                     </IonRow>
