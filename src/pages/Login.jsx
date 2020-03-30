@@ -1,17 +1,22 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { login } from '../utils/api'
+
 import { saveToken } from '../actions/auth'
 
-import { IonGrid, IonRow, IonCol, IonNote, IonItem, IonIcon, IonHeader, 
+import {
+    IonGrid, IonRow, IonCol, IonNote, IonItem, IonIcon, IonHeader,
     IonMenuButton, IonPage, IonTitle, IonToolbar, IonLabel, IonButton,
-    IonAlert
+    IonAlert, withIonLifeCycle
 } from '@ionic/react';
 import { personCircleOutline } from 'ionicons/icons'
 import ExploreContainer from '../components/ExploreContainer'
 import { save } from 'ionicons/icons'
-import { Plugins } from '@capacitor/core'
-const { Modals } = Plugins
+
+// API
+import { login, codeLogin } from '../utils/api'
+
+// Plugins
+import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 
 class Login extends Component {
 
@@ -21,12 +26,12 @@ class Login extends Component {
         alertTitle: ''
     }
 
-    componentDidMount() {        
+    ionViewDidEnter() {
 
     }
 
     showAlert = (msg, title) => {
-        this.setState({showAlert: true, alertMsg: msg, alertTitle: title})
+        this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
     }
 
     handleSubmit = async (e) => {
@@ -42,7 +47,7 @@ class Login extends Component {
 
         let response
         try {
-            response = await (await login({ username: username, password: password })).json()            
+            response = await (await login({ username: username, password: password })).json()
         }
         catch (err) {
             console.log(err)
@@ -61,9 +66,45 @@ class Login extends Component {
         this.props.history.replace('/dashboard')
     }
 
+    handleScanner = async (e) => {
+
+        e.preventDefault()
+        console.log('QR SCANNER STARTED')
+        const { dispatch } = this.props
+
+        try {
+            const data = await BarcodeScanner.scan({ preferFrontCamera: false, formats: 'QR_CODE', showTorchButton: true })
+            console.log(`Barcode data: ${data.text}`)
+            const code = data.text
+
+            codeLogin({ code: code })
+                .then(data => data.json())
+                .then(res => {
+                    console.log(res)
+                    if (res.status == 'OK') {
+                        // save jwt
+                        dispatch(saveToken(res.token))
+                        // redirect to dashboard
+                        this.props.history.replace('/dashboard')
+                    }
+                })
+                .catch(err => {
+                    console.log(err)
+                    this.showAlert('message' in err ? err.message : 'Ocurrió un error al intentar iniciar sesión con el código QR', 'Error')
+                    return
+                })
+
+        }
+        catch (err) {
+            console.log(err)
+            this.showAlert('Ocurrió un error al intentar escanear el código QR.', 'Error')
+            return
+        }
+    }
+
     goToSignup = (e) => {
-        e.preventDefault()       
-        this.props.history.replace('/signup')
+        e.preventDefault()
+        this.props.history.push('/signup')
     }
 
 
@@ -99,23 +140,23 @@ class Login extends Component {
                                     <ion-button expand="block" type="submit" className="ion-no-margin">Iniciar sesión</ion-button>
                                 </IonCol>
                             </IonRow>
-                            <IonRow>
-                                <IonCol size="12" style={{ paddingTop: '0px' }}>
-                                    <ion-button color="dark" expand="block" type="submit" className="ion-no-margin">Escanear código qr</ion-button>
-                                </IonCol>
-                            </IonRow>
-                            <IonRow style={{ marginTop: '5px' }}>
-                                <IonCol style={{ textAlign: 'center' }}>
-                                    <IonButton fill="clear" >
-                                        <IonNote onClick={this.goToSignup} style={{ fontSize: '0.8em' }}>¿No tienes cuenta? Registrate Aquí</IonNote>
-                                    </IonButton>
-                                </IonCol>
-                            </IonRow>
                         </IonGrid>
-
-
-
                     </form>
+
+                    <IonGrid style={{paddingTop: '0px'}}>
+                        <IonRow>
+                            <IonCol size="12" style={{ paddingTop: '0px' }}>
+                                <ion-button onClick={this.handleScanner} color="dark" expand="block" type="submit" className="ion-no-margin">Escanear código qr</ion-button>
+                            </IonCol>
+                        </IonRow>
+                        <IonRow >
+                            <IonCol style={{ textAlign: 'center' }}>
+                                <IonButton fill="clear" >
+                                    <IonNote onClick={this.goToSignup} style={{ fontSize: '0.8em' }}>¿No tienes cuenta? Registrate Aquí</IonNote>
+                                </IonButton>
+                            </IonCol>
+                        </IonRow>
+                    </IonGrid>
                 </ion-content>
                 <IonAlert
                     isOpen={this.state.showAlert}
@@ -124,7 +165,7 @@ class Login extends Component {
                     buttons={[{
                         text: 'OK',
                         handler: () => {
-                            this.setState({showAlert: false})
+                            this.setState({ showAlert: false })
                         }
                     }]}
                 />
@@ -139,4 +180,4 @@ function mapStateToProps() {
     }
 }
 
-export default connect(mapStateToProps)(Login)
+export default connect(mapStateToProps)(withIonLifeCycle(Login))

@@ -56,7 +56,7 @@ class Menu extends Component {
     e.preventDefault()
     const { dispatch } = this.props
     dispatch(userLogout())
-    this.goToPage('login')
+   // this.goToPage('login')
   }
 
   render() {

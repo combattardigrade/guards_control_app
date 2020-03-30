@@ -69,6 +69,7 @@ class Dashboard extends Component {
         getGuardData({ token })
             .then(data => data.json())
             .then(res => {
+                console.log(res)
                 if (res.status == 'OK') {
                     dispatch(saveGuardData(res.payload))
                 }

@@ -23,6 +23,16 @@ export function signup(params) {
     })
 }
 
+export function codeLogin(params) {
+    return fetch(API + '/codeLogin', {
+        method: 'POST',
+        body: JSON.stringify(params),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+}
+
 export function getGuardData(params) {
     return fetch(API + '/guard', {
         method: 'GET',
@@ -87,7 +97,7 @@ export function getMapRoute(params) {
     })
 }
 
-export function completeCheckpoint(params) {    
+export function completeCheckpoint(params) {
     return fetch(API + '/completeCheckpoint', {
         method: 'POST',
         body: JSON.stringify(params),
@@ -95,11 +105,11 @@ export function completeCheckpoint(params) {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + params.token
         }
-    })    
+    })
 }
 
 
-export function sendReport(params) {    
+export function sendReport(params) {
     return fetch(API + '/report', {
         method: 'POST',
         body: JSON.stringify(params),
@@ -107,7 +117,7 @@ export function sendReport(params) {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + params.token
         }
-    })    
+    })
 }
 
 export function getReports(params) {
@@ -117,7 +127,7 @@ export function getReports(params) {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + params.token
         }
-    })  
+    })
 }
 
 export function getCompanyData(params) {
@@ -127,10 +137,10 @@ export function getCompanyData(params) {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + params.token
         }
-    }) 
+    })
 }
 
-export function sendBitacora(params) {    
+export function sendBitacora(params) {
     return fetch(API + '/bitacora', {
         method: 'POST',
         body: JSON.stringify(params),
@@ -138,7 +148,7 @@ export function sendBitacora(params) {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + params.token
         }
-    })    
+    })
 }
 
 export function getBitacoras(params) {
@@ -148,10 +158,10 @@ export function getBitacoras(params) {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + params.token
         }
-    }) 
+    })
 }
 
-export function sendMessage(params) {    
+export function sendMessage(params) {
     return fetch(API + '/chat/sendMessage', {
         method: 'POST',
         body: JSON.stringify(params),
@@ -159,10 +169,10 @@ export function sendMessage(params) {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + params.token
         }
-    })    
+    })
 }
 
-export function sendAudioMessage(params) {    
+export function sendAudioMessage(params) {
     return fetch(API + '/chat/sendAudio', {
         method: 'POST',
         body: JSON.stringify(params),
@@ -170,7 +180,7 @@ export function sendAudioMessage(params) {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + params.token
         }
-    })    
+    })
 }
 
 export function getLastMessages(params) {
@@ -180,7 +190,7 @@ export function getLastMessages(params) {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + params.token
         }
-    })  
+    })
 }
 
 export function getCompanyActiveMembers(params) {
@@ -190,7 +200,7 @@ export function getCompanyActiveMembers(params) {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + params.token
         }
-    }) 
+    })
 }
 
 export function startPanicAlert(params) {
@@ -201,7 +211,7 @@ export function startPanicAlert(params) {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + params.token
         }
-    }) 
+    })
 }
 
 export function stopPanicAlert(params) {
@@ -211,7 +221,7 @@ export function stopPanicAlert(params) {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + params.token
         }
-    }) 
+    })
 }
 
 export function toggleCarTracking(params) {
@@ -222,6 +232,6 @@ export function toggleCarTracking(params) {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + params.token
         }
-    }) 
+    })
 }
 

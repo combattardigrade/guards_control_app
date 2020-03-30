@@ -3,7 +3,8 @@ import { connect } from 'react-redux'
 import { signup } from '../utils/api'
 import { saveToken } from '../actions/auth'
 
-import { IonGrid, IonRow, IonCol, IonNote, IonItem, IonIcon, 
+import {
+    IonGrid, IonRow, IonCol, IonNote, IonItem, IonIcon,
     IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar, IonLabel, IonButton,
     IonAlert
 } from '@ionic/react';
@@ -28,15 +29,15 @@ class Signup extends Component {
     }
 
     componentDidMount() {
-       const { dispatch } = this.props
+        const { dispatch } = this.props
         Device.getInfo()
             .then((info) => {
                 dispatch(saveDeviceData(info))
             })
     }
-    
+
     showAlert = (msg, title) => {
-        this.setState({showAlert: true, alertMsg: msg, alertTitle: title})
+        this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
     }
 
     handleSubmit = async (e) => {
@@ -55,28 +56,28 @@ class Signup extends Component {
         const companyCode = e.target.companyCode.value
 
         // Check all required fields
-        if (!identification || !username || !password || !rpassword || !name || !phone || !email 
-            || !address || !companyCode    
+        if (!identification || !username || !password || !rpassword || !name || !phone || !email
+            || !address || !companyCode
         ) {
             this.showAlert('Ingresa todos los campos requeridos', 'Error')
             return
         }
 
         // Check Passwords
-        if(password != rpassword) {
+        if (password != rpassword) {
             this.showAlert('Las contraseñas ingresadas no coinciden', 'Error')
             return
         }
 
         // Check Email
-        if(this.validateEmail(email) == false) {
+        if (this.validateEmail(email) == false) {
             this.showAlert('Ingresa un email válido', 'Error')
             return
         }
 
         let response
         try {
-            response = await signup({ 
+            response = await signup({
                 identification,
                 username,
                 password,
@@ -90,7 +91,7 @@ class Signup extends Component {
                 battery: device && device.batteryLevel
             })
             response = await response.json()
-            
+
         }
         catch (err) {
             console.log(err)
@@ -187,19 +188,18 @@ class Signup extends Component {
                                     <ion-button expand="block" type="submit" className="ion-no-margin">Registrar Cuenta</ion-button>
                                 </IonCol>
                             </IonRow>
-                            
-                            <IonRow style={{ marginTop: '5px' }}>
-                                <IonCol style={{ textAlign: 'center' }}>
-                                    <IonButton fill="clear" >
-                                        <IonNote onClick={this.goToLogin} style={{ fontSize: '0.8em' }}>¿Ya tienes cuenta? Inicia sesión Aquí</IonNote>
-                                    </IonButton>
-                                </IonCol>
-                            </IonRow>
                         </IonGrid>
-
-
-
                     </form>
+
+                    <IonGrid>
+                        <IonRow style={{ marginTop: '5px' }}>
+                            <IonCol style={{ textAlign: 'center' }}>
+                                <IonButton fill="clear" >
+                                    <IonNote onClick={this.goToLogin} style={{ fontSize: '0.8em' }}>¿Ya tienes cuenta? Inicia sesión Aquí</IonNote>
+                                </IonButton>
+                            </IonCol>
+                        </IonRow>
+                    </IonGrid>
                 </ion-content>
                 <IonAlert
                     isOpen={this.state.showAlert}
@@ -208,7 +208,7 @@ class Signup extends Component {
                     buttons={[{
                         text: 'OK',
                         handler: () => {
-                            this.setState({showAlert: false})
+                            this.setState({ showAlert: false })
                         }
                     }]}
                 />
