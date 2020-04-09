@@ -12,7 +12,7 @@ import {
 import { Redirect, Route } from 'react-router-dom';
 import {
     addOutline, peopleOutline, hammerOutline, documentTextOutline, cameraOutline,
-    documentAttachOutline, chevronBackOutline, searchOutline, imagesOutline
+    documentAttachOutline, chevronBackOutline, searchOutline, imagesOutline, closeCircle
 } from 'ionicons/icons'
 
 // Styles
@@ -42,7 +42,7 @@ class SendBitacora extends Component {
         alertDescription: '',
         activitiesDescription: '',
         incidentsDescription: '',
-        bitacoraPhoto: '',
+        bitacoraPhotos: [],
         showPhotoPreview: false,
         showSentMessage: false,
         showSuccessModal: false,
@@ -69,7 +69,7 @@ class SendBitacora extends Component {
         e.preventDefault()
         console.log('SEND BITACORA BTN CLICKED')
         const { token, network, dispatch } = this.props
-        const { activitiesDescription, incidentsDescription, bitacoraPhoto } = this.state
+        const { activitiesDescription, incidentsDescription, bitacoraPhotos } = this.state
 
         if (!activitiesDescription || !incidentsDescription) {
             this.showAlert('Ingresa todos los campos requeridos', 'Error')
@@ -81,7 +81,7 @@ class SendBitacora extends Component {
         const params = {
             resumenActividades: activitiesDescription,
             resumenIncidencias: incidentsDescription,
-            photoData: bitacoraPhoto,
+            photoData: bitacoraPhotos,
             token,
         }
         if (network && network.connected == true) {
@@ -92,7 +92,7 @@ class SendBitacora extends Component {
                     if (res.status == 'OK') {
                         // Clear bitacora data
                         this.setState({
-                            photoData: '',
+                            bitacoraPhotos: [],
                             showPhotoPreview: false,
                             activitiesDescription: '',
                             incidentsDescription: '',
@@ -116,13 +116,13 @@ class SendBitacora extends Component {
             dispatch(saveOfflineBitacora(params))
             // Clear bitacora data
             this.setState({
-                photoData: '',
+                bitacoraPhotos: [],
                 showPhotoPreview: false,
                 activitiesDescription: '',
                 incidentsDescription: '',
                 loading: false,
                 showSentMessage: true
-            })            
+            })
             return
         }
     }
@@ -130,7 +130,7 @@ class SendBitacora extends Component {
     handleTakePhotoBtn = async (e) => {
 
         e.preventDefault()
-        console.log('TAKE PHOTO BTN CLICKed')
+        console.log('TAKE PHOTO BTN CLICKED')
 
         const options = {
             allowEditing: false,
@@ -142,7 +142,7 @@ class SendBitacora extends Component {
         }
         try {
             const photoData = await Camera.getPhoto(options)
-            this.setState({ bitacoraPhoto: photoData.base64String, showPhotoPreview: true })
+            this.setState({ bitacoraPhotos: [...this.state.bitacoraPhotos, photoData.base64String], showPhotoPreview: true })
         }
         catch (err) {
             console.log(err)
@@ -153,7 +153,7 @@ class SendBitacora extends Component {
 
     handleGalleryBtn = async (e) => {
         e.preventDefault()
-        console.log('GALLERY BTN CLICK')
+        console.log('GALLERY BTN CLICKED')
 
         const options = {
             allowEditing: false,
@@ -164,7 +164,7 @@ class SendBitacora extends Component {
 
         try {
             const photoData = await Camera.getPhoto(options)
-            this.setState({ bitacoraPhoto: photoData.base64String, showPhotoPreview: true })
+            this.setState({ bitacoraPhotos: [...this.state.bitacoraPhotos, photoData.base64String], showPhotoPreview: true })
         }
         catch (err) {
             console.log(err)
@@ -173,12 +173,19 @@ class SendBitacora extends Component {
         }
     }
 
+    handleDeletePhoto = (photoIndex) => {
+        const { bitacoraPhotos } = this.state
+        this.setState({
+            bitacoraPhotos: bitacoraPhotos.filter((p, i) => i != photoIndex)
+        })
+    }
+
     showAlert = (msg, title) => {
         this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
     }
 
     render() {
-        const { showPhotoPreview, bitacoraPhoto, loading, showSentMessage, activitiesDescription, incidentsDescription } = this.state
+        const { showPhotoPreview, bitacoraPhotos, loading, showSentMessage, activitiesDescription, incidentsDescription } = this.state
 
         return (
             <IonPage>
@@ -230,32 +237,43 @@ class SendBitacora extends Component {
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>
+                                <IonItem lines="none">
+                                    <IonGrid>
+                                        <IonRow>
+                                            <IonCol>
+                                                <IonButton onClick={this.handleTakePhotoBtn} color="light" expand="full"><IonIcon icon={cameraOutline}></IonIcon> Tomar Foto</IonButton>
+                                            </IonCol>
+                                            <IonCol>
+                                                <IonButton onClick={this.handleGalleryBtn} color="light" expand="full"><IonIcon icon={imagesOutline}></IonIcon> Galería</IonButton>
+                                            </IonCol>
+                                        </IonRow>
+                                    </IonGrid>
+                                </IonItem>
+
                                 {
-                                    showPhotoPreview == true && bitacoraPhoto
+                                    showPhotoPreview == true && bitacoraPhotos.length > 0
                                         ?
                                         <IonItem lines="none">
                                             <IonGrid>
                                                 <IonRow>
-                                                    <IonCol >
-                                                        <IonLabel>Archivos adjuntos:</IonLabel>
-                                                        <img style={{ height: '120px', width: '120px', marginTop: '10px', borderRadius: '5px' }} src={`data:image/jpeg;base64,${bitacoraPhoto}`} />
+                                                    <IonCol>
+                                                        <IonLabel className="dataTitle">Archivos adjuntos:</IonLabel>
                                                     </IonCol>
+                                                </IonRow>
+                                                <IonRow>
+                                                    {
+                                                        bitacoraPhotos.map((photo, i) => (
+                                                            <IonCol size="3" key={i}>                                                                
+                                                                <IonButton onClick={e => { e.preventDefault(); this.handleDeletePhoto(i) }} color="danger" style={{ position: 'absolute', right: '0' }} fill="clear"><IonIcon icon={closeCircle}></IonIcon></IonButton>
+                                                                <img style={{ height: '100%', width: '100%', marginTop: '10px', borderRadius: '5px' }} src={`data:image/jpeg;base64,${photo}`} />
+                                                            </IonCol>
+                                                        ))
+                                                    }
                                                 </IonRow>
                                             </IonGrid>
                                         </IonItem>
                                         :
-                                        <IonItem lines="none">
-                                            <IonGrid>
-                                                <IonRow>
-                                                    <IonCol>
-                                                        <IonButton onClick={this.handleTakePhotoBtn} color="light" expand="full"><IonIcon icon={cameraOutline}></IonIcon> Tomar Foto</IonButton>
-                                                    </IonCol>
-                                                    <IonCol>
-                                                        <IonButton onClick={this.handleGalleryBtn} color="light" expand="full"><IonIcon icon={imagesOutline}></IonIcon> Galería</IonButton>
-                                                    </IonCol>
-                                                </IonRow>
-                                            </IonGrid>
-                                        </IonItem>
+                                        null
                                 }
                                 <IonGrid style={{ bottom: '10px', position: 'absolute', width: "98%" }}>
                                     <IonRow>
@@ -270,7 +288,7 @@ class SendBitacora extends Component {
                                 <IonSpinner name="crescent" style={{ textAlign: 'center' }} />
                             </div>
                     }
-                    
+
                     <IonAlert
                         isOpen={this.state.showAlert}
                         header={this.state.alertTitle}
