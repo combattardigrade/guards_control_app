@@ -125,7 +125,7 @@ class SendReport extends Component {
     handleTakePhotoBtn = async (e) => {
 
         e.preventDefault()
-        console.log('TAKE PHOTO BTN CLICKed')
+        console.log('TAKE PHOTO BTN CLICKED')
 
         const options = {
             allowEditing: false,
@@ -148,7 +148,7 @@ class SendReport extends Component {
 
     handleGalleryBtn = async (e) => {
         e.preventDefault()
-        console.log('GALLERY BTN CLICK')
+        console.log('GALLERY BTN CLICKED')
 
         const options = {
             allowEditing: false,

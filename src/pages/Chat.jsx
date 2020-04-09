@@ -6,12 +6,12 @@ import {
     IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar,
     IonItem, IonLabel, IonRefresher, IonRefresherContent, IonGrid, IonRow,
     IonCol, IonTabs, IonTab, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon,
-    IonFab, IonFabButton, IonModal, IonButton, IonBackButton, IonInput, IonNote, withIonLifeCycle
+    IonFab, IonFabButton, IonModal, IonButton, IonBackButton, IonInput, IonNote, withIonLifeCycle, IonAlert
 } from '@ionic/react';
 import { Redirect, Route } from 'react-router-dom';
 import {
     addOutline, peopleOutline, hammerOutline, documentTextOutline, cameraOutline,
-    documentAttachOutline, chevronBackOutline, searchOutline, micOutline, sendOutline
+    documentAttachOutline, chevronBackOutline, searchOutline, micOutline, sendOutline, imageOutline
 } from 'ionicons/icons'
 
 // Styles
@@ -21,7 +21,7 @@ import './styles.css'
 import ChatMembersModal from './ChatMembersModal'
 
 // Api
-import { sendMessage, getCompanyActiveMembers, sendAudioMessage, API, SOCKETS_HOST } from '../utils/api'
+import { sendMessage, getCompanyActiveMembers, sendAudioMessage, sendImageMessage, API, SOCKETS_HOST } from '../utils/api'
 
 // Actions
 import { saveNewChatMessage } from '../actions/chatMessages'
@@ -29,6 +29,9 @@ import { saveChatMembers } from '../actions/chatMembers'
 
 // Plugins
 import { MediaCapture } from '@ionic-native/media-capture'
+import { PhotoViewer } from '@ionic-native/photo-viewer';
+import { Plugins } from '@capacitor/core'
+const { Camera } = Plugins
 
 const moment = require('moment')
 
@@ -43,6 +46,9 @@ class Chat extends Component {
         textMsg: '',
         showChatMembersModal: false,
         goBack: false,
+        showAlert: false,
+        alertTitle: '',
+        alertMsg: ''
     }
 
     handleBackBtn = () => {
@@ -126,8 +132,85 @@ class Chat extends Component {
             )
     }
 
+    handleSendPhoto = async (e) => {
+        e.preventDefault()
+        console.log('TAKE PHOTO BTN CLICKED')
+
+        const { company, token, dispatch } = this.props
+
+        const options = {
+            allowEditing: false,
+            quality: 10,
+            resultType: 'Base64',
+            saveGallery: true,
+            source: 'CAMERA',
+            direction: 'REAR'
+        }
+
+        // Get Photo
+        const photoData = await Camera.getPhoto(options)
+
+        // Send photo to server
+        sendImageMessage({ photoData: photoData.base64String, token })
+            .then(data => data.json())
+            .then(res => {
+                if (res.status == 'OK') {
+                    console.log(res)
+
+                    // Send audio message through sockets                                    
+                    socket.emit('message', {
+                        room: company.id,
+                        msg: res.payload,
+                    })
+
+                    // Save message in locaStorage
+                    dispatch(saveNewChatMessage(res.payload))
+                }
+            })
+    }
+
+    handleSendGallery = async (e) => {
+        e.preventDefault()
+        console.log('GALLERY BTN CLICKED')
+
+        const { company, token, dispatch } = this.props
+
+        const options = {
+            allowEditing: false,
+            quality: 10,
+            resultType: 'Base64',
+            source: 'PHOTOS'
+        }
+
+        // Get Photo
+        const photoData = await Camera.getPhoto(options)
+
+        // Send photo to server
+        sendImageMessage({ photoData: photoData.base64String, token })
+            .then(data => data.json())
+            .then(res => {
+                if (res.status == 'OK') {
+                    console.log(res)
+
+                    // Send audio message through sockets                                    
+                    socket.emit('message', {
+                        room: company.id,
+                        msg: res.payload,
+                    })
+
+                    // Save message in locaStorage
+                    dispatch(saveNewChatMessage(res.payload))
+                }
+            })
+
+    }
+
+    showAlert = (msg, title) => {
+        this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
+    }
+
     ionViewWillEnter() {
-        const { company, dispatch, token } = this.props
+        const { chatMessages, company, dispatch, token } = this.props
 
         // Get Chat Members
         getCompanyActiveMembers({ companyId: company.id, token })
@@ -156,19 +239,25 @@ class Chat extends Component {
             dispatch(saveNewChatMessage(data.msg))
         })
 
-        // Scroll to bottom
-        setTimeout(() => {
-            this.scrollToBottom()
-        }, 500)
+        if (chatMessages && Object.values(chatMessages).length > 0) {
+            // Scroll to bottom
+            setTimeout(() => {
+                this.scrollToBottom()
+            }, 500)
+        }
+
     }
 
     componentDidUpdate() {
+        const { chatMessages } = this.props
         // Do not scroll when going back to previous page
         if (this.state.goBack == true) return
-        // Scroll to bottom
-        setTimeout(() => {
-            this.scrollToBottom()
-        }, 500)
+        if (chatMessages && Object.values(chatMessages).length > 0) {
+            // Scroll to bottom
+            setTimeout(() => {
+                this.scrollToBottom()
+            }, 500)
+        }
     }
 
     scrollToBottom = () => {
@@ -205,7 +294,7 @@ class Chat extends Component {
                         chatMessages
                             ?
                             Object.values(chatMessages).map((message, index) => {
-                                if (message.userId == guard.id) {
+                                if (message.userId == guard.id) { // sent
                                     if (message.messageType == 'text') {
                                         return (
                                             <Fragment key={index}>
@@ -236,8 +325,23 @@ class Chat extends Component {
                                                 </IonItem>
                                             </Fragment>
                                         )
+                                    } else if (message.messageType == 'image') {
+                                        return (
+                                            <Fragment key={index}>
+                                                <IonItem className={index + 1 == totalMessages && 'lastMessage'} lines="none" ref={index + 1 == totalMessages && (this.messagesEnd)}>
+                                                    <IonGrid>
+                                                        <IonRow>
+                                                            <IonCol size="8" offset="4" style={{ borderRadius: '5px', padding: '5px 0px', textAlign: 'right', }}>
+                                                            <img onClick={ e => { e.preventDefault(); PhotoViewer.show(API + '/photo/' + message.photoId); }} style={{width:'50%'}} src={API + '/photo/' + message.photoId} />
+                                                                <IonLabel style={{ whiteSpace: 'normal', fontSize: '.6em', marginTop: '5px', textAlign: 'right' }}>{moment(message.createdAt).fromNow()} </IonLabel>
+                                                            </IonCol>
+                                                        </IonRow>
+                                                    </IonGrid>
+                                                </IonItem>
+                                            </Fragment>
+                                        )
                                     }
-                                } else {
+                                } else { // received
                                     if (message.messageType == 'text') {
                                         return (
                                             <Fragment key={index}>
@@ -268,6 +372,21 @@ class Chat extends Component {
                                                 </IonItem>
                                             </Fragment>
                                         )
+                                    } else if (message.messageType == 'image') {
+                                        return (
+                                            <Fragment key={index}>
+                                                <IonItem className={index + 1 == totalMessages && 'lastMessage'} lines="none" ref={index + 1 == totalMessages && (this.messagesEnd)}>
+                                                    <IonGrid>
+                                                        <IonRow>
+                                                            <IonCol size="8" style={{ borderRadius: '5px', padding: '5px 0px', textAlign: 'left' }}>
+                                                                <img onClick={ e => { e.preventDefault(); PhotoViewer.show(API + '/photo/' + message.photoId); }} style={{width:'50%'}} src={API + '/photo/' + message.photoId} />
+                                                                <IonLabel style={{ whiteSpace: 'normal', fontSize: '.6em', marginTop: '5px' }}>{'user' in message && message.user.username} • {moment(message.createdAt).fromNow()} </IonLabel>
+                                                            </IonCol>
+                                                        </IonRow>
+                                                    </IonGrid>
+                                                </IonItem>
+                                            </Fragment>
+                                        )
                                     }
                                 }
                             })
@@ -276,37 +395,66 @@ class Chat extends Component {
                     }
 
 
-                    <IonItem color="light" lines="none" style={{ position: 'fixed', bottom: '0px', borderTop: '1px solid #dedede', width: '100%', zIndex: '20' }}>
-                        <IonGrid>
-                            <IonRow>
 
-                                <IonCol size="11">
-                                    <IonInput className="chatInput" onIonChange={this.handleTextMsgChange} placeholder="Ingresa tu mensaje..." value={textMsg} style={{ background: 'white', border: '1px solid rgb(214, 214, 216)' }}></IonInput>
-                                </IonCol>
-                                <IonCol size="1" style={{ padding: '0px', margin: '0px 0px 0px 0px', }}>
+                    <IonGrid style={{ backgroundColor: '#f4f5f8', position: 'fixed', bottom: '0px', borderTop: '1px solid #dedede', width: '100%', zIndex: '20' }}>
+                        <IonRow style={{ margin: '0px', padding: '0px', width: '100%' }}>
 
-                                    {
-                                        isTyping == true
-                                            ?
-                                            <IonButton onClick={this.handleSendTextMsg} fill="clear" style={{ padding: '0px', margin: '0px', height: '100%' }}>
-                                                <IonIcon style={{ fontSize: '1.7em' }} icon={sendOutline} ></IonIcon>
+                            <IonCol size={isTyping === true ? '10' : '9'}>
+                                <IonInput className="chatInput" onIonChange={this.handleTextMsgChange} placeholder="Ingresa tu mensaje..." value={textMsg} style={{ background: 'white', border: '1px solid rgb(214, 214, 216)' }}></IonInput>
+                            </IonCol>
+
+
+
+                            {
+                                isTyping == true
+                                    ?
+                                    <IonCol size="2" style={{ padding: '0px', margin: '0px 0px 0px 0px', }}>
+                                        <IonButton onClick={this.handleSendTextMsg} fill="clear" style={{ padding: '0px', margin: '0px', height: '100%', position: 'relative' }}>
+                                            <IonIcon style={{}} icon={sendOutline} ></IonIcon>
+                                        </IonButton>
+                                    </IonCol>
+                                    :
+                                    <Fragment>
+                                        <IonCol size="1" style={{ padding: '0px', margin: '0px', }}>
+                                            <IonButton onClick={this.handleSendGallery} fill="clear" style={{ padding: '0px', margin: '0px', height: '100%', left: '-15px', position: 'relative' }}>
+                                                <IonIcon style={{}} icon={imageOutline} ></IonIcon>
                                             </IonButton>
-                                            :
-                                            <IonButton onClick={this.handleRecAudioMsg} fill="clear" style={{ padding: '0px', margin: '0px', height: '100%' }}>
-                                                <IonIcon style={{ fontSize: '1.7em' }} icon={micOutline} ></IonIcon>
+                                        </IonCol>
+                                        <IonCol size="1" style={{ padding: '0px', margin: '0px', }}>
+                                            <IonButton onClick={this.handleSendPhoto} fill="clear" style={{ padding: '0px', margin: '0px', height: '100%', left: '-12px', position: 'relative' }}>
+                                                <IonIcon style={{}} icon={cameraOutline} ></IonIcon>
                                             </IonButton>
-                                    }
+                                        </IonCol>
+                                        <IonCol size="1" style={{ padding: '0px', margin: '0px', }}>
+                                            <IonButton onClick={this.handleRecAudioMsg} fill="clear" style={{ padding: '0px', margin: '0px', height: '100%', left: '-10px', position: 'relative' }}>
+                                                <IonIcon style={{}} icon={micOutline} ></IonIcon>
+                                            </IonButton>
+                                        </IonCol>
+                                    </Fragment>
+                            }
 
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </IonItem>
+
+                        </IonRow>
+                    </IonGrid>
+
 
                     <ChatMembersModal
                         chatMembers={chatMembers}
 
                         showChatMembersModal={this.state.showChatMembersModal}
                         handleToggleChatMembersModal={this.handleToggleChatMembersModal}
+                    />
+
+                    <IonAlert
+                        isOpen={this.state.showAlert}
+                        header={this.state.alertTitle}
+                        message={this.state.alertMsg}
+                        buttons={[{
+                            text: 'OK',
+                            handler: () => {
+                                this.setState({ showAlert: false })
+                            }
+                        }]}
                     />
                 </IonContent>
             </IonPage >

@@ -183,6 +183,17 @@ export function sendAudioMessage(params) {
     })
 }
 
+export function sendImageMessage(params) {
+    return fetch(API + '/chat/sendImage', {
+        method: 'POST',
+        body: JSON.stringify(params),
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    })
+}
+
 export function getLastMessages(params) {
     return fetch(API + '/chat/getMessages/' + params.page, {
         method: 'GET',

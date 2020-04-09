@@ -27,7 +27,12 @@ class Login extends Component {
     }
 
     ionViewDidEnter() {
+        const { token } = this.props
 
+        if(token) {
+            this.props.history.replace('/dashboard')
+            return
+        }
     }
 
     showAlert = (msg, title) => {
@@ -174,9 +179,9 @@ class Login extends Component {
     }
 }
 
-function mapStateToProps() {
+function mapStateToProps({ auth }) {
     return {
-
+        token: auth && auth.token,
     }
 }
 
