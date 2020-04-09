@@ -215,6 +215,7 @@ export function getCompanyActiveMembers(params) {
 }
 
 export function startPanicAlert(params) {
+    console.log(params)
     return fetch(API + '/alert', {
         method: 'POST',
         body: JSON.stringify(params),
@@ -228,6 +229,16 @@ export function startPanicAlert(params) {
 export function stopPanicAlert(params) {
     return fetch(API + '/alert', {
         method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    })
+}
+
+export function getAllPanicAlerts(params) {
+    return fetch(API + '/alerts/ACTIVE', {
+        method: 'GET',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + params.token

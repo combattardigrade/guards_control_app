@@ -30,7 +30,7 @@ import { saveDeviceData } from '../actions/device'
 import {
     getGuardData, sendUserLocation, getAccessLogs,
     getRoutesByStatus, getReports, getBitacoras,
-    getLastMessages, startPanicAlert, stopPanicAlert
+    getLastMessages, startPanicAlert, stopPanicAlert, getAllPanicAlerts
 } from '../utils/api'
 
 // Styles
@@ -58,7 +58,7 @@ class Dashboard extends Component {
 
     ionViewWillEnter() {
         const { token, dispatch } = this.props
-        
+
         // Start watching position
         this.watchPosition()
 
@@ -129,8 +129,9 @@ class Dashboard extends Component {
         // https://stackoverflow.com/questions/21177210/phonegap-cordova-media-api-when-play-audio-from-url-ui-freeze-a-few-seconds
         // var myAudio = new window.Audio("http://genesisblock.ddns.net:3000/api/audio/2");
         // myAudio.play();
-
-       
+        
+        // Watch Alerts
+        this.watchAlerts()     
     }
 
     watchPosition = () => {
@@ -188,6 +189,21 @@ class Dashboard extends Component {
             // Save network status
             dispatch(saveNetworkData(status))
         })
+    }
+
+    watchAlerts = async () => {
+        const { token } = this.props
+        getAllPanicAlerts({ token })
+            .then(data => data.json())
+            .then((res) => {
+                if (res.status === 'OK') {
+                    
+                    if(res.payload.length > 0) {
+                        this.setState({showPanicToast: true})
+                    }
+                }
+            })
+        setTimeout(this.watchAlerts, 5000)
     }
 
     handleWorkOrderClick = async (wonum) => {
@@ -462,7 +478,7 @@ class Dashboard extends Component {
 };
 
 
-function mapStateToProps({ auth, guard, network, alert, offlineData, device }) {
+function mapStateToProps({ auth, guard, network, alert, offlineData, device, location }) {
     return {
         token: auth.token,
         guard: guard && guard,
@@ -470,7 +486,8 @@ function mapStateToProps({ auth, guard, network, alert, offlineData, device }) {
         network,
         panicAlert: alert,
         device,
-        offlineData
+        offlineData,
+        location
     }
 }
 

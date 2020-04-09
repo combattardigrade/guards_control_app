@@ -14,9 +14,15 @@ import {
     closeOutline
 } from 'ionicons/icons'
 
+// Styles
 import './styles.css'
 
+// Plugins
+import { PhotoViewer } from '@ionic-native/photo-viewer'
+
+// API
 import { API } from '../utils/api'
+
 const moment = require('moment')
 
 class BitacoraModal extends Component {
@@ -80,8 +86,20 @@ class BitacoraModal extends Component {
                             <IonRow>
                                 <IonCol size="12">
                                     <IonLabel className="dataTitle">Archivos adjuntos:</IonLabel>
-                                    <img style={{ height: '120px', width: '120px', marginTop: '10px', borderRadius: '5px' }} src={`${API}/photo/${bitacora.photoId}`} />                                    
+                                    
                                 </IonCol>
+                            </IonRow>
+                            <IonRow>
+                                {
+                                    bitacora && 'photos' in bitacora && bitacora.photos.length > 0
+                                        ?
+                                        bitacora.photos.map((photo, i) => (
+                                            <IonCol size="3" key={i}>
+                                                <img onClick={ e => { e.preventDefault(); PhotoViewer.show(API + '/photo/' + photo.id); }} style={{ height: '100%', width: '100%', marginTop: '10px', borderRadius: '5px' }} src={`${API}/photo/${photo.id}`} />
+                                            </IonCol>
+                                        ))
+                                        : null
+                                }
                             </IonRow>
                         </IonGrid>
                     </IonItem>

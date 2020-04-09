@@ -14,7 +14,12 @@ import {
     closeOutline
 } from 'ionicons/icons'
 
+// Plugins
+import { PhotoViewer } from '@ionic-native/photo-viewer'
+
+// API
 import { API } from '../utils/api'
+
 const moment = require('moment')
 
 class ReportModal extends Component {
@@ -22,7 +27,7 @@ class ReportModal extends Component {
     render() {
 
         const { report, base64Img, showReportModal, handleToggleReportModal } = this.props
-        
+
         console.log(report)
 
         return (
@@ -86,11 +91,21 @@ class ReportModal extends Component {
                     <IonItem>
                         <IonGrid>
                             <IonRow>
-                                <IonCol size="12">
+                                <IonCol>
                                     <IonLabel className="dataTitle">Archivos adjuntos:</IonLabel>
-                                    <img style={{ height: '120px', width: '120px', marginTop: '10px', borderRadius: '5px' }} src={`${API}/photo/${report.photoId}`} />
-                                    {/* <img style={{ height: '120px', width: '120px', marginTop: '10px', borderRadius: '5px' }} src={`data:image/jpeg;base64,${base64Img}`} /> */}
                                 </IonCol>
+                            </IonRow>   
+                            <IonRow>
+                                {
+                                    report && 'photos' in report && report.photos.length > 0
+                                        ?
+                                        report.photos.map((photo, i) => (
+                                            <IonCol size="3" key={i}>
+                                                <img onClick={ e => { e.preventDefault(); PhotoViewer.show(API + '/photo/' + photo.id); }} style={{ height: '100%', width: '100%', marginTop: '10px', borderRadius: '5px' }} src={`${API}/photo/${photo.id}`} />
+                                            </IonCol>
+                                        ))
+                                        : null
+                                }
                             </IonRow>
                         </IonGrid>
                     </IonItem>
