@@ -12,7 +12,7 @@ import {
 import { Redirect, Route } from 'react-router-dom';
 import {
     addOutline, peopleOutline, hammerOutline, documentTextOutline, cameraOutline,
-    documentAttachOutline, chevronBackOutline, searchOutline, imagesOutline
+    documentAttachOutline, chevronBackOutline, searchOutline, imagesOutline, closeCircle
 } from 'ionicons/icons'
 
 // Styles
@@ -40,7 +40,7 @@ class SendReport extends Component {
         alertDescription: '',
         reportTitle: '',
         reportDescription: '',
-        reportPhoto: '',
+        reportPhotos: [],
         showPhotoPreview: false,
         showSentMessage: false
     }
@@ -61,7 +61,7 @@ class SendReport extends Component {
         e.preventDefault()
         console.log('SEND REPORT BTN CLICKED')
         const { token, location, network, dispatch } = this.props
-        const { reportTitle, reportDescription, reportPhoto } = this.state
+        const { reportTitle, reportDescription, reportPhotos } = this.state
 
         if (!reportTitle || !reportDescription) {
             this.showAlert('Ingresa todos los campos requeridos', 'Error')
@@ -75,7 +75,7 @@ class SendReport extends Component {
             description: reportDescription,
             lat: location ? location.lat : '0.0',
             lng: location ? location.lng : '0.0',
-            photoData: reportPhoto,
+            photoData: reportPhotos,
             token,
         }
 
@@ -87,7 +87,7 @@ class SendReport extends Component {
                     if (res.status == 'OK') {
                         // Clear report data
                         this.setState({
-                            photoData: '',
+                            reportPhotos: '',
                             showPhotoPreview: false,
                             reportTitle: '',
                             reportDescription: '',
@@ -111,7 +111,7 @@ class SendReport extends Component {
             dispatch(saveOfflineReport(params))
             // Clear report data
             this.setState({
-                photoData: '',
+                reportPhotos: '',
                 showPhotoPreview: false,
                 reportTitle: '',
                 reportDescription: '',
@@ -137,7 +137,7 @@ class SendReport extends Component {
         }
         try {
             const photoData = await Camera.getPhoto(options)
-            this.setState({ reportPhoto: photoData.base64String, showPhotoPreview: true })
+            this.setState({ reportPhotos: [...this.state.reportPhotos, photoData.base64String], showPhotoPreview: true })
         }
         catch (err) {
             console.log(err)
@@ -159,13 +159,20 @@ class SendReport extends Component {
 
         try {
             const photoData = await Camera.getPhoto(options)
-            this.setState({ reportPhoto: photoData.base64String, showPhotoPreview: true })
+            this.setState({ reportPhotos: [...this.state.reportPhotos, photoData.base64String], showPhotoPreview: true })
         }
         catch (err) {
             console.log(err)
             this.showAlert('Ocurrió un error al intentar añadir una foto', 'Error')
             return
         }
+    }
+
+    handleDeletePhoto = (photoIndex) => {
+        const { reportPhotos } = this.state
+        this.setState({
+            reportPhotos: reportPhotos.filter((p, i) => i != photoIndex)
+        })
     }
 
     showAlert = (msg, title) => {
@@ -175,7 +182,7 @@ class SendReport extends Component {
     render() {
 
         const { location } = this.props
-        const { showPhotoPreview, reportPhoto, reportTitle, reportDescription, loading, showSentMessage } = this.state
+        const { showPhotoPreview, reportPhotos, reportTitle, reportDescription, loading, showSentMessage } = this.state
 
         return (
             <IonPage>
@@ -226,32 +233,43 @@ class SendReport extends Component {
                                     </IonGrid>
                                 </IonItem>
 
+                                <IonItem lines="none">
+                                    <IonGrid>
+                                        <IonRow>
+                                            <IonCol>
+                                                <IonButton onClick={this.handleTakePhotoBtn} color="light" expand="full"><IonIcon icon={cameraOutline}></IonIcon> Tomar Foto</IonButton>
+                                            </IonCol>
+                                            <IonCol>
+                                                <IonButton onClick={this.handleGalleryBtn} color="light" expand="full"><IonIcon icon={imagesOutline}></IonIcon> Galería</IonButton>
+                                            </IonCol>
+                                        </IonRow>
+                                    </IonGrid>
+                                </IonItem>
+
                                 {
-                                    showPhotoPreview == true && reportPhoto
-                                        ?
+                                    showPhotoPreview == true && reportPhotos.length > 0
+                                        ?                                        
                                         <IonItem lines="none">
                                             <IonGrid>
                                                 <IonRow>
-                                                    <IonCol >
-                                                        <IonLabel>Archivos adjuntos:</IonLabel>
-                                                        <img style={{ height: '120px', width: '120px', marginTop: '10px', borderRadius: '5px' }} src={`data:image/jpeg;base64,${reportPhoto}`} />
+                                                    <IonCol>
+                                                        <IonLabel className="dataTitle">Archivos adjuntos:</IonLabel>
                                                     </IonCol>
+                                                </IonRow>
+                                                <IonRow>
+                                                    {
+                                                        reportPhotos.map((photo, i) => (
+                                                            <IonCol size="3" key={i}>
+                                                                <IonButton onClick={e => { e.preventDefault(); this.handleDeletePhoto(i) }} color="danger" style={{ position: 'absolute', right: '0' }} fill="clear"><IonIcon icon={closeCircle}></IonIcon></IonButton>
+                                                                <img style={{ height: '100%', width: '100%', marginTop: '10px', borderRadius: '5px' }} src={`data:image/jpeg;base64,${photo}`} />
+                                                            </IonCol>
+                                                        ))
+                                                    }
                                                 </IonRow>
                                             </IonGrid>
                                         </IonItem>
                                         :
-                                        <IonItem lines="none">
-                                            <IonGrid>
-                                                <IonRow>
-                                                    <IonCol>
-                                                        <IonButton onClick={this.handleTakePhotoBtn} color="light" expand="full"><IonIcon icon={cameraOutline}></IonIcon> Tomar Foto</IonButton>
-                                                    </IonCol>
-                                                    <IonCol>
-                                                        <IonButton onClick={this.handleGalleryBtn} color="light" expand="full"><IonIcon icon={imagesOutline}></IonIcon> Galería</IonButton>
-                                                    </IonCol>
-                                                </IonRow>
-                                            </IonGrid>
-                                        </IonItem>
+                                        null
                                 }
                                 <IonGrid style={{ bottom: '10px', position: 'absolute', width: "98%" }}>
                                     <IonRow>
