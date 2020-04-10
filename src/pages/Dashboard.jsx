@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import socketIOClient from 'socket.io-client'
 import {
     IonButtons, IonButton, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle,
     IonToolbar, IonIcon, IonItem, IonLabel,
@@ -24,13 +25,14 @@ import { saveNetworkData } from '../actions/network'
 import { toggleAlert } from '../actions/alert'
 import { saveOfflineUserLocation } from '../actions/offlineData'
 import { saveDeviceData } from '../actions/device'
-
+import { saveNewChatMessage } from '../actions/chatMessages'
+import { saveLastChatVisitTime } from '../actions/notifications'
 
 // Api
 import {
     getGuardData, sendUserLocation, getAccessLogs,
     getRoutesByStatus, getReports, getBitacoras,
-    getLastMessages, startPanicAlert, stopPanicAlert, getAllPanicAlerts
+    getLastMessages, startPanicAlert, stopPanicAlert, getAllPanicAlerts, SOCKETS_HOST
 } from '../utils/api'
 
 // Styles
@@ -45,6 +47,7 @@ import { Plugins } from '@capacitor/core';
 const { Device } = Plugins;
 const { Network } = Plugins;
 
+const socket = socketIOClient(SOCKETS_HOST)
 
 class Dashboard extends Component {
 
@@ -57,7 +60,7 @@ class Dashboard extends Component {
     }
 
     ionViewWillEnter() {
-        const { token, dispatch } = this.props
+        const { token, company, dispatch } = this.props
 
         // Start watching position
         this.watchPosition()
@@ -129,9 +132,28 @@ class Dashboard extends Component {
         // https://stackoverflow.com/questions/21177210/phonegap-cordova-media-api-when-play-audio-from-url-ui-freeze-a-few-seconds
         // var myAudio = new window.Audio("http://genesisblock.ddns.net:3000/api/audio/2");
         // myAudio.play();
-        
+
         // Watch Alerts
-        this.watchAlerts()     
+        this.watchAlerts()
+
+        socket.on('connect', () => {
+            console.log(`Connection to sockets server stablished correctly...`)
+            // Join company's chat room
+            socket.emit('joinRoom', company.id)
+            console.log('Joining chat room...')
+        })
+
+        socket.on('joined', (data) => {
+            console.log(`Joined room ${data}`)
+        })
+
+        // Listen for new messages
+        socket.on('message', (data) => {
+            console.log('New message received: ', data.msg)
+            // save message
+            dispatch(saveNewChatMessage(data.msg))
+
+        })
     }
 
     watchPosition = () => {
@@ -197,9 +219,9 @@ class Dashboard extends Component {
             .then(data => data.json())
             .then((res) => {
                 if (res.status === 'OK') {
-                    
-                    if(res.payload.length > 0) {
-                        this.setState({showPanicToast: true})
+
+                    if (res.payload.length > 0) {
+                        this.setState({ showPanicToast: true })
                     }
                 }
             })
@@ -284,10 +306,16 @@ class Dashboard extends Component {
             .catch(err => console.log('ERROR LAUNCHING CALL DIALER', err))
     }
 
+    handleGoToChat = async () => {
+        const { dispatch } = this.props
+        dispatch(saveLastChatVisitTime())
+        this.goToPage('chat')
+    }
+
 
     render() {
 
-        const { company, network, panicAlert } = this.props
+        const { company, network, panicAlert, notifications, chatMessages } = this.props
 
         return (
             <IonPage>
@@ -387,13 +415,30 @@ class Dashboard extends Component {
                         </IonRow>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('chat') }}>
+                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none"  onClick={e => { e.preventDefault(); this.handleGoToChat() }}>
                                     <IonGrid>
+                                        <IonLabel style={{ position: 'absolute', right: '5px', fontSize:'0.7em' }}>
+                                             
+                                            {
+                                                chatMessages && Object.values(chatMessages).length > 0
+                                                    ?
+                                                    Object.values(chatMessages).filter((msg) => {
+                                                        if (new Date(msg.createdAt) >= new Date(notifications.lastChatVisitTime)) {
+                                                            return true
+                                                        }
+                                                    }).length
+                                                    :
+                                                    '0'
+                                            }
+                                        </IonLabel>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon className="dashBtnIcon" icon={chatboxEllipsesOutline}></IonIcon></IonCol>
                                         </IonRow>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonLabel className="dashBtnText">Chat</IonLabel></IonCol>
+                                            <IonCol>
+                                                <IonLabel className="dashBtnText">Chat</IonLabel>
+
+                                            </IonCol>
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>
@@ -478,7 +523,7 @@ class Dashboard extends Component {
 };
 
 
-function mapStateToProps({ auth, guard, network, alert, offlineData, device, location }) {
+function mapStateToProps({ auth, guard, network, alert, offlineData, device, location, notifications, chatMessages }) {
     return {
         token: auth.token,
         guard: guard && guard,
@@ -487,7 +532,9 @@ function mapStateToProps({ auth, guard, network, alert, offlineData, device, loc
         panicAlert: alert,
         device,
         offlineData,
-        location
+        location,
+        notifications,
+        chatMessages
     }
 }
 

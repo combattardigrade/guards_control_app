@@ -14,6 +14,7 @@ import network from './network'
 import alert from './alert'
 import offlineData from './offlineData'
 import carTracking from './carTracking'
+import notifications from './notifications'
 import storage from 'redux-persist/lib/storage'
 
 const appReducer = combineReducers({
@@ -32,6 +33,7 @@ const appReducer = combineReducers({
     alert,
     offlineData,
     carTracking,
+    notifications,
 })
 
 const rootReducer = (state, action) => {    
