@@ -12,7 +12,7 @@ import {
 import { Redirect, Route } from 'react-router-dom';
 import {
     addOutline, peopleOutline, hammerOutline, documentTextOutline, cameraOutline,
-    documentAttachOutline, chevronBackOutline, searchOutline, imagesOutline, closeCircle
+    documentAttachOutline, chevronBackOutline, searchOutline, imagesOutline, closeCircle, micOutline
 } from 'ionicons/icons'
 
 // Styles
@@ -28,6 +28,7 @@ import { saveOfflineBitacora } from '../actions/offlineData'
 import SuccessModal from './SuccessModal'
 
 // Plugins
+import { SpeechRecognition } from '@ionic-native/speech-recognition';
 import { Plugins } from '@capacitor/core'
 const { Camera } = Plugins
 
@@ -46,6 +47,8 @@ class SendBitacora extends Component {
         showPhotoPreview: false,
         showSentMessage: false,
         showSuccessModal: false,
+        actividadesRecognitionActive: false,
+        incidenciasRecognitionActive: false
     }
 
     handleBackBtn = () => {
@@ -184,6 +187,133 @@ class SendBitacora extends Component {
         this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
     }
 
+    handleIncidenciasSpeech = async (e) => {
+        e.preventDefault()
+        console.log('INCIDENCIAS SPEECH RECOGNITION STARTED')
+
+        // Check if another speech recognition process is active
+        if (this.state.actividadesRecognitionActive === true || this.state.incidenciasRecognitionActive === true) {
+            this.showAlert('Otro proceso de reconocimiento de voz se encuentra activo', 'Error')
+            return
+        }
+
+        // Check if feature is available
+        const available = await SpeechRecognition.isRecognitionAvailable()
+
+        if (!available) {
+            this.showAlert('Reconocimiento de voz no disponible', 'Error')
+            return
+        }
+
+        // Check permission
+        const hasPermission = await SpeechRecognition.hasPermission()
+        if (!hasPermission) {
+            console.log('SPEECH RECOGNITION DOES NOT HAVE PERMISSION')
+            console.log('REQUESTING PERMISSION')
+            await SpeechRecognition.requestPermission()
+        }
+
+        // Check if user provided permissions
+        const hasPermission2ndCheck = await SpeechRecognition.hasPermission()
+        if (!hasPermission2ndCheck) {
+            this.showAlert('La aplicación no tiene permisos para realizar la acción', 'Error')
+            return
+        }
+
+        this.setState({ incidenciasRecognitionActive: true })
+
+        // Configure options
+        const options = {
+            language: 'es-MX',
+            matches: 500,
+        }
+
+        // Start the recognition process
+        SpeechRecognition.startListening(options)
+            .subscribe(
+                (matches) => {
+                    console.log(matches)
+                    this.setState({ incidentsDescription: matches[0] })
+                },
+                (err) => {
+                    console.log(err)
+                    this.showAlert(err, 'Error')
+                    this.setState({ incidenciasRecognitionActive: false })
+                }
+            )
+
+    }
+
+    handleActividadesSpeech = async (e) => {
+        e.preventDefault()
+        console.log('ACTIVIDADES SPEECH RECOGNITION STARTED')
+
+        // Check if another speech recognition process is active
+        if (this.state.actividadesRecognitionActive === true || this.state.incidenciasRecognitionActive === true) {
+            this.showAlert('Otro proceso de reconocimiento de voz se encuentra activo', 'Error')
+            return
+        }
+
+        // Check if feature is available
+        const available = await SpeechRecognition.isRecognitionAvailable()
+
+        if (!available) {
+            this.showAlert('Reconocimiento de voz no disponible', 'Error')
+            return
+        }
+
+        // Check permission
+        const hasPermission = await SpeechRecognition.hasPermission()
+        if (!hasPermission) {
+            console.log('SPEECH RECOGNITION DOES NOT HAVE PERMISSION')
+            console.log('REQUESTING PERMISSION')
+            await SpeechRecognition.requestPermission()
+        }
+
+        // Check if user provided permissions
+        const hasPermission2ndCheck = await SpeechRecognition.hasPermission()
+        if (!hasPermission2ndCheck) {
+            this.showAlert('La aplicación no tiene permisos para realizar la acción', 'Error')
+            return
+        }
+
+        this.setState({ actividadesRecognitionActive: true })
+
+        // Configure options
+        const options = {
+            language: 'es-MX',
+            matches: 500,
+        }
+
+        // Start the recognition process
+        SpeechRecognition.startListening(options)
+            .subscribe(
+                (matches) => {
+                    console.log(matches)
+                    this.setState({ activitiesDescription: matches[0] })
+                },
+                (err) => {
+                    console.log(err)
+                    this.showAlert(err, 'Error')
+                    this.setState({ actividadesRecognitionActive: false })
+                }
+            )
+    }
+
+    handleStopIncidenciasSpeech = async (e) => {
+        e.preventDefault()
+        console.log('INCIDENCIAS SPEECH RECOGNITION STOPPED')
+        SpeechRecognition.stopListening()
+        this.setState({ incidenciasRecognitionActive: false })
+    }
+
+    handleStopActividadesSpeech = async (e) => {
+        e.preventDefault()
+        console.log('ACTIVIDADES SPEECH RECOGNITION STOPPED')
+        SpeechRecognition.stopListening()
+        this.setState({ actividadesRecognitionActive: false })
+    }
+
     render() {
         const { showPhotoPreview, bitacoraPhotos, loading, showSentMessage, activitiesDescription, incidentsDescription } = this.state
 
@@ -208,8 +338,14 @@ class SendBitacora extends Component {
                                         <IonRow>
                                             <IonCol size="12">
                                                 <IonLabel className="dataTitle" style={{ maxWidth: 'unset' }}>Resumen de Actividades del día:</IonLabel>
-                                                <IonTextarea onIonChange={this.handleActivitiesChange} value={activitiesDescription} className="dataField" placeholder="Escribe el texto aquí..."></IonTextarea>
-
+                                                <IonTextarea rows="2" onIonChange={this.handleActivitiesChange} value={activitiesDescription} className="dataField" placeholder="Escribe el texto aquí..."></IonTextarea>
+                                                {
+                                                    this.state.actividadesRecognitionActive === false
+                                                        ?
+                                                        <IonButton onClick={this.handleActividadesSpeech} color="dark"><IonIcon icon={micOutline}></IonIcon> Reconocimiento de Voz</IonButton>
+                                                        :
+                                                        <IonButton onClick={this.handleStopActividadesSpeech} color="danger"><IonIcon icon={micOutline}></IonIcon>Detener Reconocimiento de Voz</IonButton>
+                                                }
                                             </IonCol>
                                         </IonRow>
                                     </IonGrid>
@@ -220,7 +356,15 @@ class SendBitacora extends Component {
                                         <IonRow>
                                             <IonCol size="12" >
                                                 <IonLabel className="dataTitle" style={{ maxWidth: 'unset' }}>Resumen de Incidencias del día:</IonLabel>
-                                                <IonTextarea onIonChange={this.handleIncidentsChange} value={incidentsDescription} className="dataField" placeholder="Escribe el texto aquí..."></IonTextarea>
+                                                <IonTextarea rows="2" onIonChange={this.handleIncidentsChange} value={incidentsDescription} className="dataField" placeholder="Escribe el texto aquí..."></IonTextarea>
+                                                {
+                                                    this.state.incidenciasRecognitionActive === false
+                                                        ?
+                                                        <IonButton onClick={this.handleIncidenciasSpeech} color="dark"><IonIcon icon={micOutline}></IonIcon> Reconocimiento de Voz</IonButton>
+                                                        :
+                                                        <IonButton onClick={this.handleStopIncidenciasSpeech} color="danger"><IonIcon icon={micOutline}></IonIcon>Detener Reconocimiento de Voz</IonButton>
+                                                }
+
                                             </IonCol>
                                         </IonRow>
 
@@ -263,7 +407,7 @@ class SendBitacora extends Component {
                                                 <IonRow>
                                                     {
                                                         bitacoraPhotos.map((photo, i) => (
-                                                            <IonCol size="3" key={i}>                                                                
+                                                            <IonCol size="3" key={i}>
                                                                 <IonButton onClick={e => { e.preventDefault(); this.handleDeletePhoto(i) }} color="danger" style={{ position: 'absolute', right: '0' }} fill="clear"><IonIcon icon={closeCircle}></IonIcon></IonButton>
                                                                 <img style={{ height: '100%', width: '100%', marginTop: '10px', borderRadius: '5px' }} src={`data:image/jpeg;base64,${photo}`} />
                                                             </IonCol>

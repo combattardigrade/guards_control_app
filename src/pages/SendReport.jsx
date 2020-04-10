@@ -12,7 +12,7 @@ import {
 import { Redirect, Route } from 'react-router-dom';
 import {
     addOutline, peopleOutline, hammerOutline, documentTextOutline, cameraOutline,
-    documentAttachOutline, chevronBackOutline, searchOutline, imagesOutline, closeCircle
+    documentAttachOutline, chevronBackOutline, searchOutline, imagesOutline, closeCircle, micOutline
 } from 'ionicons/icons'
 
 // Styles
@@ -20,6 +20,7 @@ import './styles.css'
 
 
 // Api
+import { SpeechRecognition } from '@ionic-native/speech-recognition';
 import { sendReport } from '../utils/api'
 
 // Actions 
@@ -42,7 +43,9 @@ class SendReport extends Component {
         reportDescription: '',
         reportPhotos: [],
         showPhotoPreview: false,
-        showSentMessage: false
+        showSentMessage: false,
+        titleRecognitionActive: false,
+        descriptionRecognitionActive: false
     }
 
     handleBackBtn = () => {
@@ -179,6 +182,132 @@ class SendReport extends Component {
         this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
     }
 
+    handleTitleSpeech = async (e) => {
+        e.preventDefault()
+        console.log('TITLE SPEECH RECOGNITION STARTED')
+
+        // Check if another speech recognition process is active
+        if (this.state.titleRecognitionActive === true || this.state.descriptionRecognitionActive === true) {
+            this.showAlert('Otro proceso de reconocimiento de voz se encuentra activo', 'Error')
+            return
+        }
+
+        // Check if feature is available
+        const available = await SpeechRecognition.isRecognitionAvailable()
+
+        if (!available) {
+            this.showAlert('Reconocimiento de voz no disponible', 'Error')
+            return
+        }
+
+        // Check permission
+        const hasPermission = await SpeechRecognition.hasPermission()
+        if (!hasPermission) {
+            console.log('SPEECH RECOGNITION DOES NOT HAVE PERMISSION')
+            console.log('REQUESTING PERMISSION')
+            await SpeechRecognition.requestPermission()
+        }
+
+        // Check if user provided permissions
+        const hasPermission2ndCheck = await SpeechRecognition.hasPermission()
+        if (!hasPermission2ndCheck) {
+            this.showAlert('La aplicación no tiene permisos para realizar la acción', 'Error')
+            return
+        }
+
+        this.setState({ titleRecognitionActive: true })
+
+        // Configure options
+        const options = {
+            language: 'es-MX',
+            matches: 500,
+        }
+
+        // Start the recognition process
+        SpeechRecognition.startListening(options)
+            .subscribe(
+                (matches) => {
+                    console.log(matches)
+                    this.setState({ reportTitle: matches[0] })
+                },
+                (err) => {
+                    console.log(err)
+                    this.showAlert(err, 'Error')
+                    this.setState({ titleRecognitionActive: false })
+                }
+            )
+    }
+
+    handleDescriptionSpeech = async (e) => {
+        e.preventDefault()
+        console.log('DESCRIPTION SPEECH RECOGNITION STARTED')
+
+        // Check if another speech recognition process is active
+        if (this.state.titleRecognitionActive === true || this.state.descriptionRecognitionActive === true) {
+            this.showAlert('Otro proceso de reconocimiento de voz se encuentra activo', 'Error')
+            return
+        }
+
+        // Check if feature is available
+        const available = await SpeechRecognition.isRecognitionAvailable()
+
+        if (!available) {
+            this.showAlert('Reconocimiento de voz no disponible', 'Error')
+            return
+        }
+
+        // Check permission
+        const hasPermission = await SpeechRecognition.hasPermission()
+        if (!hasPermission) {
+            console.log('SPEECH RECOGNITION DOES NOT HAVE PERMISSION')
+            console.log('REQUESTING PERMISSION')
+            await SpeechRecognition.requestPermission()
+        }
+
+        // Check if user provided permissions
+        const hasPermission2ndCheck = await SpeechRecognition.hasPermission()
+        if (!hasPermission2ndCheck) {
+            this.showAlert('La aplicación no tiene permisos para realizar la acción', 'Error')
+            return
+        }
+
+        this.setState({ descriptionRecognitionActive: true })
+
+        // Configure options
+        const options = {
+            language: 'es-MX',
+            matches: 500,
+        }
+
+        // Start the recognition process
+        SpeechRecognition.startListening(options)
+            .subscribe(
+                (matches) => {
+                    console.log(matches)
+                    this.setState({ reportDescription: matches[0] })
+                },
+                (err) => {
+                    console.log(err)
+                    this.showAlert(err, 'Error')
+                    this.setState({ descriptionRecognitionActive: false })
+                }
+            )
+    }
+
+    handleStopTitleSpeech = async (e) => {
+        e.preventDefault()
+        console.log('TITLE SPEECH RECOGNITION STOPPED')
+        SpeechRecognition.stopListening()
+        this.setState({ titleRecognitionActive: false })
+    }
+
+    handleStopDescriptionSpeech = async (e) => {
+        e.preventDefault()
+        console.log('DESCRIPTION SPEECH RECOGNITION STOPPED')
+        SpeechRecognition.stopListening()
+        this.setState({ descriptionRecognitionActive: false })
+    }
+
     render() {
 
         const { location } = this.props
@@ -206,7 +335,16 @@ class SendReport extends Component {
                                             <IonCol><IonLabel>Título:</IonLabel></IonCol>
                                         </IonRow>
                                         <IonRow>
-                                            <IonCol> <IonInput value={reportTitle} onIonChange={this.handleTitleChange} placeholder="Escribe el título del evento o incidente..." ></IonInput></IonCol>
+                                            <IonCol> 
+                                                <IonInput value={reportTitle} onIonChange={this.handleTitleChange} placeholder="Escribe el título del evento o incidente..." ></IonInput>
+                                                {
+                                                    this.state.titleRecognitionActive === false
+                                                        ?
+                                                        <IonButton onClick={this.handleTitleSpeech} color="dark"><IonIcon icon={micOutline}></IonIcon> Reconocimiento de Voz</IonButton>
+                                                        :
+                                                        <IonButton onClick={this.handleStopTitleSpeech} color="danger"><IonIcon icon={micOutline}></IonIcon>Detener Reconocimiento de Voz</IonButton>
+                                                }
+                                            </IonCol>
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>
@@ -216,7 +354,16 @@ class SendReport extends Component {
                                             <IonCol><IonLabel>Descripción de la incidencia:</IonLabel></IonCol>
                                         </IonRow>
                                         <IonRow>
-                                            <IonCol> <IonTextarea value={reportDescription} onIonChange={this.handleDescriptionChange} placeholder="Escribe la descripción del incidente o evento a reportar..."></IonTextarea></IonCol>
+                                            <IonCol> 
+                                                <IonTextarea rows="3" value={reportDescription} onIonChange={this.handleDescriptionChange} placeholder="Escribe la descripción del incidente o evento a reportar..."></IonTextarea>
+                                                {
+                                                    this.state.descriptionRecognitionActive === false
+                                                        ?
+                                                        <IonButton onClick={this.handleDescriptionSpeech} color="dark"><IonIcon icon={micOutline}></IonIcon> Reconocimiento de Voz</IonButton>
+                                                        :
+                                                        <IonButton onClick={this.handleStopDescriptionSpeech} color="danger"><IonIcon icon={micOutline}></IonIcon>Detener Reconocimiento de Voz</IonButton>
+                                                }
+                                            </IonCol>
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>
