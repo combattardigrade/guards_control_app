@@ -1,3 +1,5 @@
+// export const API = 'http://155.138.230.105:3000/api'
+// export const SOCKETS_HOST = 'http://155.138.230.105:2053'
 export const API = 'http://genesisblock.ddns.net:3000/api'
 export const SOCKETS_HOST = 'http://genesisblock.ddns.net:2053'
 const MAPBOX_DIRECTIONS_API = 'https://api.mapbox.com/directions/v5/mapbox/walking/'

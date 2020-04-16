@@ -76,6 +76,7 @@ class StartTurn extends Component {
                             dispatch(updateGuardStatus('ON_PATROL'))
                             dispatch(saveNewAccessLog(res.payload))
                             // show success page
+                            this.setState({ showSuccessModal: true })
                         }
                     })
                     .catch(err => {
@@ -131,6 +132,7 @@ class StartTurn extends Component {
                                 dispatch(updateGuardStatus('ON_PATROL'))
                                 dispatch(saveNewAccessLog(res.payload))
                                 // show success page
+                                this.setState({ showSuccessModal: true })
                             }
                         })
                         .catch(err => {
@@ -238,7 +240,7 @@ class StartTurn extends Component {
                                 showSuccessModal={this.state.showSuccessModal}
                                 handleSuccessModalBtn={this.handleSuccessModalBtn}
                                 title="¡Éxito!"
-                                description="¡Salida Registrada Correctamente!"
+                                description="Entrada Registrada Correctamente!"
 
                             />
                         )

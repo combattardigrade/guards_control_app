@@ -169,6 +169,10 @@ class EndTurn extends Component {
         const { location, guard } = this.props
         const { loading } = this.state
 
+        if(!guard) {
+            return <div>Loading...</div>
+        }
+
         return (
             <IonPage>
                 <IonHeader>
@@ -236,7 +240,7 @@ class EndTurn extends Component {
                                 showSuccessModal={this.state.showSuccessModal}
                                 handleSuccessModalBtn={this.handleSuccessModalBtn}
                                 title="¡Éxito!"
-                                description="¡Entrada Registrada Correctamente!"
+                                description="¡Salida Registrada Correctamente!"
 
                             />
                         )

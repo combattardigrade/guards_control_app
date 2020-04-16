@@ -47,7 +47,7 @@ import { Plugins } from '@capacitor/core';
 const { Device } = Plugins;
 const { Network } = Plugins;
 
-const socket = socketIOClient(SOCKETS_HOST)
+
 
 class Dashboard extends Component {
 
@@ -92,6 +92,7 @@ class Dashboard extends Component {
         getRoutesByStatus({ status: 'ACTIVE', token })
             .then(data => data.json())
             .then(res => {
+                console.log(res)
                 if (res.status == 'OK') {
                     console.log(res.payload)
                     dispatch(saveRoutes(res.payload))
@@ -135,6 +136,8 @@ class Dashboard extends Component {
 
         // Watch Alerts
         this.watchAlerts()
+
+        const socket = socketIOClient(SOCKETS_HOST)
 
         socket.on('connect', () => {
             console.log(`Connection to sockets server stablished correctly...`)
@@ -214,14 +217,16 @@ class Dashboard extends Component {
     }
 
     watchAlerts = async () => {
-        const { token } = this.props
+        const { token, dispatch } = this.props
         getAllPanicAlerts({ token })
             .then(data => data.json())
             .then((res) => {
                 if (res.status === 'OK') {
-
+                    console.log(res.payload)
                     if (res.payload.length > 0) {
-                        this.setState({ showPanicToast: true })
+                        dispatch(toggleAlert(true))
+                    } else {
+                        dispatch(toggleAlert(false))
                     }
                 }
             })
@@ -264,8 +269,8 @@ class Dashboard extends Component {
             })
     }
 
-    handlePanicBtn = (e) => {
-        e.preventDefault()
+    handlePanicBtn = () => {
+        
         const { token, panicAlert, dispatch } = this.props
         if (panicAlert == true) {
             this.setState({ showPanicToast: false })
@@ -348,7 +353,7 @@ class Dashboard extends Component {
                             </IonCol>
 
                             <IonCol size="6">
-                                <IonItem color={panicAlert == true ? 'success' : 'danger'} style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={this.handlePanicBtn} >
+                                <IonItem color={panicAlert == true ? 'success' : 'danger'} style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => {e.preventDefault(); this.handlePanicBtn();}} >
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon className="dashBtnIcon" icon={alertCircleOutline}></IonIcon></IonCol>
@@ -415,10 +420,10 @@ class Dashboard extends Component {
                         </IonRow>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none"  onClick={e => { e.preventDefault(); this.handleGoToChat() }}>
+                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" onClick={e => { e.preventDefault(); this.handleGoToChat() }}>
                                     <IonGrid>
-                                        <IonLabel style={{ position: 'absolute', right: '5px', fontSize:'0.7em' }}>
-                                             
+                                        <IonLabel style={{ position: 'absolute', right: '5px', fontSize: '0.7em' }}>
+
                                             {
                                                 chatMessages && Object.values(chatMessages).length > 0
                                                     ?
@@ -474,11 +479,20 @@ class Dashboard extends Component {
                     </IonGrid>
 
                     <IonToast
-                        isOpen={this.state.showPanicToast}
+                        isOpen={panicAlert}
                         onDidDismiss={() => { this.setState({ showPanicToast: false }) }}
                         message="¡Alerta de Pánico Activada!"
                         position="bottom"
                         color="danger"
+                        buttons={[
+                            {
+                                text: 'Terminar',
+                                role: 'cancel',
+                                handler: () => {
+                                    this.handlePanicBtn()
+                                }
+                            }
+                        ]}
                     />
 
                     <IonAlert

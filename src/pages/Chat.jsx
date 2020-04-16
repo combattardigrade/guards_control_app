@@ -36,7 +36,7 @@ const { Camera } = Plugins
 const moment = require('moment')
 
 
-const socket = socketIOClient(SOCKETS_HOST)
+
 
 class Chat extends Component {
     messagesEnd = React.createRef()
@@ -48,7 +48,8 @@ class Chat extends Component {
         goBack: false,
         showAlert: false,
         alertTitle: '',
-        alertMsg: ''
+        alertMsg: '',
+        socket: ''
     }
 
     handleBackBtn = () => {
@@ -67,7 +68,7 @@ class Chat extends Component {
 
     handleSendTextMsg = (e) => {
         e.preventDefault()
-        const { textMsg } = this.state
+        const { textMsg, socket } = this.state
         const { token, company, dispatch } = this.props
         sendMessage({ messageText: textMsg, token })
             .then(data => data.json())
@@ -94,6 +95,7 @@ class Chat extends Component {
         e.preventDefault()
         console.log('RECORDING_AUDIO_MESSAGE')
         const { token, company, dispatch } = this.props
+        const { socket } = this.state
         MediaCapture.captureAudio({ limit: 1, duration: 30 })
             .then(
                 (mediaFile) => {
@@ -137,6 +139,7 @@ class Chat extends Component {
         console.log('TAKE PHOTO BTN CLICKED')
 
         const { company, token, dispatch } = this.props
+        const { socket } = this.state
 
         const options = {
             allowEditing: false,
@@ -174,6 +177,7 @@ class Chat extends Component {
         console.log('GALLERY BTN CLICKED')
 
         const { company, token, dispatch } = this.props
+        const { socket } = this.state
 
         const options = {
             allowEditing: false,
@@ -220,7 +224,8 @@ class Chat extends Component {
                     dispatch(saveChatMembers(res.payload.users))
                 }
             })
-
+        const socket = socketIOClient(SOCKETS_HOST)
+        this.setState({ socket })
         socket.on('connect', () => {
             console.log(`Connection to sockets server stablished correctly...`)
             // Join company's chat room
@@ -332,7 +337,7 @@ class Chat extends Component {
                                                     <IonGrid>
                                                         <IonRow>
                                                             <IonCol size="8" offset="4" style={{ borderRadius: '5px', padding: '5px 0px', textAlign: 'right', }}>
-                                                            <img onClick={ e => { e.preventDefault(); PhotoViewer.show(API + '/photo/' + message.photoId); }} style={{width:'50%'}} src={API + '/photo/' + message.photoId} />
+                                                                <img onClick={e => { e.preventDefault(); PhotoViewer.show(API + '/photo/' + message.photoId); }} style={{ width: '50%' }} src={API + '/photo/' + message.photoId} />
                                                                 <IonLabel style={{ whiteSpace: 'normal', fontSize: '.6em', marginTop: '5px', textAlign: 'right' }}>{moment(message.createdAt).fromNow()} </IonLabel>
                                                             </IonCol>
                                                         </IonRow>
@@ -379,7 +384,7 @@ class Chat extends Component {
                                                     <IonGrid>
                                                         <IonRow>
                                                             <IonCol size="8" style={{ borderRadius: '5px', padding: '5px 0px', textAlign: 'left' }}>
-                                                                <img onClick={ e => { e.preventDefault(); PhotoViewer.show(API + '/photo/' + message.photoId); }} style={{width:'50%'}} src={API + '/photo/' + message.photoId} />
+                                                                <img onClick={e => { e.preventDefault(); PhotoViewer.show(API + '/photo/' + message.photoId); }} style={{ width: '50%' }} src={API + '/photo/' + message.photoId} />
                                                                 <IonLabel style={{ whiteSpace: 'normal', fontSize: '.6em', marginTop: '5px' }}>{'user' in message && message.user.username} • {moment(message.createdAt).fromNow()} </IonLabel>
                                                             </IonCol>
                                                         </IonRow>

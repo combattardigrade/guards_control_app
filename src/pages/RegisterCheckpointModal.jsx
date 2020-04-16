@@ -13,6 +13,8 @@ import {
     closeOutline
 } from 'ionicons/icons'
 
+// Components
+import SuccessModal from './SuccessModal'
 
 // Actions
 import { saveRoutes } from '../actions/routes'
@@ -31,7 +33,8 @@ class RegisterCheckpointModal extends Component {
     state = {
         showAlert: false,
         alertTitle: '',
-        alertMsg: ''
+        alertMsg: '',
+        showSuccessModal: false,
     }
 
 
@@ -66,6 +69,7 @@ class RegisterCheckpointModal extends Component {
                                 })
                             // show success page
                             console.log('CHECKPOINT COMPLETED SUCCESSFULLY')
+                            this.setState({ showSuccessModal: true })
                         }
                     })
                     .catch(err => {
@@ -76,6 +80,7 @@ class RegisterCheckpointModal extends Component {
             } else {
                 // save offline checkpoint
                 dispatch(saveOfflineCheckpoint(checkpointData))
+                this.setState({ showSuccessModal: true })
                 return
             }
 
@@ -127,7 +132,8 @@ class RegisterCheckpointModal extends Component {
                                         }
                                     })
                                 // show success page
-                                console.log('CHECKPOINT COMPLETED SUCCESSFULLY')
+                                console.log('CHECKPOINT COMPLETED SUCCESSFULLY')                                
+                                this.setState({ showSuccessModal: true })
                             }
                         })
                         .catch(err => {
@@ -138,6 +144,7 @@ class RegisterCheckpointModal extends Component {
                 } else {
                     // save offline checkpoint
                     dispatch(saveOfflineCheckpoint(checkpointData))
+                    this.setState({ showSuccessModal: true })
                     return
                 }
             })
@@ -151,6 +158,11 @@ class RegisterCheckpointModal extends Component {
 
     showAlert = (msg, title) => {
         this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
+    }
+
+    handleSuccessModalBtn = () => {
+        this.setState({ showSuccessModal: false })
+        this.props.history.replace('/dashboard')
     }
 
 
@@ -256,6 +268,17 @@ class RegisterCheckpointModal extends Component {
                             }
                         }]}
                     />
+                    {
+                        this.state.showSuccessModal && (
+                            <SuccessModal
+                                showSuccessModal={this.state.showSuccessModal}
+                                handleSuccessModalBtn={this.handleSuccessModalBtn}
+                                title="¡Éxito!"
+                                description="Punto de Control Registrado Correctamente!"
+
+                            />
+                        )
+                    }
                 </IonContent>
             </IonModal >
 
