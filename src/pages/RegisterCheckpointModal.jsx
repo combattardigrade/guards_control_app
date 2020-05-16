@@ -13,8 +13,7 @@ import {
     closeOutline
 } from 'ionicons/icons'
 
-// Components
-import SuccessModal from './SuccessModal'
+
 
 // Actions
 import { saveRoutes } from '../actions/routes'
@@ -34,7 +33,7 @@ class RegisterCheckpointModal extends Component {
         showAlert: false,
         alertTitle: '',
         alertMsg: '',
-        showSuccessModal: false,
+        
     }
 
 
@@ -43,7 +42,7 @@ class RegisterCheckpointModal extends Component {
 
         e.preventDefault()
         console.log('QR SCANNER STARTED')
-        const { token, checkpoint, dispatch, network } = this.props
+        const { token, checkpoint, dispatch, network, handleShowSuccessModal } = this.props
 
         try {
             const data = await BarcodeScanner.scan({ preferFrontCamera: false, formats: 'QR_CODE', showTorchButton: true })
@@ -69,7 +68,7 @@ class RegisterCheckpointModal extends Component {
                                 })
                             // show success page
                             console.log('CHECKPOINT COMPLETED SUCCESSFULLY')
-                            this.setState({ showSuccessModal: true })
+                            handleShowSuccessModal()
                         }
                     })
                     .catch(err => {
@@ -80,7 +79,7 @@ class RegisterCheckpointModal extends Component {
             } else {
                 // save offline checkpoint
                 dispatch(saveOfflineCheckpoint(checkpointData))
-                this.setState({ showSuccessModal: true })
+                handleShowSuccessModal()
                 return
             }
 
@@ -95,7 +94,7 @@ class RegisterCheckpointModal extends Component {
     handleNFC = async (e) => {
         e.preventDefault()
         console.log('NFC SCANNER STARTED')
-        const { token, checkpoint, dispatch, network } = this.props        
+        const { token, checkpoint, dispatch, network, handleShowSuccessModal } = this.props        
 
         try {
             // Receive NFC event       
@@ -133,7 +132,7 @@ class RegisterCheckpointModal extends Component {
                                     })
                                 // show success page
                                 console.log('CHECKPOINT COMPLETED SUCCESSFULLY')                                
-                                this.setState({ showSuccessModal: true })
+                                handleShowSuccessModal()
                             }
                         })
                         .catch(err => {
@@ -144,7 +143,7 @@ class RegisterCheckpointModal extends Component {
                 } else {
                     // save offline checkpoint
                     dispatch(saveOfflineCheckpoint(checkpointData))
-                    this.setState({ showSuccessModal: true })
+                    handleShowSuccessModal()
                     return
                 }
             })
@@ -159,13 +158,6 @@ class RegisterCheckpointModal extends Component {
     showAlert = (msg, title) => {
         this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
     }
-
-    handleSuccessModalBtn = () => {
-        this.setState({ showSuccessModal: false })
-        this.props.history.replace('/dashboard')
-    }
-
-
 
     render() {
 
@@ -268,17 +260,7 @@ class RegisterCheckpointModal extends Component {
                             }
                         }]}
                     />
-                    {
-                        this.state.showSuccessModal && (
-                            <SuccessModal
-                                showSuccessModal={this.state.showSuccessModal}
-                                handleSuccessModalBtn={this.handleSuccessModalBtn}
-                                title="¡Éxito!"
-                                description="Punto de Control Registrado Correctamente!"
-
-                            />
-                        )
-                    }
+                    
                 </IonContent>
             </IonModal >
 

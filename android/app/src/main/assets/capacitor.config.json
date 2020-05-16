@@ -1,8 +1,11 @@
 {
-  "appId": "io.ionic.starter",
-  "appName": "guards",
+  "appId": "com.softbotguardias.app",
+  "appName": "Guardias",
   "bundledWebRuntime": false,
   "npmClient": "npm",
   "webDir": "build",
-  "cordova": {}
+  "android": {
+    "allowMixedContent": true,
+    "webContentsDebuggingEnabled": true
+  }
 }

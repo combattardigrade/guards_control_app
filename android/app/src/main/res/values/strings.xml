@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Guardias</string>
-    <string name="title_activity_main">Guardias</string>
-    <string name="package_name">com.softbot.guardias</string>
-    <string name="custom_url_scheme">com.softbot.guardias</string>
+    <string name="app_name">guards</string>
+    <string name="title_activity_main">guards</string>
+    <string name="package_name">com.softbotguardias.app</string>
+    <string name="custom_url_scheme">com.softbotguardias.app</string>
 </resources>

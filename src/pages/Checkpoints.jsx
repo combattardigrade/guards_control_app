@@ -14,9 +14,11 @@ import {
     chevronBackOutline, checkmarkOutline, closeOutline
 } from 'ionicons/icons'
 
+// Components
 import RouteMap from '../components/RouteMap'
 import RegisterCheckpointModal from './RegisterCheckpointModal'
 import { getMapRoute } from '../utils/api'
+import SuccessModal from './SuccessModal'
 import './styles.css'
 
 
@@ -31,6 +33,7 @@ class Checkpoints extends Component {
         registerBtnDisabled: true,
         activeCheckpoint: '',
         showRegisterCheckpointModal: false,
+        showSuccessModal: false,
         currentCheckpoint: '',
         currentRoute: '',
         loading: true
@@ -40,8 +43,11 @@ class Checkpoints extends Component {
         const { routes } = this.props
         if (routes) {
             //this.setState({ checkpoints: routes[0].checkpoints, loading: false })
-            this.handleShowRoute(0)
-            
+           try { this.handleShowRoute(0) }
+           catch(err) {
+               console.log(err)
+           }
+
         }
     }
 
@@ -105,6 +111,15 @@ class Checkpoints extends Component {
         this.setState({ showRegisterCheckpointModal: value })
     }
 
+    handleShowSuccessModal = () => {
+        this.setState({ showSuccessModal: true, showRegisterCheckpointModal: false })
+    }
+
+    handleSuccessModalBtn = () => {
+        this.setState({ showSuccessModal: false })
+        this.props.history.replace('/dashboard')
+    }
+
     render() {
 
         const { routes, location, } = this.props
@@ -126,7 +141,7 @@ class Checkpoints extends Component {
 
 
                     <IonRow>
-                        <IonCol>                            
+                        <IonCol>
                             {
                                 location && checkpoints && points ? <RouteMap location={location} checkpoints={checkpoints} routePoints={points} /> : <div>Loading map...</div>
                             }
@@ -187,18 +202,34 @@ class Checkpoints extends Component {
                             </IonRow>
                     }
 
-
-
-
                     <div style={{ textAlign: 'center', position: 'fixed', width: '100%', bottom: '10px' }}>
                         <IonButton disabled={this.state.registerBtnDisabled} onClick={this.handleScanClick}> Escanear Punto de Control</IonButton>
                     </div>
-                    <RegisterCheckpointModal
-                        checkpoint={this.state.currentCheckpoint}
-                        route={this.state.currentRoute}
-                        showRegisterCheckpointModal={this.state.showRegisterCheckpointModal}
-                        handleToggleRegisterCheckpointModal={this.handleToggleRegisterCheckpointModal}
-                    />
+
+                    {
+                        this.state.showRegisterCheckpointModal && (
+                            <RegisterCheckpointModal
+                                checkpoint={this.state.currentCheckpoint}
+                                route={this.state.currentRoute}
+                                showRegisterCheckpointModal={this.state.showRegisterCheckpointModal}
+                                handleToggleRegisterCheckpointModal={this.handleToggleRegisterCheckpointModal}
+                                handleShowSuccessModal={this.handleShowSuccessModal}
+                            />
+                        )
+                    }
+
+                    {
+                        this.state.showSuccessModal && (
+                            <SuccessModal
+                                showSuccessModal={this.state.showSuccessModal}
+                                handleSuccessModalBtn={this.handleSuccessModalBtn}
+                                title="¡Éxito!"
+                                description="¡Punto de Control Registrado Correctamente!"
+
+                            />
+                        )
+                    }
+
                     <IonAlert
                         isOpen={this.state.showAlert}
                         header={this.state.alertTitle}
@@ -210,6 +241,7 @@ class Checkpoints extends Component {
                             }
                         }]}
                     />
+
                 </IonContent>
             </IonPage >
 

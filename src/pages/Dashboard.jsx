@@ -9,7 +9,8 @@ import {
 import {
     notificationsOutline, keyOutline, shieldCheckmarkOutline, repeatOutline,
     navigateOutline, cameraOutline, readerOutline, alertCircleOutline,
-    chatboxEllipsesOutline, callOutline, ellipse, cloudUploadOutline
+    chatboxEllipsesOutline, callOutline, ellipse, cloudUploadOutline,
+    micCircleOutline, micOffCircleOutline
 
 } from 'ionicons/icons'
 
@@ -35,6 +36,11 @@ import {
     getLastMessages, startPanicAlert, stopPanicAlert, getAllPanicAlerts, SOCKETS_HOST
 } from '../utils/api'
 
+// Sounds
+import start_beep from '../sounds/start_beep.wav'
+import beep_sound2 from '../sounds/end_beep.mp3'
+import beep_sound3 from '../sounds/receive_beep.mp3'
+
 // Styles
 import './styles.css'
 
@@ -44,9 +50,8 @@ import './styles.css'
 import { Geolocation } from '@ionic-native/geolocation';
 import { CallNumber } from '@ionic-native/call-number';
 import { Plugins } from '@capacitor/core';
-const { Device } = Plugins;
-const { Network } = Plugins;
-
+// import { NativeAudio } from '@ionic-native/native-audio';
+const { Device, Network, Haptics } = Plugins;
 
 
 class Dashboard extends Component {
@@ -56,11 +61,74 @@ class Dashboard extends Component {
         showPanicAlert: false,
         showPanicToast: false,
         alertMsg: '',
-        alertTitle: ''
+        alertTitle: '',
+        recordingAudio: false
+    }
+
+    mediaRecorder = ''
+    socket = ''
+    chunks = ''
+
+
+    componentDidMount() {
+        const { token, dispatch } = this.props
+        const self = this
+
+        // Get Guard Data
+        getGuardData({ token })
+            .then(data => data.json())
+            .then(res => {
+                console.log(res)
+                if (res.status == 'OK') {
+                    console.log(res.payload)
+                    self.socket = socketIOClient(SOCKETS_HOST)
+
+                    self.socket.on('connect', () => {
+                        console.log(`Connection to sockets server stablished correctly...`)
+                        setTimeout(() => {
+                            // Join company's chat room
+                            self.socket.emit('joinRoom', res.payload.companyId)
+                            console.log('Joining chat room...')
+                        }, 5000)
+                    })
+
+                    self.socket.on('joined', (data) => {
+                        console.log(`Joined room ${data}`)
+                    })
+
+                    // Listen for new messages
+                    self.socket.on('message', async (data) => {
+                        if (data.msg.type === 'live_audio') {
+                            console.log('New voice message received...')
+                            // Play sound effect
+                            const beep = new window.Audio(beep_sound3)
+                            beep.play()
+                            await self.sleep(1000)
+                            var blob = new Blob([data.msg.arrayBuffer], { 'type': 'audio/ogg; codecs=opus' })
+                            var myAudio = new window.Audio()
+                            myAudio.src = window.URL.createObjectURL(blob)
+                            myAudio.play()
+
+                            // const audio = document.createElement('audio')
+                            // audio.src = window.URL.createObjectURL(blob)
+                            // console.log(audio)
+                            // audio.play()
+                            return
+                        }
+
+                        // Text messages
+                        console.log('New message received: ', data.msg)
+                        // save message
+                        dispatch(saveNewChatMessage(data.msg))
+                    })
+                }
+            })
+
+
     }
 
     ionViewWillEnter() {
-        const { token, company, dispatch } = this.props
+        const { token, company, guard, dispatch } = this.props
 
         // Start watching position
         this.watchPosition()
@@ -137,26 +205,71 @@ class Dashboard extends Component {
         // Watch Alerts
         this.watchAlerts()
 
-        const socket = socketIOClient(SOCKETS_HOST)
+    }
 
-        socket.on('connect', () => {
-            console.log(`Connection to sockets server stablished correctly...`)
-            // Join company's chat room
-            socket.emit('joinRoom', company.id)
-            console.log('Joining chat room...')
-        })
+    handleSendVoiceBtn = async (e) => {
+        e.preventDefault()
+        // Play sound effect
+        const beep = new window.Audio(start_beep)
+        beep.play()
 
-        socket.on('joined', (data) => {
-            console.log(`Joined room ${data}`)
-        })
+        // Haptics
+        Haptics.vibrate()
 
-        // Listen for new messages
-        socket.on('message', (data) => {
-            console.log('New message received: ', data.msg)
-            // save message
-            dispatch(saveNewChatMessage(data.msg))
+        console.log('START_VOICE_RECORDING_BTN')
+        const { guard } = this.props
+        this.setState({ recordingAudio: true })
+        const self = this
 
-        })
+        await this.sleep(500)
+
+        try {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then((mediaStream) => {
+                    self.mediaRecorder = new MediaRecorder(mediaStream)
+
+                    self.mediaRecorder.onstart = (e) => {
+                        self.chunks = []
+                    }
+
+                    self.mediaRecorder.ondataavailable = (e) => {
+                        self.chunks.push(e.data)
+                    }
+
+                    self.mediaRecorder.onstop = (e) => {
+                        console.log('Voice message sent...')
+                        const blob = new Blob(self.chunks, { type: 'audio/ogg; codecs=opus' })
+                        // change to company voice channel                        
+                        self.socket.emit('message', {
+                            room: guard.companyId,
+                            msg: { type: 'live_audio', arrayBuffer: blob },
+                        })
+                    }
+
+                    self.mediaRecorder.start()
+                })
+        } catch (e) {
+            console.log(e)
+        }
+
+        // setTimeout(() => {
+        //     if(this.state.recordingAudio)
+        // }, 10000)
+    }
+
+    handleStopVoiceBtn = () => {
+
+        console.log('STOP_VOICE_RECORDING_BTN')
+        this.setState({ recordingAudio: false })
+        const beep = new window.Audio(beep_sound2)
+        beep.play()
+        const self = this
+
+        try {
+            self.mediaRecorder.stop()
+        } catch (e) {
+            console.log(e)
+        }
     }
 
     watchPosition = () => {
@@ -191,7 +304,7 @@ class Dashboard extends Component {
                 sendUserLocation({ ...locationData, token })
                     .then(data => data.json())
                     .then(res => {
-                        console.log(res)
+                        // console.log(res)
                         dispatch(saveLocation(locationData))
                     })
             } else {
@@ -222,7 +335,7 @@ class Dashboard extends Component {
             .then(data => data.json())
             .then((res) => {
                 if (res.status === 'OK') {
-                    console.log(res.payload)
+                    // console.log(res.payload)
                     if (res.payload.length > 0) {
                         dispatch(toggleAlert(true))
                     } else {
@@ -270,7 +383,7 @@ class Dashboard extends Component {
     }
 
     handlePanicBtn = () => {
-        
+
         const { token, panicAlert, dispatch } = this.props
         if (panicAlert == true) {
             this.setState({ showPanicToast: false })
@@ -317,6 +430,9 @@ class Dashboard extends Component {
         this.goToPage('chat')
     }
 
+    sleep = (ms) => {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
     render() {
 
@@ -353,7 +469,7 @@ class Dashboard extends Component {
                             </IonCol>
 
                             <IonCol size="6">
-                                <IonItem color={panicAlert == true ? 'success' : 'danger'} style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => {e.preventDefault(); this.handlePanicBtn();}} >
+                                <IonItem color={panicAlert == true ? 'success' : 'danger'} style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => { e.preventDefault(); this.handlePanicBtn(); }} >
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon className="dashBtnIcon" icon={alertCircleOutline}></IonIcon></IonCol>
@@ -474,7 +590,35 @@ class Dashboard extends Component {
                                     </IonGrid>
                                 </IonItem>
                             </IonCol>
+                            <IonCol size="6"   >
 
+                                {
+                                    this.state.recordingAudio === false
+                                        ?
+                                        <IonItem onClick={this.handleSendVoiceBtn} color='warning' style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button >
+                                            <IonGrid>
+                                                <IonRow style={{ textAlign: 'center' }}>
+                                                    <IonCol><IonIcon className="dashBtnIcon" icon={micCircleOutline}></IonIcon></IonCol>
+                                                </IonRow>
+                                                <IonRow style={{ textAlign: 'center' }}>
+                                                    <IonCol><IonLabel className="dashBtnText">Mandar Mesaje de Voz</IonLabel></IonCol>
+                                                </IonRow>
+                                            </IonGrid>
+                                        </IonItem>
+                                        :
+                                        <IonItem onClick={this.handleStopVoiceBtn} color='danger' style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button >
+                                            <IonGrid>
+                                                <IonRow style={{ textAlign: 'center' }}>
+                                                    <IonCol><IonIcon className="dashBtnIcon" icon={micOffCircleOutline}></IonIcon></IonCol>
+                                                </IonRow>
+                                                <IonRow style={{ textAlign: 'center' }}>
+                                                    <IonCol><IonLabel className="dashBtnText">Detener Mensaje de Voz</IonLabel></IonCol>
+                                                </IonRow>
+                                            </IonGrid>
+                                        </IonItem>
+                                }
+
+                            </IonCol>
                         </IonRow>
                     </IonGrid>
 
@@ -531,7 +675,7 @@ class Dashboard extends Component {
                         }]}
                     />
                 </IonContent>
-            </IonPage>
+            </IonPage >
         );
     }
 };

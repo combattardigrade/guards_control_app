@@ -239,6 +239,7 @@ class Chat extends Component {
 
         // Listen for new messages
         socket.on('message', (data) => {
+            if (data.msg.type === 'live_audio') return
             console.log('New message received: ', data.msg)
             // save message
             dispatch(saveNewChatMessage(data.msg))
