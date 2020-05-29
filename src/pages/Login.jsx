@@ -1,16 +1,17 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
-import { saveToken } from '../actions/auth'
-
 import {
     IonGrid, IonRow, IonCol, IonNote, IonItem, IonIcon, IonHeader,
     IonMenuButton, IonPage, IonTitle, IonToolbar, IonLabel, IonButton,
-    IonAlert, withIonLifeCycle
+    IonAlert, withIonLifeCycle, IonCheckbox, IonInput
 } from '@ionic/react';
 import { personCircleOutline } from 'ionicons/icons'
 import ExploreContainer from '../components/ExploreContainer'
 import { save } from 'ionicons/icons'
+
+// Actions
+import { saveToken, saveCredentials, removeCredentials } from '../actions/auth'
 
 // API
 import { login, codeLogin } from '../utils/api'
@@ -21,18 +22,26 @@ import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 class Login extends Component {
 
     state = {
+        username: '',
+        password: '',
+        rememberAccount: false,
         showAlert: false,
         alertMsg: '',
         alertTitle: ''
     }
 
     ionViewDidEnter() {
-        const { token } = this.props
+        const { token, credentials } = this.props
 
-        if(token) {
+        if (token) {
             this.props.history.replace('/dashboard')
             return
         }
+    }
+
+    componentDidMount() {
+        const { credentials } = this.props
+        this.setState({ username: credentials.username, password: credentials.password })
     }
 
     showAlert = (msg, title) => {
@@ -41,9 +50,8 @@ class Login extends Component {
 
     handleSubmit = async (e) => {
         e.preventDefault()
-
-        const username = e.target.username.value
-        const password = e.target.password.value
+        const { username, password, rememberAccount } = this.state
+        const { dispatch } = this.props
 
         if (!username || !password) {
             this.showAlert('Ingresa todos los campos requeridos', 'Error')
@@ -64,12 +72,21 @@ class Login extends Component {
             this.showAlert('message' in response ? response.message : 'Ocurrió un error al intentar realizar la acción. Por favor, inténtalo nuevamente.', 'Error')
             return
         }
+
+        // remember account
+        rememberAccount
+            ? dispatch(saveCredentials({ username, password }))
+            : dispatch(removeCredentials())
+
         // save jwt
         this.props.dispatch(saveToken(response.token))
 
         // redirect to dashboard
         this.props.history.replace('/dashboard')
     }
+
+    handleUsernameChange = (e) => this.setState({ username: e.target.value })
+    handlePasswordChange = (e) => this.setState({ password: e.target.value })
 
     handleScanner = async (e) => {
 
@@ -114,12 +131,13 @@ class Login extends Component {
 
 
     render() {
+        
         return (
             <IonPage>
 
 
                 <ion-content >
-                    <form onSubmit={this.handleSubmit} style={{}}>
+                    <form>
                         <div style={{ textAlign: 'center' }}>
                             <IonIcon style={{ fontSize: '6em', paddingTop: '40px' }} icon={personCircleOutline}></IonIcon>
 
@@ -127,31 +145,36 @@ class Login extends Component {
                         <div style={{ textAlign: 'center', marginTop: '20px' }}>
                             <IonTitle>Iniciar Sesión</IonTitle>
                         </div>
-                        <div style={{ padding: 15 }}>
+                        <div style={{ padding: '15 15 0 15' }}>
                             <ion-item>
                                 <ion-label position="stacked">Usuario:<ion-text color="danger">*</ion-text></ion-label>
-                                <ion-input type="text" name="username"></ion-input>
+                                <IonInput value={this.state.username} onIonChange={this.handleUsernameChange} type="text" ></IonInput>
                             </ion-item>
 
                             <ion-item>
                                 <ion-label position="stacked">Contraseña: <ion-text color="danger">*</ion-text></ion-label>
-                                <ion-input type="password" name="password"></ion-input>
+                                <IonInput value={this.state.password} onIonChange={this.handlePasswordChange} type="password" ></IonInput>
                             </ion-item>
+
+                            <IonItem lines="none">
+                                <IonCheckbox color="primary" checked={this.state.rememberAccount} onIonChange={e => this.setState({ rememberAccount: !this.state.rememberAccount })} />
+                                <IonLabel style={{ paddingLeft: '15px' }}>Recordar credenciales</IonLabel>
+                            </IonItem>
                         </div>
 
                         <IonGrid>
                             <IonRow>
                                 <IonCol size="12" style={{ paddingBottom: '0px' }}>
-                                    <ion-button expand="block" type="submit" className="ion-no-margin">Iniciar sesión</ion-button>
+                                    <IonButton onClick={this.handleSubmit} expand="block" className="ion-no-margin">Iniciar sesión</IonButton>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
                     </form>
 
-                    <IonGrid style={{paddingTop: '0px'}}>
+                    <IonGrid style={{ paddingTop: '0px' }}>
                         <IonRow>
                             <IonCol size="12" style={{ paddingTop: '0px' }}>
-                                <ion-button onClick={this.handleScanner} color="dark" expand="block" type="submit" className="ion-no-margin">Escanear código qr</ion-button>
+                                <ion-button onClick={this.handleScanner} color="dark" expand="block" className="ion-no-margin">Escanear código qr</ion-button>
                             </IonCol>
                         </IonRow>
                         <IonRow >
@@ -182,6 +205,7 @@ class Login extends Component {
 function mapStateToProps({ auth }) {
     return {
         token: auth && auth.token,
+        credentials: auth && auth.credentials
     }
 }
 
