@@ -50,6 +50,9 @@ import './styles.css'
 import { Geolocation } from '@ionic-native/geolocation';
 import { CallNumber } from '@ionic-native/call-number';
 import { Plugins } from '@capacitor/core';
+import { AndroidPermissions } from '@ionic-native/android-permissions';
+import { Diagnostic } from '@ionic-native/diagnostic';
+
 // import { NativeAudio } from '@ionic-native/native-audio';
 const { Device, Network, Haptics } = Plugins;
 
@@ -62,7 +65,9 @@ class Dashboard extends Component {
         showPanicToast: false,
         alertMsg: '',
         alertTitle: '',
-        recordingAudio: false
+        recordingAudio: false,
+        socketsAvailable: false,
+        showPermissionAlert: false,
     }
 
     mediaRecorder = ''
@@ -94,6 +99,9 @@ class Dashboard extends Component {
 
                     self.socket.on('joined', (data) => {
                         console.log(`Joined room ${data}`)
+                        if (!this.state.socketsAvailable) {
+                            this.setState({ socketsAvailable: true })
+                        }
                     })
 
                     // Listen for new messages
@@ -209,6 +217,12 @@ class Dashboard extends Component {
 
     handleSendVoiceBtn = async (e) => {
         e.preventDefault()
+
+        if (!this.state.socketsAvailable) {
+            this.showAlert('Conexión no disponible. Por favor inténtalo nuevamente', 'Error')
+            return
+        }
+
         // Play sound effect
         const beep = new window.Audio(start_beep)
         beep.play()
@@ -252,14 +266,17 @@ class Dashboard extends Component {
             console.log(e)
         }
 
-        // setTimeout(() => {
-        //     if(this.state.recordingAudio)
-        // }, 10000)
+        this.walkieTalkieTimer = setTimeout(() => {
+            if (this.state.recordingAudio) {
+                this.handleStopVoiceBtn()
+            }
+        }, 8000)
     }
 
     handleStopVoiceBtn = () => {
 
         console.log('STOP_VOICE_RECORDING_BTN')
+        clearInterval(this.walkieTalkieTimer)
         this.setState({ recordingAudio: false })
         const beep = new window.Audio(beep_sound2)
         beep.play()
@@ -356,17 +373,47 @@ class Dashboard extends Component {
         this.setState({ showAlert: true, alertMsg: msg, alertTitle: title })
     }
 
-    handleAccessBtn = (e) => {
-        const { guard, history } = this.props
-        e.preventDefault()
+    showPermissionAlert = (msg, title) => {
+        this.setState({ showPermissionAlert: true, alertMsg: msg, alertTitle: title })
+    }
 
-        if (guard.status == 'ON_STAND_BY') {
-            history.push('startTurn')
-        } else if (guard.status == 'ON_PATROL') {
-            history.push('endTurn')
-        } else {
-            this.showAlert('No fue posible obtener el estado del guardia. Por favor, inténtalo nuevamente', 'Error')
+    handleAccessBtn = (e) => {
+        console.log('CHECK_LOCATION_PERMISSIONS')
+        e.preventDefault()
+        const { device, guard, history } = this.props
+        
+        if (device.platform === 'android') {
+            // Check if App has Location Permission
+            AndroidPermissions.checkPermission(AndroidPermissions.PERMISSION.ACCESS_FINE_LOCATION)
+                .then(
+                    (result) => {
+                        // Check if Location is Enabled
+                        Diagnostic.isLocationEnabled(
+                            (isEnabled) => {
+                                if (isEnabled) {
+                                    // Check guard access status
+                                    if (guard.status == 'ON_STAND_BY') {
+                                        history.push('startTurn')
+                                    } else if (guard.status == 'ON_PATROL') {
+                                        history.push('endTurn')
+                                    } else {
+                                        this.showAlert('No fue posible obtener el estado del guardia. Por favor, inténtalo nuevamente', 'Error')
+                                    }
+                                } else {
+                                    this.showPermissionAlert('Activa la Localización del dispositivo para continuar', 'Activar Localización')
+                                }
+                            },                            
+                            () => this.showPermissionAlert('Activa la Localización del dispositivo para continuar', 'Activar Localización')
+                        )
+                    },
+                    (err) => {
+                        console.log(err)
+                        AndroidPermissions.requestPermission(AndroidPermissions.PERMISSION.ACCESS_FINE_LOCATION)
+                    }
+                )
         }
+
+
     }
 
     handlePanicAlertActivation = () => {
@@ -411,6 +458,28 @@ class Dashboard extends Component {
         } else {
             this.showAlert('Sin conexión. No es posible realizar la sincronización con el servidor.', 'Error')
             return
+        }
+    }
+
+    checkPermissionsAndGoToPage = (page) => {
+        console.log('CHECK_LOCATION_PERMISSIONS')
+        const { device } = this.props
+        if (device.platform === 'android') {
+            // Check if App has Location Permission
+            AndroidPermissions.checkPermission(AndroidPermissions.PERMISSION.ACCESS_FINE_LOCATION)
+                .then(
+                    (result) => {
+                        // Check if Location is Enabled
+                        Diagnostic.isLocationEnabled(
+                            (isEnabled) => isEnabled ? this.goToPage(page) : this.showPermissionAlert('Activa la Localización del dispositivo para continuar', 'Activar Localización'),
+                            () => this.showPermissionAlert('Activa la Localización del dispositivo para continuar', 'Activar Localización')
+                        )
+                    },
+                    (err) => {
+                        console.log(err)
+                        AndroidPermissions.requestPermission(AndroidPermissions.PERMISSION.ACCESS_FINE_LOCATION)
+                    }
+                )
         }
     }
 
@@ -484,7 +553,7 @@ class Dashboard extends Component {
                         </IonRow>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('checkpoints') }}>
+                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => { e.preventDefault(); this.checkPermissionsAndGoToPage('checkpoints') }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon className="dashBtnIcon" icon={shieldCheckmarkOutline}></IonIcon></IonCol>
@@ -496,7 +565,7 @@ class Dashboard extends Component {
                                 </IonItem>
                             </IonCol>
                             <IonCol size="6">
-                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('routes') }}>
+                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => { e.preventDefault(); this.checkPermissionsAndGoToPage('routes') }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon className="dashBtnIcon" icon={navigateOutline}></IonIcon></IonCol>
@@ -510,7 +579,7 @@ class Dashboard extends Component {
                         </IonRow>
                         <IonRow>
                             <IonCol size="6">
-                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('sendBitacora') }}>
+                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => { e.preventDefault(); this.checkPermissionsAndGoToPage('sendBitacora') }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon className="dashBtnIcon" icon={readerOutline}></IonIcon></IonCol>
@@ -522,7 +591,7 @@ class Dashboard extends Component {
                                 </IonItem>
                             </IonCol>
                             <IonCol size="6">
-                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => { e.preventDefault(); this.goToPage('sendReport') }}>
+                                <IonItem color="dark" style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button onClick={e => { e.preventDefault(); this.checkPermissionsAndGoToPage('sendReport') }}>
                                     <IonGrid>
                                         <IonRow style={{ textAlign: 'center' }}>
                                             <IonCol><IonIcon className="dashBtnIcon" icon={cameraOutline}></IonIcon></IonCol>
@@ -601,7 +670,7 @@ class Dashboard extends Component {
                                                     <IonCol><IonIcon className="dashBtnIcon" icon={micCircleOutline}></IonIcon></IonCol>
                                                 </IonRow>
                                                 <IonRow style={{ textAlign: 'center' }}>
-                                                    <IonCol><IonLabel className="dashBtnText">Mandar Mesaje de Voz</IonLabel></IonCol>
+                                                    <IonCol><IonLabel className="dashBtnText">Walkie Talkie</IonLabel></IonCol>
                                                 </IonRow>
                                             </IonGrid>
                                         </IonItem>
@@ -612,7 +681,7 @@ class Dashboard extends Component {
                                                     <IonCol><IonIcon className="dashBtnIcon" icon={micOffCircleOutline}></IonIcon></IonCol>
                                                 </IonRow>
                                                 <IonRow style={{ textAlign: 'center' }}>
-                                                    <IonCol><IonLabel className="dashBtnText">Detener Mensaje de Voz</IonLabel></IonCol>
+                                                    <IonCol><IonLabel className="dashBtnText">Detener</IonLabel></IonCol>
                                                 </IonRow>
                                             </IonGrid>
                                         </IonItem>
@@ -673,6 +742,24 @@ class Dashboard extends Component {
                                 this.setState({ showAlert: false })
                             }
                         }]}
+                    />
+
+                    <IonAlert
+                        isOpen={this.state.showPermissionAlert}
+                        header={this.state.alertTitle}
+                        message={this.state.alertMsg}
+                        buttons={
+                            [
+                                {
+                                    text: 'Cancelar',
+                                    handler: () => this.setState({ showPermissionAlert: false })
+                                },
+                                {
+                                    text: 'OK',
+                                    handler: () => Diagnostic.switchToLocationSettings()
+                                }
+                            ]
+                        }
                     />
                 </IonContent>
             </IonPage >

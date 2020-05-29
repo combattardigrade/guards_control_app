@@ -2,10 +2,6 @@
 	"folders": [
 		{
 			"path": "."
-		},
-		{
-			"name": "SSH FS - doublehands",
-			"uri": "ssh://doublehands/"
 		}
 	],
 	"settings": {}
