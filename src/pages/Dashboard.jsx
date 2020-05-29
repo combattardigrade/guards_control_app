@@ -54,6 +54,7 @@ import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { Diagnostic } from '@ionic-native/diagnostic';
 import { AppLauncher } from '@ionic-native/app-launcher';
 
+
 // import { NativeAudio } from '@ionic-native/native-audio';
 const { Device, Network, Haptics } = Plugins;
 
@@ -69,6 +70,7 @@ class Dashboard extends Component {
         recordingAudio: false,
         socketsAvailable: false,
         showPermissionAlert: false,
+        showZelloAlert: false,
     }
 
     mediaRecorder = ''
@@ -378,6 +380,10 @@ class Dashboard extends Component {
         this.setState({ showPermissionAlert: true, alertMsg: msg, alertTitle: title })
     }
 
+    showZelloAlert = (msg, title) => {
+        this.setState({ showZelloAlert: true, alertMsg: msg, alertTitle: title })
+    }
+
     handleAccessBtn = (e) => {
         console.log('CHECK_LOCATION_PERMISSIONS')
         e.preventDefault()
@@ -481,6 +487,30 @@ class Dashboard extends Component {
                         AndroidPermissions.requestPermission(AndroidPermissions.PERMISSION.ACCESS_FINE_LOCATION)
                     }
                 )
+        }
+    }
+
+    handleOpenZello = (e) => {
+        e.preventDefault()
+        console.log('OPEN_ZELLO')
+        const { device } = this.props
+        const options = {}
+
+        if (device.platform === 'android') {
+            options.packageName = 'com.loudtalks'
+            AppLauncher.canLaunch(options)
+                .then((canLaunch) => {
+                    if(canLaunch) {
+                        console.log('ZELLO_CAN_BE_LAUNCHED')
+                        AppLauncher.launch(options)
+                            .then((launched) => console.log(launched))
+                            .catch((err) => console.log(err))
+                    }
+                })
+                .catch((err) => {
+                    console.log(err)
+                    this.showPermissionAlert('Debe instalar la aplicación Zello!', 'Zello')
+                })
         }
     }
 
@@ -661,8 +691,18 @@ class Dashboard extends Component {
                                 </IonItem>
                             </IonCol>
                             <IonCol size="6"   >
+                                <IonItem onClick={this.handleOpenZello} color='warning' style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button >
+                                    <IonGrid>
+                                        <IonRow style={{ textAlign: 'center' }}>
+                                            <IonCol><IonIcon className="dashBtnIcon" icon={micCircleOutline}></IonIcon></IonCol>
+                                        </IonRow>
+                                        <IonRow style={{ textAlign: 'center' }}>
+                                            <IonCol><IonLabel className="dashBtnText">Zello</IonLabel></IonCol>
+                                        </IonRow>
+                                    </IonGrid>
+                                </IonItem>
 
-                                {
+                                {/* {
                                     this.state.recordingAudio === false
                                         ?
                                         <IonItem onClick={this.handleSendVoiceBtn} color='warning' style={{ border: '2px solid whitesmoke', borderRadius: '5px' }} lines="none" button >
@@ -686,7 +726,7 @@ class Dashboard extends Component {
                                                 </IonRow>
                                             </IonGrid>
                                         </IonItem>
-                                }
+                                } */}
 
                             </IonCol>
                         </IonRow>
@@ -758,6 +798,27 @@ class Dashboard extends Component {
                                 {
                                     text: 'OK',
                                     handler: () => { Diagnostic.switchToLocationSettings(); this.setState({ showPermissionAlert: false }) }
+                                }
+                            ]
+                        }
+                    />
+
+                    <IonAlert
+                        isOpen={this.state.showZelloAlert}
+                        header={this.state.alertTitle}
+                        message={this.state.alertMsg}
+                        buttons={
+                            [
+                                {
+                                    text: 'Cancelar',
+                                    handler: () => this.setState({ showZelloAlert: false })
+                                },
+                                {
+                                    text: 'OK',
+                                    handler: () => { 
+                                        window.open('https://play.google.com/store/apps/details?id=com.loudtalks&hl=en', '_system'); 
+                                        this.setState({ showZelloAlert: false }) 
+                                    }
                                 }
                             ]
                         }
