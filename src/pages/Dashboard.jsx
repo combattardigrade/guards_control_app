@@ -52,6 +52,7 @@ import { CallNumber } from '@ionic-native/call-number';
 import { Plugins } from '@capacitor/core';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { Diagnostic } from '@ionic-native/diagnostic';
+import { AppLauncher } from '@ionic-native/app-launcher';
 
 // import { NativeAudio } from '@ionic-native/native-audio';
 const { Device, Network, Haptics } = Plugins;
@@ -381,7 +382,7 @@ class Dashboard extends Component {
         console.log('CHECK_LOCATION_PERMISSIONS')
         e.preventDefault()
         const { device, guard, history } = this.props
-        
+
         if (device.platform === 'android') {
             // Check if App has Location Permission
             AndroidPermissions.checkPermission(AndroidPermissions.PERMISSION.ACCESS_FINE_LOCATION)
@@ -402,7 +403,7 @@ class Dashboard extends Component {
                                 } else {
                                     this.showPermissionAlert('Activa la Localización del dispositivo para continuar', 'Activar Localización')
                                 }
-                            },                            
+                            },
                             () => this.showPermissionAlert('Activa la Localización del dispositivo para continuar', 'Activar Localización')
                         )
                     },
@@ -756,7 +757,7 @@ class Dashboard extends Component {
                                 },
                                 {
                                     text: 'OK',
-                                    handler: () => Diagnostic.switchToLocationSettings()
+                                    handler: () => { Diagnostic.switchToLocationSettings(); this.setState({ showPermissionAlert: false }) }
                                 }
                             ]
                         }
