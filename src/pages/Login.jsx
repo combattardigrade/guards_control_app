@@ -41,7 +41,7 @@ class Login extends Component {
 
     componentDidMount() {
         const { credentials } = this.props
-        this.setState({ username: credentials.username, password: credentials.password })
+        this.setState({ username: credentials ? credentials.username : '', password: credentials ? credentials.password : ''})
     }
 
     showAlert = (msg, title) => {
@@ -131,7 +131,7 @@ class Login extends Component {
 
 
     render() {
-        
+
         return (
             <IonPage>
 

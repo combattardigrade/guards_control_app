@@ -106,9 +106,10 @@ class StartTurn extends Component {
         e.preventDefault()
 
         if (device.platform === 'android') {
+            console.log('DIAGNOSE_NFC')
             try {
                 const isPresent = await Diagnostic.isNFCPresent()
-
+                console.log(isPresent)
                 if (!isPresent) {
                     this.showAlert('El dispositivo no cuenta con funcionalidad NFC', 'ERROR')
                     return
@@ -136,7 +137,8 @@ class StartTurn extends Component {
                     console.log('success')
                 },
                 () => {
-                    console.log('err')
+                    this.showAlert('Ocurrió un error al intentar iniciar la comunicación NFC.', 'Error')
+                    return
                 }
             ).subscribe((event) => {
                 const payload = event.tag.ndefMessage[0]["payload"]
@@ -176,7 +178,7 @@ class StartTurn extends Component {
         }
         catch (err) {
             console.log(err)
-            this.showAlert('Ocurrió un error al intentar escanear el código QR.', 'Error')
+            this.showAlert('Ocurrió un error al intentar iniciar la comunicación NFC.', 'Error')
             return
         }
     }

@@ -518,7 +518,7 @@ class Dashboard extends Component {
                 })
                 .catch((err) => {
                     console.log(err)
-                    this.showPermissionAlert('Debe instalar la aplicación Zello!', 'Zello')
+                    this.showZelloAlert('Debe instalar la aplicación Zello!', 'Zello')
                 })
         }
     }

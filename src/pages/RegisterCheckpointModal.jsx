@@ -98,6 +98,7 @@ class RegisterCheckpointModal extends Component {
         const { token, device, checkpoint, dispatch, network, handleShowSuccessModal } = this.props        
 
         if (device.platform === 'android') {
+            console.log('DIAGNOSE_NFC')
             try {
                 const isPresent = await Diagnostic.isNFCPresent()
 
@@ -128,7 +129,8 @@ class RegisterCheckpointModal extends Component {
                     console.log('success')
                 },
                 () => {
-                    console.log('err')
+                    this.showAlert('Ocurrió un error al intentar iniciar la comunicación NFC.', 'Error')
+                    return
                 }
             ).subscribe((event) => {
                 const payload = event.tag.ndefMessage[0]["payload"]
