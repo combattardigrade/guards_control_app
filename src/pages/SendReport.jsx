@@ -320,7 +320,7 @@ class SendReport extends Component {
                         <IonButtons slot="start" onClick={e => { e.preventDefault(); this.handleBackBtn() }}>
                             <IonIcon style={{ fontSize: '28px' }} icon={chevronBackOutline}></IonIcon>
                         </IonButtons>
-                        <IonTitle>Enviar Reporte</IonTitle>
+                        <IonTitle>Enviar Reporte de Anomalía</IonTitle>
                     </IonToolbar>
                 </IonHeader>
 

@@ -140,13 +140,18 @@ class Dashboard extends Component {
     }
 
     ionViewWillEnter() {
-        const { token, company, guard, dispatch } = this.props
+        const { token, device, company, guard, dispatch } = this.props
 
         // Start watching position
         this.watchPosition()
 
         // Start watching network
         this.watchNetwork()
+
+        // Start watching battery
+        if (device.platform === 'android') {
+            this.watchBattery()
+        }
 
         // Get Guard Data
         getGuardData({ token })
@@ -375,7 +380,7 @@ class Dashboard extends Component {
         saveBatteryLog({ imei: device.uuid, batteryLevel: batteryData.batteryLevel, isCharging: batteryData.isCharging ? 1 : 0, token })
             .then(data => data.json())
             .then((res) => {
-                if(res.status === 'OK') {
+                if (res.status === 'OK') {
                     dispatch(saveBatteryData({ batteryLevel: batteryData.batteryLevel, isCharging: batteryData.isCharging }))
                 }
             })
@@ -653,7 +658,7 @@ class Dashboard extends Component {
                                             <IonCol><IonIcon className="dashBtnIcon" icon={cameraOutline}></IonIcon></IonCol>
                                         </IonRow>
                                         <IonRow style={{ textAlign: 'center' }}>
-                                            <IonCol><IonLabel className="dashBtnText">Reportar</IonLabel></IonCol>
+                                            <IonCol><IonLabel className="dashBtnText">Reportar Anomalía</IonLabel></IonCol>
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>
