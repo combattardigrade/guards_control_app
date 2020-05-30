@@ -26,12 +26,14 @@ import { updateGuardStatus } from '../actions/guard'
 import { saveNewAccessLog } from '../actions/accessLogs'
 import { saveOfflineAccessLog } from '../actions/offlineData'
 
+// Plugins
+import { Diagnostic } from '@ionic-native/diagnostic';
+
 // Components
 import SuccessModal from './SuccessModal'
-
 import './styles.css'
 
-const moment = require('moment')
+import moment from 'moment'
 
 
 class StartTurn extends Component {
@@ -102,6 +104,30 @@ class StartTurn extends Component {
         console.log('NFC SCANNER STARTED')
         const { token, location, device, network, dispatch } = this.props
         e.preventDefault()
+
+        if (device.platform === 'android') {
+            try {
+                const isPresent = await Diagnostic.isNFCPresent()
+
+                if (!isPresent) {
+                    this.showAlert('El dispositivo no cuenta con funcionalidad NFC', 'ERROR')
+                    return
+                }
+
+                const isEnabled = await Diagnostic.isNFCEnabled()
+
+                if (!isEnabled) {
+                    this.showAlert('Activa el sistema NFC para continuar', 'ERROR')
+                    Diagnostic.switchToNFCSettings()
+                    return
+                }
+
+            } catch (err) {
+                console.log(err)
+                this.showAlert('Ocurrió un error al intentar iniciar el sistema NFC en el dispositivo')
+                return
+            }
+        }
 
         try {
             // Receive NFC event       

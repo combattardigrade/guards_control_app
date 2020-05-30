@@ -418,9 +418,16 @@ class Dashboard extends Component {
                         AndroidPermissions.requestPermission(AndroidPermissions.PERMISSION.ACCESS_FINE_LOCATION)
                     }
                 )
+        } else {
+            // Check guard access status
+            if (guard.status == 'ON_STAND_BY') {
+                history.push('startTurn')
+            } else if (guard.status == 'ON_PATROL') {
+                history.push('endTurn')
+            } else {
+                this.showAlert('No fue posible obtener el estado del guardia. Por favor, inténtalo nuevamente', 'Error')
+            }
         }
-
-
     }
 
     handlePanicAlertActivation = () => {
@@ -487,6 +494,8 @@ class Dashboard extends Component {
                         AndroidPermissions.requestPermission(AndroidPermissions.PERMISSION.ACCESS_FINE_LOCATION)
                     }
                 )
+        } else {
+            this.goToPage(page)
         }
     }
 
@@ -500,7 +509,7 @@ class Dashboard extends Component {
             options.packageName = 'com.loudtalks'
             AppLauncher.canLaunch(options)
                 .then((canLaunch) => {
-                    if(canLaunch) {
+                    if (canLaunch) {
                         console.log('ZELLO_CAN_BE_LAUNCHED')
                         AppLauncher.launch(options)
                             .then((launched) => console.log(launched))
@@ -815,9 +824,9 @@ class Dashboard extends Component {
                                 },
                                 {
                                     text: 'OK',
-                                    handler: () => { 
-                                        window.open('https://play.google.com/store/apps/details?id=com.loudtalks&hl=en', '_system'); 
-                                        this.setState({ showZelloAlert: false }) 
+                                    handler: () => {
+                                        window.open('https://play.google.com/store/apps/details?id=com.loudtalks&hl=en', '_system');
+                                        this.setState({ showZelloAlert: false })
                                     }
                                 }
                             ]

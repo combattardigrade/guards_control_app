@@ -31,7 +31,7 @@ class Login extends Component {
     }
 
     ionViewDidEnter() {
-        const { token, credentials } = this.props
+        const { token } = this.props
 
         if (token) {
             this.props.history.replace('/dashboard')
