@@ -25,7 +25,7 @@ import { saveChatMessages } from '../actions/chatMessages'
 import { saveNetworkData } from '../actions/network'
 import { toggleAlert } from '../actions/alert'
 import { saveOfflineUserLocation } from '../actions/offlineData'
-import { saveDeviceData } from '../actions/device'
+import { saveDeviceData, saveBatteryData } from '../actions/device'
 import { saveNewChatMessage } from '../actions/chatMessages'
 import { saveLastChatVisitTime } from '../actions/notifications'
 
@@ -33,7 +33,8 @@ import { saveLastChatVisitTime } from '../actions/notifications'
 import {
     getGuardData, sendUserLocation, getAccessLogs,
     getRoutesByStatus, getReports, getBitacoras,
-    getLastMessages, startPanicAlert, stopPanicAlert, getAllPanicAlerts, SOCKETS_HOST
+    getLastMessages, startPanicAlert, stopPanicAlert, getAllPanicAlerts, SOCKETS_HOST,
+    saveBatteryLog
 } from '../utils/api'
 
 // Sounds
@@ -364,6 +365,21 @@ class Dashboard extends Component {
                 }
             })
         setTimeout(this.watchAlerts, 5000)
+    }
+
+    watchBattery = async () => {
+        const { token, device, dispatch } = this.props
+
+        const batteryData = await Device.getBatteryInfo()
+
+        saveBatteryLog({ imei: device.uuid, batteryLevel: batteryData.batteryLevel, isCharging: batteryData.isCharging ? 1 : 0, token })
+            .then(data => data.json())
+            .then((res) => {
+                if(res.status === 'OK') {
+                    dispatch(saveBatteryData({ batteryLevel: batteryData.batteryLevel, isCharging: batteryData.isCharging }))
+                }
+            })
+        setTimeout(this.watchBattery, 20000)
     }
 
     handleWorkOrderClick = async (wonum) => {

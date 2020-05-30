@@ -259,3 +259,14 @@ export function toggleCarTracking(params) {
     })
 }
 
+export function saveBatteryLog(params) {
+    return fetch(API + '/device/battery', {
+        method: 'POST',
+        body: JSON.stringify(params),
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    })
+}
+
