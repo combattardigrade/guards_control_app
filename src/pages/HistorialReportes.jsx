@@ -61,7 +61,7 @@ class HistorialReportes extends Component {
                         <IonButtons slot="start" onClick={e => { e.preventDefault(); this.handleBackBtn() }}>
                             <IonIcon style={{ fontSize: '28px' }} icon={chevronBackOutline}></IonIcon>
                         </IonButtons>
-                        <IonTitle>Historial Reportes</IonTitle>
+                        <IonTitle>Historial Anomalías</IonTitle>
                     </IonToolbar>
                 </IonHeader>
 

@@ -158,7 +158,7 @@ class Dashboard extends Component {
             })
 
 
-        if (network && !network.connected) {
+        if (network && network.connected === false) {
             console.log('OFFLINE_USER')
             const testUser = {
                 active: 1,

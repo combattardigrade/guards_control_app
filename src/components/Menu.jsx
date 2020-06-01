@@ -93,7 +93,7 @@ class Menu extends Component {
 
             <IonItem lines="full" button onClick={e => { e.preventDefault(); this.goToPage('/historialReportes') }}>
               <IonIcon icon={layersOutline}></IonIcon>
-              <IonLabel style={{ marginLeft: '10px' }}>Historial de Reportes</IonLabel>
+              <IonLabel style={{ marginLeft: '10px' }}>Historial de Anomalías</IonLabel>
             </IonItem>
 
             <IonItem lines="full" button onClick={e => { e.preventDefault(); this.goToPage('/historialBitacoras') }}>

@@ -36,8 +36,8 @@ const appReducer = combineReducers({
     notifications,
 })
 
-const rootReducer = (state, action) => {    
-    if(action.type == 'USER_LOGOUT') {
+const rootReducer = (state, action) => {
+    if (action.type == 'USER_LOGOUT') {
         // storage.removeItem('persist:root')
         state = {
             auth: {
@@ -56,8 +56,13 @@ const rootReducer = (state, action) => {
             guard: {},
             location: {},
             notifications: {},
-            offlineData: {},
-            
+            offlineData: {
+                accessLogs: [],
+                checkpoints: [],
+                bitacoras: [],
+                reports: [],
+                userLocations: [],
+            },
             reports: {},
             routes: {}
         }

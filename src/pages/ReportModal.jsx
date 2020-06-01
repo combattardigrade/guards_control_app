@@ -37,7 +37,7 @@ class ReportModal extends Component {
                         <IonButtons slot="end" onClick={e => { e.preventDefault(); handleToggleReportModal(false) }}>
                             <IonIcon style={{ fontSize: '28px' }} icon={closeOutline}></IonIcon>
                         </IonButtons>
-                        <IonTitle>Reporte (ID:{report.id})</IonTitle>
+                        <IonTitle>Reporte de Anomalía (ID:{report.id})</IonTitle>
                     </IonToolbar>
                 </IonHeader>
 

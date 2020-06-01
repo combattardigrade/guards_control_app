@@ -45,7 +45,11 @@ class Login extends Component {
 
     componentDidMount() {
         const { credentials, dispatch } = this.props
-        this.setState({ username: credentials ? credentials.username : '', password: credentials ? credentials.password : '' })
+        this.setState({
+            username: credentials ? credentials.username : '',
+            password: credentials ? credentials.password : '',
+            rememberAccount: credentials ? true : false
+        })
 
         Device.getInfo()
             .then((info) => {
@@ -53,7 +57,7 @@ class Login extends Component {
             })
 
         Network.getStatus()
-            .then((status) => {                
+            .then((status) => {
                 dispatch(saveNetworkData(status))
             })
     }
@@ -65,14 +69,16 @@ class Login extends Component {
     handleSubmit = async (e) => {
         e.preventDefault()
         const { username, password, rememberAccount } = this.state
-        const { network, dispatch } = this.props
+        const { dispatch } = this.props
 
         if (!username || !password) {
             this.showAlert('Ingresa todos los campos requeridos', 'Error')
             return
         }
 
-        if (!network || !network.connected) {
+        const network = await Network.getStatus()            
+        
+        if (network && network.connected === false) {
             // save offline token
             this.props.dispatch(saveToken('OFFLINE_TOKEN'))
             // redirect to dashboard
@@ -223,10 +229,11 @@ class Login extends Component {
     }
 }
 
-function mapStateToProps({ auth }) {
+function mapStateToProps({ auth, network }) {
     return {
         token: auth && auth.token,
-        credentials: auth && auth.credentials
+        credentials: auth && auth.credentials,
+        network
     }
 }
 
