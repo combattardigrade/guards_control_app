@@ -120,7 +120,7 @@ function PrivateRoute({ component: Component, ...rest }) {
 function mapStateToProps({ device, auth }) {
   return {
     device,
-    auth
+    auth: auth && auth.token
   }
 }
 

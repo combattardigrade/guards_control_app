@@ -369,10 +369,10 @@ class Dashboard extends Component {
     watchNetwork = async () => {
         const { network, token, dispatch } = this.props
 
-        if (!network) {
-            let status = await Network.getStatus()
-            dispatch(saveNetworkData(status))
-        }
+        // if (!network) {
+        //     let status = await Network.getStatus()
+        //     dispatch(saveNetworkData(status))
+        // }
 
         Network.addListener('networkStatusChange', (status) => {
             console.log('Network status changes', status)

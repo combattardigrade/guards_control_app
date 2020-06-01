@@ -38,8 +38,29 @@ const appReducer = combineReducers({
 
 const rootReducer = (state, action) => {    
     if(action.type == 'USER_LOGOUT') {
-        storage.removeItem('persist:root')
-        state = undefined
+        // storage.removeItem('persist:root')
+        state = {
+            auth: {
+                token: null,
+                credentials: state.auth.credentials,
+            },
+            accessLogs: {},
+            alert: false,
+            bitacoras: {},
+            carTracking: {
+                carLocations: [],
+                tracking: false,
+            },
+            chatMembers: '',
+            chatMessages: {},
+            guard: {},
+            location: {},
+            notifications: {},
+            offlineData: {},
+            
+            reports: {},
+            routes: {}
+        }
     }
     return appReducer(state, action)
 }
