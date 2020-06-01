@@ -26,6 +26,7 @@ class Routes extends Component {
         alertTitle: '',
         alertMsg: '',
         checkpoints: '',
+        center: '',
         loading: true
     }
 
@@ -62,13 +63,13 @@ class Routes extends Component {
                 points.push({ lat: point[1], lng: point[0] })
             })
         }
-        this.setState({ points, loading: false })
+        this.setState({ points, center: { lat: checkpoints[0].lat, lng: checkpoints[0].lng }, loading: false })
     }
 
     render() {
 
         const { routes, location } = this.props
-        const { checkpoints, points, loading } = this.state
+        const { checkpoints, points, center, loading } = this.state
 
         return (
             <IonPage>
@@ -86,9 +87,9 @@ class Routes extends Component {
                         <IonCol>
                             {
 
-                                (location && checkpoints && points &&loading == false)
+                                (location && checkpoints && points && loading == false)
                                     ?                                    
-                                    <RouteMap location={location} checkpoints={checkpoints} routePoints={points} />
+                                    <RouteMap location={location} checkpoints={checkpoints} routePoints={points} center={center ? center : location} />
                                     : <div>Loading map...</div>
                             }
                         </IonCol>

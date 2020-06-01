@@ -31,7 +31,7 @@ class RouteMap extends Component {
 
     render() {
 
-        const { location, google, checkpoints, routePoints } = this.props
+        const { location, center, google, checkpoints, routePoints } = this.props
         const { points, loading } = this.state
 
         return (
@@ -39,10 +39,11 @@ class RouteMap extends Component {
             <Map
                 google={google}
                 zoom={15}
-
+                center={center}
                 style={mapStyles}
                 initialCenter={{ lat: location.lat, lng: location.lng }}
                 mapTypeControl={false}
+                default
                 styles={[{
                     featureType: 'poi',
                     elementType: 'labels.icon',

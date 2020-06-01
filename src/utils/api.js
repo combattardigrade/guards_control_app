@@ -270,3 +270,13 @@ export function saveBatteryLog(params) {
     })
 }
 
+export function saveNetworkLog(params) {
+    return fetch(API + '/device/network', {
+        method: 'POST',
+        body: JSON.stringify(params),
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + params.token
+        }
+    })
+}

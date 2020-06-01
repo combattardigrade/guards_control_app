@@ -79,7 +79,7 @@ class Checkpoints extends Component {
                 points.push({ lat: point[1], lng: point[0] })
             })
         }
-        this.setState({ points })
+        this.setState({ points, center:  { lat: checkpoints[0].lat, lng: checkpoints[0].lng }})
     }
 
     handleCheckpointClick(checkpoint) {
@@ -123,7 +123,7 @@ class Checkpoints extends Component {
     render() {
 
         const { routes, location, } = this.props
-        const { points, checkpoints, loading } = this.state
+        const { points, checkpoints, center, loading } = this.state
 
         return (
             <IonPage>
@@ -143,7 +143,7 @@ class Checkpoints extends Component {
                     <IonRow>
                         <IonCol>
                             {
-                                location && checkpoints && points ? <RouteMap location={location} checkpoints={checkpoints} routePoints={points} /> : <div>Loading map...</div>
+                                location && checkpoints && points ? <RouteMap location={location} checkpoints={checkpoints} routePoints={points} center={center ? center : location} /> : <div>Loading map...</div>
                             }
                         </IonCol>
                     </IonRow>

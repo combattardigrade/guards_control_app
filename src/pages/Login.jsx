@@ -12,12 +12,16 @@ import { save } from 'ionicons/icons'
 
 // Actions
 import { saveToken, saveCredentials, removeCredentials } from '../actions/auth'
+import { saveDeviceData } from '../actions/device'
+import { saveNetworkData } from '../actions/network'
 
 // API
 import { login, codeLogin } from '../utils/api'
 
 // Plugins
 import { BarcodeScanner } from '@ionic-native/barcode-scanner';
+import { Plugins } from '@capacitor/core';
+const { Device, Network } = Plugins;
 
 class Login extends Component {
 
@@ -40,8 +44,18 @@ class Login extends Component {
     }
 
     componentDidMount() {
-        const { credentials } = this.props
-        this.setState({ username: credentials ? credentials.username : '', password: credentials ? credentials.password : ''})
+        const { credentials, dispatch } = this.props
+        this.setState({ username: credentials ? credentials.username : '', password: credentials ? credentials.password : '' })
+
+        Device.getInfo()
+            .then((info) => {
+                dispatch(saveDeviceData(info))
+            })
+
+        Network.getStatus()
+            .then((status) => {                
+                dispatch(saveNetworkData(status))
+            })
     }
 
     showAlert = (msg, title) => {
@@ -51,11 +65,18 @@ class Login extends Component {
     handleSubmit = async (e) => {
         e.preventDefault()
         const { username, password, rememberAccount } = this.state
-        const { dispatch } = this.props
+        const { network, dispatch } = this.props
 
         if (!username || !password) {
             this.showAlert('Ingresa todos los campos requeridos', 'Error')
             return
+        }
+
+        if (!network || !network.connected) {
+            // save offline token
+            this.props.dispatch(saveToken('OFFLINE_TOKEN'))
+            // redirect to dashboard
+            this.props.history.replace('/dashboard')
         }
 
         let response
@@ -79,7 +100,7 @@ class Login extends Component {
             : dispatch(removeCredentials())
 
         // save jwt
-        this.props.dispatch(saveToken(response.token))
+        dispatch(saveToken(response.token))
 
         // redirect to dashboard
         this.props.history.replace('/dashboard')

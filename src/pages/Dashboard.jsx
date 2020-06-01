@@ -34,7 +34,7 @@ import {
     getGuardData, sendUserLocation, getAccessLogs,
     getRoutesByStatus, getReports, getBitacoras,
     getLastMessages, startPanicAlert, stopPanicAlert, getAllPanicAlerts, SOCKETS_HOST,
-    saveBatteryLog
+    saveBatteryLog, saveNetworkLog
 } from '../utils/api'
 
 // Sounds
@@ -140,7 +140,7 @@ class Dashboard extends Component {
     }
 
     ionViewWillEnter() {
-        const { token, device, company, guard, dispatch } = this.props
+        const { token, network, company, guard, dispatch } = this.props
 
         // Start watching position
         this.watchPosition()
@@ -148,9 +148,38 @@ class Dashboard extends Component {
         // Start watching network
         this.watchNetwork()
 
-        // Start watching battery
-        if (device.platform === 'android') {
-            this.watchBattery()
+        Device.getInfo()
+            .then((info) => {
+                // Start watching battery
+                if (info.platform !== 'web') {
+                    this.watchBattery()
+                }
+                dispatch(saveDeviceData(info))
+            })
+
+
+        if (network && !network.connected) {
+            console.log('OFFLINE_USER')
+            const testUser = {
+                active: 1,
+                address: 'Dirección de prueba',
+                code: 'a9b3803ea94550234c821709f5fc9c9b',
+                company: {
+                    code: '638ebbeecf4c1d081568663ed384b2fa',
+                    name: 'Empresa 1',
+                    phone: '123456789',
+                    status: 'ACTIVE',
+                    website: 'https://google.com'
+                },
+                companyId: 0,
+                email: 'guardia.prueba@prueba.com',
+                phone: '123456789',
+                status: 'ON_STAND_BY',
+                userType: 'guard',
+                username: 'UsuarioPrueba'
+            }
+            dispatch(saveGuardData(testUser))
+            return
         }
 
         // Get Guard Data
@@ -211,10 +240,7 @@ class Dashboard extends Component {
                 }
             })
 
-        Device.getInfo()
-            .then((info) => {
-                dispatch(saveDeviceData(info))
-            })
+
         // https://stackoverflow.com/questions/21177210/phonegap-cordova-media-api-when-play-audio-from-url-ui-freeze-a-few-seconds
         // var myAudio = new window.Audio("http://genesisblock.ddns.net:3000/api/audio/2");
         // myAudio.play();
@@ -341,7 +367,7 @@ class Dashboard extends Component {
     }
 
     watchNetwork = async () => {
-        const { network, dispatch } = this.props
+        const { network, token, dispatch } = this.props
 
         if (!network) {
             let status = await Network.getStatus()
@@ -350,6 +376,7 @@ class Dashboard extends Component {
 
         Network.addListener('networkStatusChange', (status) => {
             console.log('Network status changes', status)
+            saveNetworkLog({ connected: status.connected ? 'CONNECTED' : 'OFFLINE', connectionType: status.connectionType, token })
             // Save network status
             dispatch(saveNetworkData(status))
         })
